@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Google Earth Engine Map Viewer</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.css" />
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>🌍 Google Earth Engine Map Viewer</h1>
+            <p>Visualize satellite imagery and geospatial data</p>
+        </header>
+
+        <div class="controls">
+            <div class="control-group">
+                <label for="dataType">Select Data Type:</label>
+                <select id="dataType">
+                    <option value="ndvi">NDVI (Vegetation Index)</option>
+                    <option value="satellite">Satellite Imagery</option>
+                    <option value="landcover">Land Cover</option>
+                </select>
+            </div>
+
+            <div class="control-group">
+                <label for="region">Region:</label>
+                <select id="region">
+                    <option value="california">California</option>
+                    <option value="amazon">Amazon Rainforest</option>
+                    <option value="sahara">Sahara Desert</option>
+                    <option value="custom">Custom Coordinates</option>
+                </select>
+            </div>
+
+            <div class="control-group">
+                <button id="loadBtn" class="btn btn-primary">Load Data</button>
+                <button id="clearBtn" class="btn btn-secondary">Clear Map</button>
+            </div>
+
+            <div id="status" class="status"></div>
+        </div>
+
+        <div id="map"></div>
+
+        <div class="info-panel">
+            <h3>Information</h3>
+            <p><strong>Data Source:</strong> Google Earth Engine</p>
+            <p><strong>Status:</strong> <span id="connectionStatus">Checking...</span></p>
+            <p id="dataInfo"></p>
+        </div>
+    </div>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.js"></script>
+    <script src="app.js"></script>
+</body>
+</html>
+

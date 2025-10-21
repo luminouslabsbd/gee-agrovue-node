@@ -4,12 +4,15 @@ const path = require('path');
 const fs = require('fs');
 require('dotenv').config();
 
+const FieldAnalysisService = require('./services/fieldAnalysisService');
+
 const app = express();
 const PORT = process.env.PORT || 3000;
 
 // Load Earth Engine credentials
 let ee;
 let eeInitialized = false;
+let fieldAnalysisService;
 
 async function initializeEarthEngine() {
   try {
@@ -32,6 +35,9 @@ async function initializeEarthEngine() {
           () => {
             console.log('✅ Earth Engine initialized successfully');
             eeInitialized = true;
+            // Initialize field analysis service
+            fieldAnalysisService = new FieldAnalysisService(ee);
+            console.log('✅ Field Analysis Service initialized');
           },
           (error) => {
             console.error('❌ Earth Engine initialization error:', error);
@@ -138,6 +144,62 @@ app.get('/api/satellite', async (req, res) => {
     });
   } catch (error) {
     console.error('Error fetching satellite data:', error);
+    res.status(500).json({
+      success: false,
+      error: error.message
+    });
+  }
+});
+
+// Field Analysis endpoint - Analyze NDVI for farm field boundaries
+app.post('/api/field-analysis', async (req, res) => {
+  try {
+    if (!eeInitialized || !fieldAnalysisService) {
+      return res.status(503).json({
+        success: false,
+        error: 'Earth Engine not initialized yet. Please try again in a moment.'
+      });
+    }
+
+    const { fieldBoundary, fieldId, startDate, endDate } = req.body;
+
+    // Validate input
+    if (!fieldBoundary || !fieldId) {
+      return res.status(400).json({
+        success: false,
+        error: 'Missing required fields: fieldBoundary and fieldId'
+      });
+    }
+
+    if (fieldBoundary.type !== 'Polygon') {
+      return res.status(400).json({
+        success: false,
+        error: 'Only Polygon geometries are supported'
+      });
+    }
+
+    // Set default dates if not provided
+    const end = endDate || new Date().toISOString().split('T')[0];
+    const start = startDate || new Date(Date.now() - 30 * 24 * 60 * 60 * 1000).toISOString().split('T')[0];
+
+    console.log(`📊 Analyzing field ${fieldId} from ${start} to ${end}`);
+
+    // Perform analysis
+    const analysisResult = await fieldAnalysisService.analyzeFieldNDVI(
+      fieldBoundary,
+      fieldId,
+      start,
+      end
+    );
+
+    res.json({
+      success: true,
+      data: analysisResult,
+      message: 'Field analysis completed successfully'
+    });
+
+  } catch (error) {
+    console.error('Error analyzing field:', error);
     res.status(500).json({
       success: false,
       error: error.message

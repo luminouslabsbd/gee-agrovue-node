@@ -156,63 +156,8 @@ app.get('/api/satellite', async (req, res) => {
   }
 });
 
-// Field Analysis endpoint - Analyze NDVI for farm field boundaries
-app.post('/api/field-analysis', async (req, res) => {
-  try {
-    if (!eeInitialized || !fieldAnalysisService) {
-      return res.status(503).json({
-        success: false,
-        error: 'Earth Engine not initialized yet. Please try again in a moment.'
-      });
-    }
-
-    const { fieldBoundary, fieldId, startDate, endDate } = req.body;
-
-    // Validate input
-    if (!fieldBoundary || !fieldId) {
-      return res.status(400).json({
-        success: false,
-        error: 'Missing required fields: fieldBoundary and fieldId'
-      });
-    }
-
-    if (fieldBoundary.type !== 'Polygon') {
-      return res.status(400).json({
-        success: false,
-        error: 'Only Polygon geometries are supported'
-      });
-    }
-
-    // Set default dates if not provided
-    const end = endDate || new Date().toISOString().split('T')[0];
-    const start = startDate || new Date(Date.now() - 30 * 24 * 60 * 60 * 1000).toISOString().split('T')[0];
-
-    console.log(`📊 Analyzing field ${fieldId} from ${start} to ${end}`);
-
-    // Perform analysis
-    const analysisResult = await fieldAnalysisService.analyzeFieldNDVI(
-      fieldBoundary,
-      fieldId,
-      start,
-      end
-    );
-
-    res.json({
-      success: true,
-      data: analysisResult,
-      message: 'Field analysis completed successfully'
-    });
-
-  } catch (error) {
-    console.error('Error analyzing field:', error);
-    res.status(500).json({
-      success: false,
-      error: error.message
-    });
-  }
-});
-
 // NDVI Time Series endpoint - Generate historical NDVI trends
+// ⚠️ IMPORTANT: This MUST come BEFORE /api/field-analysis to avoid route shadowing
 app.post('/api/field-analysis/time-series', async (req, res) => {
   try {
     if (!eeInitialized || !ndviTimeSeriesService) {
@@ -263,6 +208,62 @@ app.post('/api/field-analysis/time-series', async (req, res) => {
 
   } catch (error) {
     console.error('Error generating time series:', error);
+    res.status(500).json({
+      success: false,
+      error: error.message
+    });
+  }
+});
+
+// Field Analysis endpoint - Analyze NDVI for farm field boundaries
+app.post('/api/field-analysis', async (req, res) => {
+  try {
+    if (!eeInitialized || !fieldAnalysisService) {
+      return res.status(503).json({
+        success: false,
+        error: 'Earth Engine not initialized yet. Please try again in a moment.'
+      });
+    }
+
+    const { fieldBoundary, fieldId, startDate, endDate } = req.body;
+
+    // Validate input
+    if (!fieldBoundary || !fieldId) {
+      return res.status(400).json({
+        success: false,
+        error: 'Missing required fields: fieldBoundary and fieldId'
+      });
+    }
+
+    if (fieldBoundary.type !== 'Polygon') {
+      return res.status(400).json({
+        success: false,
+        error: 'Only Polygon geometries are supported'
+      });
+    }
+
+    // Set default dates if not provided
+    const end = endDate || new Date().toISOString().split('T')[0];
+    const start = startDate || new Date(Date.now() - 30 * 24 * 60 * 60 * 1000).toISOString().split('T')[0];
+
+    console.log(`📊 Analyzing field ${fieldId} from ${start} to ${end}`);
+
+    // Perform analysis
+    const analysisResult = await fieldAnalysisService.analyzeFieldNDVI(
+      fieldBoundary,
+      fieldId,
+      start,
+      end
+    );
+
+    res.json({
+      success: true,
+      data: analysisResult,
+      message: 'Field analysis completed successfully'
+    });
+
+  } catch (error) {
+    console.error('Error analyzing field:', error);
     res.status(500).json({
       success: false,
       error: error.message

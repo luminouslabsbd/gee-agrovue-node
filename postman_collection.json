@@ -1,0 +1,140 @@
+{
+  "info": {
+    "name": "NDVI Time Series API Collection",
+    "description": "Complete API collection for NDVI Time Series and Map endpoints",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+    "version": "1.0.0"
+  },
+  "item": [
+    {
+      "name": "Health Check",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "http://localhost:3000/api/health",
+          "protocol": "http",
+          "host": ["localhost"],
+          "port": "3000",
+          "path": ["api", "health"]
+        }
+      }
+    },
+    {
+      "name": "Time Series - 10 Day Interval",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"fieldBoundary\": {\n    \"type\": \"Polygon\",\n    \"coordinates\": [[[90.37110641598703, 23.841231509287553],\n                     [90.37093743681908, 23.84014467798467],\n                     [90.37123516201974, 23.84014713133873],\n                     [90.3713531792164, 23.840186384997345],\n                     [90.37110641598703, 23.841231509287553]]]\n  },\n  \"fieldId\": \"NGR-KD-12345\",\n  \"startDate\": \"2025-01-01\",\n  \"endDate\": \"2025-12-31\",\n  \"intervalDays\": 10\n}"
+        },
+        "url": {
+          "raw": "http://localhost:3000/api/field-analysis/time-series",
+          "protocol": "http",
+          "host": ["localhost"],
+          "port": "3000",
+          "path": ["api", "field-analysis", "time-series"]
+        }
+      }
+    },
+    {
+      "name": "Time Series Map - 10 Day Interval",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"fieldBoundary\": {\n    \"type\": \"Polygon\",\n    \"coordinates\": [[[90.37110641598703, 23.841231509287553],\n                     [90.37093743681908, 23.84014467798467],\n                     [90.37123516201974, 23.84014713133873],\n                     [90.3713531792164, 23.840186384997345],\n                     [90.37110641598703, 23.841231509287553]]]\n  },\n  \"fieldId\": \"NGR-KD-12345\",\n  \"startDate\": \"2025-01-01\",\n  \"endDate\": \"2025-12-31\",\n  \"intervalDays\": 10\n}"
+        },
+        "url": {
+          "raw": "http://localhost:3000/api/field-analysis/time-series-map",
+          "protocol": "http",
+          "host": ["localhost"],
+          "port": "3000",
+          "path": ["api", "field-analysis", "time-series-map"]
+        }
+      }
+    },
+    {
+      "name": "Time Series Map - 30 Day Interval",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"fieldBoundary\": {\n    \"type\": \"Polygon\",\n    \"coordinates\": [[[90.37110641598703, 23.841231509287553],\n                     [90.37093743681908, 23.84014467798467],\n                     [90.37123516201974, 23.84014713133873],\n                     [90.3713531792164, 23.840186384997345],\n                     [90.37110641598703, 23.841231509287553]]]\n  },\n  \"fieldId\": \"NGR-KD-12345\",\n  \"startDate\": \"2025-01-01\",\n  \"endDate\": \"2025-12-31\",\n  \"intervalDays\": 30\n}"
+        },
+        "url": {
+          "raw": "http://localhost:3000/api/field-analysis/time-series-map",
+          "protocol": "http",
+          "host": ["localhost"],
+          "port": "3000",
+          "path": ["api", "field-analysis", "time-series-map"]
+        }
+      }
+    },
+    {
+      "name": "Time Series Map - 5 Day Interval",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"fieldBoundary\": {\n    \"type\": \"Polygon\",\n    \"coordinates\": [[[90.37110641598703, 23.841231509287553],\n                     [90.37093743681908, 23.84014467798467],\n                     [90.37123516201974, 23.84014713133873],\n                     [90.3713531792164, 23.840186384997345],\n                     [90.37110641598703, 23.841231509287553]]]\n  },\n  \"fieldId\": \"NGR-KD-12345\",\n  \"startDate\": \"2025-06-01\",\n  \"endDate\": \"2025-08-31\",\n  \"intervalDays\": 5\n}"
+        },
+        "url": {
+          "raw": "http://localhost:3000/api/field-analysis/time-series-map",
+          "protocol": "http",
+          "host": ["localhost"],
+          "port": "3000",
+          "path": ["api", "field-analysis", "time-series-map"]
+        }
+      }
+    },
+    {
+      "name": "Field Analysis",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"fieldBoundary\": {\n    \"type\": \"Polygon\",\n    \"coordinates\": [[[90.37110641598703, 23.841231509287553],\n                     [90.37093743681908, 23.84014467798467],\n                     [90.37123516201974, 23.84014713133873],\n                     [90.3713531792164, 23.840186384997345],\n                     [90.37110641598703, 23.841231509287553]]]\n  },\n  \"fieldId\": \"NGR-KD-12345\"\n}"
+        },
+        "url": {
+          "raw": "http://localhost:3000/api/field-analysis",
+          "protocol": "http",
+          "host": ["localhost"],
+          "port": "3000",
+          "path": ["api", "field-analysis"]
+        }
+      }
+    }
+  ]
+}
+

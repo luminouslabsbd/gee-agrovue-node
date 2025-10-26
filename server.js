@@ -6,6 +6,7 @@ require('dotenv').config();
 
 const FieldAnalysisService = require('./services/fieldAnalysisService');
 const NDVITimeSeriesService = require('./services/ndviTimeSeriesService');
+const NDVITimeSeriesMapService = require('./services/ndviTimeSeriesMapService');
 
 const app = express();
 const PORT = process.env.PORT || 3000;
@@ -15,6 +16,7 @@ let ee;
 let eeInitialized = false;
 let fieldAnalysisService;
 let ndviTimeSeriesService;
+let ndviTimeSeriesMapService;
 
 async function initializeEarthEngine() {
   try {
@@ -43,6 +45,9 @@ async function initializeEarthEngine() {
             // Initialize NDVI time series service
             ndviTimeSeriesService = new NDVITimeSeriesService(ee);
             console.log('✅ NDVI Time Series Service initialized');
+            // Initialize NDVI time series map service
+            ndviTimeSeriesMapService = new NDVITimeSeriesMapService(ee);
+            console.log('✅ NDVI Time Series Map Service initialized');
           },
           (error) => {
             console.error('❌ Earth Engine initialization error:', error);
@@ -149,6 +154,65 @@ app.get('/api/satellite', async (req, res) => {
     });
   } catch (error) {
     console.error('Error fetching satellite data:', error);
+    res.status(500).json({
+      success: false,
+      error: error.message
+    });
+  }
+});
+
+// NDVI Time Series Map endpoint - Generate NDVI maps for time series
+// ⚠️ IMPORTANT: This MUST come BEFORE /api/field-analysis to avoid route shadowing
+app.post('/api/field-analysis/time-series-map', async (req, res) => {
+  try {
+    if (!eeInitialized || !ndviTimeSeriesMapService) {
+      return res.status(503).json({
+        success: false,
+        error: 'Earth Engine not initialized yet. Please try again in a moment.'
+      });
+    }
+
+    const { fieldBoundary, fieldId, startDate, endDate, intervalDays } = req.body;
+
+    // Validate input
+    if (!fieldBoundary || !fieldId) {
+      return res.status(400).json({
+        success: false,
+        error: 'Missing required fields: fieldBoundary and fieldId'
+      });
+    }
+
+    if (fieldBoundary.type !== 'Polygon') {
+      return res.status(400).json({
+        success: false,
+        error: 'Only Polygon geometries are supported'
+      });
+    }
+
+    // Set default dates if not provided
+    const end = endDate || new Date().toISOString().split('T')[0];
+    const start = startDate || new Date(Date.now() - 365 * 24 * 60 * 60 * 1000).toISOString().split('T')[0];
+    const interval = intervalDays || 10;
+
+    console.log(`🗺️  Generating time series maps for field ${fieldId} from ${start} to ${end} with ${interval}-day intervals`);
+
+    // Generate time series maps
+    const mapsResult = await ndviTimeSeriesMapService.generateTimeSeriesMaps(
+      fieldBoundary,
+      fieldId,
+      start,
+      end,
+      interval
+    );
+
+    res.json({
+      success: true,
+      data: mapsResult,
+      message: 'Time series maps generated successfully'
+    });
+
+  } catch (error) {
+    console.error('Error generating time series maps:', error);
     res.status(500).json({
       success: false,
       error: error.message

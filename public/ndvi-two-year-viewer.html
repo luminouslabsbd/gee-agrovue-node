@@ -4,9 +4,11 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>NDVI 2-Year Field Analysis Viewer</title>
-    
+
     <!-- Leaflet CSS -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.css" />
+    <!-- Font Awesome for Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
     
     <style>
         * {
@@ -14,103 +16,126 @@
             padding: 0;
             box-sizing: border-box;
         }
-        
+
         body {
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
             background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
             min-height: 100vh;
             padding: 20px;
+            color: #333;
         }
-        
+
         .container {
-            max-width: 1600px;
+            max-width: 1800px;
             margin: 0 auto;
         }
-        
+
         .header {
             background: white;
             padding: 30px;
-            border-radius: 8px;
+            border-radius: 12px;
             margin-bottom: 20px;
-            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+            box-shadow: 0 8px 16px rgba(0,0,0,0.15);
+            border-left: 5px solid #667eea;
         }
-        
+
         .header h1 {
             color: #333;
             margin-bottom: 10px;
-            font-size: 28px;
+            font-size: 32px;
+            font-weight: 700;
+            display: flex;
+            align-items: center;
+            gap: 10px;
         }
-        
+
         .header p {
             color: #666;
             font-size: 14px;
+            margin-top: 5px;
         }
-        
+
         .content {
             display: grid;
-            grid-template-columns: 1fr 350px;
+            grid-template-columns: 1fr 380px;
             gap: 20px;
         }
-        
+
         #map {
-            height: 600px;
-            border-radius: 8px;
-            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+            height: 650px;
+            border-radius: 12px;
+            box-shadow: 0 8px 16px rgba(0,0,0,0.15);
             background: #e0e0e0;
         }
-        
+
         .sidebar {
             background: white;
             padding: 20px;
-            border-radius: 8px;
-            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+            border-radius: 12px;
+            box-shadow: 0 8px 16px rgba(0,0,0,0.15);
             overflow-y: auto;
-            max-height: 600px;
+            max-height: 650px;
         }
         
         .sidebar h3 {
             margin-bottom: 15px;
             color: #333;
             font-size: 16px;
-            border-bottom: 2px solid #667eea;
+            border-bottom: 3px solid #667eea;
             padding-bottom: 10px;
+            font-weight: 700;
+            display: flex;
+            align-items: center;
+            gap: 8px;
         }
-        
+
         .form-group {
             margin-bottom: 15px;
         }
-        
+
         .form-group label {
             display: block;
-            margin-bottom: 5px;
+            margin-bottom: 8px;
             color: #555;
-            font-size: 12px;
+            font-size: 13px;
             font-weight: 600;
         }
-        
+
         .form-group select {
             width: 100%;
-            padding: 8px;
-            border: 1px solid #ddd;
-            border-radius: 4px;
-            font-size: 12px;
+            padding: 10px;
+            border: 2px solid #ddd;
+            border-radius: 6px;
+            font-size: 13px;
+            transition: border-color 0.3s;
         }
-        
+
+        .form-group select:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+
         button {
             width: 100%;
-            padding: 10px;
+            padding: 12px;
             background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
             color: white;
             border: none;
-            border-radius: 4px;
+            border-radius: 6px;
             cursor: pointer;
             font-weight: 600;
-            font-size: 12px;
-            transition: transform 0.2s;
+            font-size: 13px;
+            transition: all 0.3s;
+            box-shadow: 0 4px 12px rgba(102, 126, 234, 0.4);
         }
-        
+
         button:hover {
             transform: translateY(-2px);
+            box-shadow: 0 6px 16px rgba(102, 126, 234, 0.6);
+        }
+
+        button:active {
+            transform: translateY(0);
         }
         
         .loading {
@@ -254,13 +279,248 @@
             border-radius: 2px;
         }
         
+        /* Tabs */
+        .tabs {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 15px;
+            border-bottom: 2px solid #eee;
+        }
+
+        .tab-btn {
+            padding: 10px 15px;
+            background: none;
+            border: none;
+            border-bottom: 3px solid transparent;
+            color: #666;
+            cursor: pointer;
+            font-weight: 600;
+            font-size: 13px;
+            transition: all 0.3s;
+            box-shadow: none;
+        }
+
+        .tab-btn:hover {
+            color: #667eea;
+            transform: none;
+            box-shadow: none;
+        }
+
+        .tab-btn.active {
+            color: #667eea;
+            border-bottom-color: #667eea;
+        }
+
+        .tab-content {
+            display: none;
+        }
+
+        .tab-content.active {
+            display: block;
+        }
+
+        /* Image Gallery */
+        .image-gallery {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 10px;
+            max-height: 400px;
+            overflow-y: auto;
+        }
+
+        .image-card {
+            background: #f9f9f9;
+            border: 2px solid #eee;
+            border-radius: 8px;
+            padding: 12px;
+            cursor: pointer;
+            transition: all 0.3s;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .image-card:hover {
+            border-color: #667eea;
+            background: #f0f0ff;
+            box-shadow: 0 4px 12px rgba(102, 126, 234, 0.2);
+        }
+
+        .image-card.active {
+            border-color: #667eea;
+            background: #e8e8ff;
+            box-shadow: 0 4px 12px rgba(102, 126, 234, 0.3);
+        }
+
+        .image-info {
+            flex: 1;
+        }
+
+        .image-date {
+            font-weight: 600;
+            color: #333;
+            font-size: 13px;
+        }
+
+        .image-ndvi {
+            font-size: 12px;
+            color: #666;
+            margin-top: 3px;
+        }
+
+        .image-actions {
+            display: flex;
+            gap: 8px;
+        }
+
+        .btn-small {
+            padding: 6px 10px;
+            background: #667eea;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 11px;
+            transition: all 0.3s;
+            box-shadow: none;
+        }
+
+        .btn-small:hover {
+            background: #764ba2;
+            transform: none;
+            box-shadow: none;
+        }
+
+        /* Download Modal */
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 1000;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0,0,0,0.5);
+            animation: fadeIn 0.3s;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+
+        .modal.show {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .modal-content {
+            background: white;
+            padding: 30px;
+            border-radius: 12px;
+            max-width: 500px;
+            width: 90%;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.3);
+            animation: slideUp 0.3s;
+        }
+
+        @keyframes slideUp {
+            from { transform: translateY(20px); opacity: 0; }
+            to { transform: translateY(0); opacity: 1; }
+        }
+
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+            border-bottom: 2px solid #eee;
+            padding-bottom: 15px;
+        }
+
+        .modal-header h2 {
+            font-size: 20px;
+            color: #333;
+        }
+
+        .close-btn {
+            background: none;
+            border: none;
+            font-size: 24px;
+            cursor: pointer;
+            color: #666;
+            padding: 0;
+            width: auto;
+            box-shadow: none;
+        }
+
+        .close-btn:hover {
+            color: #333;
+        }
+
+        .modal-body {
+            margin-bottom: 20px;
+        }
+
+        .modal-body p {
+            margin-bottom: 10px;
+            color: #666;
+            font-size: 13px;
+        }
+
+        .modal-body strong {
+            color: #333;
+        }
+
+        .modal-footer {
+            display: flex;
+            gap: 10px;
+            justify-content: flex-end;
+        }
+
+        .btn-cancel {
+            padding: 10px 20px;
+            background: #eee;
+            color: #333;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-weight: 600;
+            font-size: 13px;
+        }
+
+        .btn-cancel:hover {
+            background: #ddd;
+        }
+
+        .btn-download {
+            padding: 10px 20px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-weight: 600;
+            font-size: 13px;
+            box-shadow: 0 4px 12px rgba(102, 126, 234, 0.4);
+        }
+
+        .btn-download:hover {
+            box-shadow: 0 6px 16px rgba(102, 126, 234, 0.6);
+        }
+
         @media (max-width: 768px) {
             .content {
                 grid-template-columns: 1fr;
             }
-            
+
             #map {
                 height: 400px;
+            }
+
+            .sidebar {
+                max-height: none;
             }
         }
     </style>
@@ -268,36 +528,38 @@
 <body>
     <div class="container">
         <div class="header">
-            <h1>🌾 NDVI 2-Year Field Analysis Viewer</h1>
-            <p>View 2-year NDVI trends and field images with detailed statistics</p>
+            <h1><i class="fas fa-leaf"></i> NDVI 2-Year Field Analysis Viewer</h1>
+            <p>🌾 View 2-year NDVI trends, field images, and detailed statistics with automatic image storage</p>
         </div>
-        
+
         <div class="content">
             <div id="map"></div>
-            
+
             <div class="sidebar">
-                <h3>Analysis Settings</h3>
-                
+                <h3><i class="fas fa-cog"></i> Analysis Settings</h3>
+
                 <div class="error" id="error"></div>
                 <div class="success" id="success"></div>
-                
+
                 <div class="form-group">
-                    <label>Interval Type</label>
+                    <label><i class="fas fa-calendar"></i> Interval Type</label>
                     <select id="intervalType">
-                        <option value="monthly" selected>Monthly (12 data points/year)</option>
-                        <option value="weekly">Weekly (52 data points/year)</option>
+                        <option value="monthly" selected>📅 Monthly (24 data points)</option>
+                        <option value="weekly">📊 Weekly (104 data points)</option>
                     </select>
                 </div>
-                
-                <button onclick="generateAnalysis()">Generate 2-Year Analysis</button>
-                
+
+                <button onclick="generateAnalysis()">
+                    <i class="fas fa-play"></i> Generate 2-Year Analysis
+                </button>
+
                 <div class="loading" id="loading">
                     <div class="spinner"></div>
                     <p>Analyzing 2 years of data...</p>
                 </div>
-                
+
                 <div class="stats-box" id="statsBox" style="display: none;">
-                    <h4 style="margin-bottom: 10px; color: #333;">📊 Statistics</h4>
+                    <h4 style="margin-bottom: 10px; color: #333;"><i class="fas fa-chart-bar"></i> Statistics</h4>
                     <div class="stat-item">
                         <span class="stat-label">Mean NDVI:</span>
                         <span class="stat-value" id="meanNdvi">-</span>
@@ -318,12 +580,34 @@
                         <span class="stat-label">Trend:</span>
                         <span class="stat-value" id="trend">-</span>
                     </div>
+                    <div class="stat-item">
+                        <span class="stat-label">Total Images:</span>
+                        <span class="stat-value" id="totalImages">-</span>
+                    </div>
                 </div>
-                
-                <div class="timeline" id="timeline"></div>
-                
+
+                <!-- Tabs for Timeline and Gallery -->
+                <div class="tabs" id="tabs" style="display: none;">
+                    <button class="tab-btn active" onclick="switchTab('timeline')">
+                        <i class="fas fa-list"></i> Timeline
+                    </button>
+                    <button class="tab-btn" onclick="switchTab('gallery')">
+                        <i class="fas fa-images"></i> Gallery
+                    </button>
+                </div>
+
+                <!-- Timeline Tab -->
+                <div class="tab-content active" id="timeline-tab">
+                    <div class="timeline" id="timeline"></div>
+                </div>
+
+                <!-- Gallery Tab -->
+                <div class="tab-content" id="gallery-tab">
+                    <div class="image-gallery" id="imageGallery"></div>
+                </div>
+
                 <div class="legend">
-                    <div class="legend-title">NDVI Scale</div>
+                    <div class="legend-title"><i class="fas fa-palette"></i> NDVI Scale</div>
                     <div class="legend-item">
                         <div class="legend-color" style="background: #d73027;"></div>
                         <span>Poor (-1 to 0)</span>
@@ -352,37 +636,66 @@
             </div>
         </div>
     </div>
+
+    <!-- Download Modal -->
+    <div class="modal" id="downloadModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2><i class="fas fa-download"></i> Download Image</h2>
+                <button class="close-btn" onclick="closeModal()">&times;</button>
+            </div>
+            <div class="modal-body">
+                <p><strong>Date:</strong> <span id="modalDate">-</span></p>
+                <p><strong>NDVI Value:</strong> <span id="modalNdvi">-</span></p>
+                <p><strong>Download URL:</strong></p>
+                <p style="word-break: break-all; background: #f9f9f9; padding: 10px; border-radius: 4px; font-size: 11px;">
+                    <span id="modalUrl">-</span>
+                </p>
+                <p style="margin-top: 15px; color: #666; font-size: 12px;">
+                    <i class="fas fa-info-circle"></i> Click the download button to save the image metadata to your device.
+                </p>
+            </div>
+            <div class="modal-footer">
+                <button class="btn-cancel" onclick="closeModal()">Cancel</button>
+                <button class="btn-download" onclick="downloadImage()">
+                    <i class="fas fa-download"></i> Download
+                </button>
+            </div>
+        </div>
+    </div>
     
     <!-- Leaflet JS -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.js"></script>
-    
+
     <script>
         let map;
         let currentLayers = [];
         let allTimeSeries = [];
-        
+        let currentSeriesId = null;
+        let currentDownloadData = null;
+
         // Initialize map
         function initMap() {
             map = L.map('map').setView([23.84, 90.37], 15);
-            
+
             // Add base layer
             L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
                 attribution: '© OpenStreetMap contributors',
                 maxZoom: 19
             }).addTo(map);
         }
-        
+
         // Generate 2-year analysis
         async function generateAnalysis() {
             const intervalType = document.getElementById('intervalType').value;
             const loading = document.getElementById('loading');
             const error = document.getElementById('error');
             const success = document.getElementById('success');
-            
+
             loading.classList.add('show');
             error.classList.remove('show');
             success.classList.remove('show');
-            
+
             try {
                 const response = await fetch('/api/field-analysis/two-year-time-series', {
                     method: 'POST',
@@ -400,21 +713,26 @@
                         intervalType: intervalType
                     })
                 });
-                
+
                 if (!response.ok) throw new Error('API request failed');
-                
+
                 const data = await response.json();
                 allTimeSeries = data.data.time_series;
-                
+                currentSeriesId = data.data.series_id;
+
                 displayStatistics(data.data);
                 displayTimeline(allTimeSeries);
-                success.textContent = `✅ Generated ${allTimeSeries.length} data points successfully!`;
+                displayImageGallery(allTimeSeries);
+
+                document.getElementById('tabs').style.display = 'flex';
+
+                success.textContent = `✅ Generated ${allTimeSeries.length} data points with ${allTimeSeries.length} images stored!`;
                 success.classList.add('show');
-                
+
                 if (allTimeSeries.length > 0) {
                     selectTimePoint(0);
                 }
-                
+
             } catch (err) {
                 error.textContent = `❌ Error: ${err.message}`;
                 error.classList.add('show');
@@ -422,7 +740,7 @@
                 loading.classList.remove('show');
             }
         }
-        
+
         // Display statistics
         function displayStatistics(data) {
             const statsBox = document.getElementById('statsBox');
@@ -431,14 +749,15 @@
             document.getElementById('minNdvi').textContent = data.statistics.min_ndvi.toFixed(3);
             document.getElementById('maxNdvi').textContent = data.statistics.max_ndvi.toFixed(3);
             document.getElementById('trend').textContent = data.trends.trend.toUpperCase();
+            document.getElementById('totalImages').textContent = data.total_data_points;
             statsBox.style.display = 'block';
         }
-        
+
         // Display timeline
         function displayTimeline(timeSeries) {
             const timeline = document.getElementById('timeline');
-            timeline.innerHTML = '<h4 style="margin-bottom: 10px; color: #333;">📅 Timeline</h4>';
-            
+            timeline.innerHTML = '<h4 style="margin-bottom: 10px; color: #333;"><i class="fas fa-list"></i> Timeline</h4>';
+
             timeSeries.forEach((data, index) => {
                 const item = document.createElement('div');
                 item.className = 'timeline-item' + (index === 0 ? ' active' : '');
@@ -450,33 +769,127 @@
                 timeline.appendChild(item);
             });
         }
-        
+
+        // Display image gallery
+        function displayImageGallery(timeSeries) {
+            const gallery = document.getElementById('imageGallery');
+            gallery.innerHTML = '';
+
+            timeSeries.forEach((data, index) => {
+                const card = document.createElement('div');
+                card.className = 'image-card' + (index === 0 ? ' active' : '');
+                card.innerHTML = `
+                    <div class="image-info">
+                        <div class="image-date">${data.date}</div>
+                        <div class="image-ndvi">NDVI: ${data.mean_ndvi.toFixed(3)}</div>
+                    </div>
+                    <div class="image-actions">
+                        <button class="btn-small" onclick="selectTimePoint(${index})" title="View on map">
+                            <i class="fas fa-map"></i>
+                        </button>
+                        <button class="btn-small" onclick="openDownloadModal(${index})" title="Download">
+                            <i class="fas fa-download"></i>
+                        </button>
+                    </div>
+                `;
+                gallery.appendChild(card);
+            });
+        }
+
+        // Switch tabs
+        function switchTab(tabName) {
+            // Hide all tabs
+            document.querySelectorAll('.tab-content').forEach(tab => {
+                tab.classList.remove('active');
+            });
+
+            // Remove active from all buttons
+            document.querySelectorAll('.tab-btn').forEach(btn => {
+                btn.classList.remove('active');
+            });
+
+            // Show selected tab
+            document.getElementById(tabName + '-tab').classList.add('active');
+
+            // Add active to clicked button
+            event.target.classList.add('active');
+        }
+
+        // Open download modal
+        function openDownloadModal(index) {
+            const data = allTimeSeries[index];
+            currentDownloadData = data;
+
+            document.getElementById('modalDate').textContent = data.date;
+            document.getElementById('modalNdvi').textContent = data.mean_ndvi.toFixed(3);
+            document.getElementById('modalUrl').textContent = data.download_url || 'Not available';
+
+            document.getElementById('downloadModal').classList.add('show');
+        }
+
+        // Close modal
+        function closeModal() {
+            document.getElementById('downloadModal').classList.remove('show');
+        }
+
+        // Download image
+        function downloadImage() {
+            if (!currentDownloadData || !currentDownloadData.download_url) {
+                alert('Download URL not available');
+                return;
+            }
+
+            // Create a link and trigger download
+            const link = document.createElement('a');
+            link.href = currentDownloadData.download_url;
+            link.download = `ndvi_${currentDownloadData.date}.json`;
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+
+            closeModal();
+        }
+
         // Select and display time point
         function selectTimePoint(index) {
             const data = allTimeSeries[index];
-            
+
             // Remove old layers
             currentLayers.forEach(layer => map.removeLayer(layer));
             currentLayers = [];
-            
+
             // Add new layer
-            const layer = L.tileLayer(
-                `https://earthengine.googleapis.com/map/${data.map_id}/{z}/{x}/{y}?token=${data.map_token}`,
-                {
-                    attribution: `NDVI - ${data.date}`,
-                    opacity: 0.7,
-                    maxZoom: 20
-                }
-            ).addTo(map);
-            
-            currentLayers.push(layer);
-            
-            // Update active item
+            if (data.map_token) {
+                const layer = L.tileLayer(
+                    `https://earthengine.googleapis.com/map/${data.map_id}/{z}/{x}/{y}?token=${data.map_token}`,
+                    {
+                        attribution: `NDVI - ${data.date}`,
+                        opacity: 0.7,
+                        maxZoom: 20
+                    }
+                ).addTo(map);
+
+                currentLayers.push(layer);
+            }
+
+            // Update active items
             document.querySelectorAll('.timeline-item').forEach((item, i) => {
                 item.classList.toggle('active', i === index);
             });
+
+            document.querySelectorAll('.image-card').forEach((card, i) => {
+                card.classList.toggle('active', i === index);
+            });
         }
-        
+
+        // Close modal on outside click
+        window.onclick = function(event) {
+            const modal = document.getElementById('downloadModal');
+            if (event.target === modal) {
+                closeModal();
+            }
+        }
+
         // Initialize on load
         window.addEventListener('load', initMap);
     </script>

@@ -14,6 +14,7 @@ const TimeSeriesImageStorageService = require('./services/timeSeriesImageStorage
 const NDVIImageGenerationService = require('./services/ndviImageGenerationService');
 const NDVILegendService = require('./services/ndviLegendService');
 const NDVIChartService = require('./services/ndviChartService');
+const FloodDetectionService = require('./services/floodDetectionService');
 
 const app = express();
 const PORT = process.env.PORT || 3000;
@@ -31,6 +32,7 @@ let timeSeriesImageStorageService;
 let ndviImageGenerationService;
 let ndviLegendService;
 let ndviChartService;
+let floodDetectionService;
 
 async function initializeEarthEngine() {
   try {
@@ -83,6 +85,9 @@ async function initializeEarthEngine() {
             // Initialize NDVI chart service
             ndviChartService = new NDVIChartService(ee);
             console.log('✅ NDVI Chart Service initialized');
+            // Initialize flood detection service
+            floodDetectionService = new FloodDetectionService(ee);
+            console.log('✅ Flood Detection Service initialized');
           },
           (error) => {
             console.error('❌ Earth Engine initialization error:', error);
@@ -1008,6 +1013,131 @@ app.post('/api/field-analysis/ndvi-chart', async (req, res) => {
     res.json(chartData);
   } catch (error) {
     console.error('Error generating NDVI chart:', error);
+    res.status(500).json({
+      success: false,
+      error: error.message
+    });
+  }
+});
+
+/**
+ * Flood Detection API
+ * POST /api/field-analysis/flood-detection
+ *
+ * Detects current flood status and historical floods for a field
+ * Uses Sentinel-1 SAR imagery for water extent analysis
+ */
+app.post('/api/field-analysis/flood-detection', async (req, res) => {
+  try {
+    if (!floodDetectionService) {
+      return res.status(503).json({
+        success: false,
+        error: 'Flood Detection Service not initialized'
+      });
+    }
+
+    const { fieldBoundary, fieldId, currentDate } = req.body;
+
+    // Validate required fields
+    if (!fieldBoundary || !fieldId) {
+      return res.status(400).json({
+        success: false,
+        error: 'Missing required fields: fieldBoundary, fieldId'
+      });
+    }
+
+    // Validate field boundary
+    if (!fieldBoundary.type || !fieldBoundary.coordinates) {
+      return res.status(400).json({
+        success: false,
+        error: 'Invalid fieldBoundary format. Must be a GeoJSON Polygon or MultiPolygon'
+      });
+    }
+
+    console.log(`🌊 Detecting floods for field ${fieldId}`);
+
+    // Detect floods
+    const floodData = await floodDetectionService.detectFloods(
+      fieldBoundary,
+      fieldId,
+      currentDate
+    );
+
+    res.json(floodData);
+  } catch (error) {
+    console.error('Error detecting floods:', error);
+    res.status(500).json({
+      success: false,
+      error: error.message
+    });
+  }
+});
+
+/**
+ * Flood Time Series API
+ * POST /api/field-analysis/flood-time-series
+ *
+ * Generates flood time series data for a field
+ * Shows water extent changes over time
+ */
+app.post('/api/field-analysis/flood-time-series', async (req, res) => {
+  try {
+    if (!floodDetectionService) {
+      return res.status(503).json({
+        success: false,
+        error: 'Flood Detection Service not initialized'
+      });
+    }
+
+    const { fieldBoundary, fieldId, startDate, endDate, intervalDays } = req.body;
+
+    // Validate required fields
+    if (!fieldBoundary || !fieldId || !startDate || !endDate) {
+      return res.status(400).json({
+        success: false,
+        error: 'Missing required fields: fieldBoundary, fieldId, startDate, endDate'
+      });
+    }
+
+    // Validate field boundary
+    if (!fieldBoundary.type || !fieldBoundary.coordinates) {
+      return res.status(400).json({
+        success: false,
+        error: 'Invalid fieldBoundary format. Must be a GeoJSON Polygon or MultiPolygon'
+      });
+    }
+
+    // Validate dates
+    const start = new Date(startDate);
+    const end = new Date(endDate);
+    if (isNaN(start.getTime()) || isNaN(end.getTime())) {
+      return res.status(400).json({
+        success: false,
+        error: 'Invalid date format. Use YYYY-MM-DD'
+      });
+    }
+
+    if (start >= end) {
+      return res.status(400).json({
+        success: false,
+        error: 'startDate must be before endDate'
+      });
+    }
+
+    console.log(`📊 Generating flood time series for field ${fieldId}`);
+
+    // Generate flood time series
+    const timeSeriesData = await floodDetectionService.generateFloodTimeSeries(
+      fieldBoundary,
+      fieldId,
+      startDate,
+      endDate,
+      intervalDays || 30
+    );
+
+    res.json(timeSeriesData);
+  } catch (error) {
+    console.error('Error generating flood time series:', error);
     res.status(500).json({
       success: false,
       error: error.message

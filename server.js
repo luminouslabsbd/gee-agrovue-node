@@ -9,6 +9,7 @@ const NDVITimeSeriesService = require('./services/ndviTimeSeriesService');
 const NDVITimeSeriesMapService = require('./services/ndviTimeSeriesMapService');
 const NDVITwoYearTimeSeriesService = require('./services/ndviTwoYearTimeSeriesService');
 const FieldDataUpdateService = require('./services/fieldDataUpdateService');
+const NDVIImageExportService = require('./services/ndviImageExportService');
 
 const app = express();
 const PORT = process.env.PORT || 3000;
@@ -21,6 +22,7 @@ let ndviTimeSeriesService;
 let ndviTimeSeriesMapService;
 let ndviTwoYearTimeSeriesService;
 let fieldDataUpdateService;
+let ndviImageExportService;
 
 async function initializeEarthEngine() {
   try {
@@ -58,6 +60,9 @@ async function initializeEarthEngine() {
             // Initialize field data update service
             fieldDataUpdateService = new FieldDataUpdateService(ee, ndviTwoYearTimeSeriesService);
             console.log('✅ Field Data Update Service initialized');
+            // Initialize NDVI image export service
+            ndviImageExportService = new NDVIImageExportService(ee);
+            console.log('✅ NDVI Image Export Service initialized');
           },
           (error) => {
             console.error('❌ Earth Engine initialization error:', error);
@@ -585,6 +590,162 @@ app.get('/api/field-analysis/change-history/:fieldId', (req, res) => {
 
   } catch (error) {
     console.error('Error retrieving change history:', error);
+    res.status(500).json({
+      success: false,
+      error: error.message
+    });
+  }
+});
+
+// ============================================
+// NDVI Image Export & Storage Endpoints
+// ============================================
+
+/**
+ * Export and store NDVI image
+ * POST /api/field-analysis/export-ndvi-image
+ */
+app.post('/api/field-analysis/export-ndvi-image', async (req, res) => {
+  try {
+    if (!eeInitialized) {
+      return res.status(503).json({
+        success: false,
+        error: 'Earth Engine not initialized yet'
+      });
+    }
+
+    const { fieldBoundary, fieldId, date } = req.body;
+
+    if (!fieldBoundary || !fieldId || !date) {
+      return res.status(400).json({
+        success: false,
+        error: 'Missing required parameters: fieldBoundary, fieldId, date'
+      });
+    }
+
+    const result = await ndviImageExportService.exportAndStoreNDVIImage(
+      fieldBoundary,
+      fieldId,
+      date
+    );
+
+    res.json({
+      success: true,
+      data: result
+    });
+  } catch (error) {
+    console.error('Error exporting NDVI image:', error);
+    res.status(500).json({
+      success: false,
+      error: error.message
+    });
+  }
+});
+
+/**
+ * Get stored NDVI image metadata
+ * GET /api/field-analysis/stored-image/:filename
+ */
+app.get('/api/field-analysis/stored-image/:filename', (req, res) => {
+  try {
+    if (!ndviImageExportService) {
+      return res.status(503).json({
+        success: false,
+        error: 'Image export service not initialized'
+      });
+    }
+
+    const metadata = ndviImageExportService.getStoredImage(req.params.filename);
+    res.json({
+      success: true,
+      data: metadata
+    });
+  } catch (error) {
+    console.error('Error getting stored image:', error);
+    res.status(404).json({
+      success: false,
+      error: error.message
+    });
+  }
+});
+
+/**
+ * List all stored NDVI images
+ * GET /api/field-analysis/stored-images
+ * Query params: fieldId (optional)
+ */
+app.get('/api/field-analysis/stored-images', (req, res) => {
+  try {
+    if (!ndviImageExportService) {
+      return res.status(503).json({
+        success: false,
+        error: 'Image export service not initialized'
+      });
+    }
+
+    const { fieldId } = req.query;
+    const images = ndviImageExportService.listStoredImages(fieldId);
+
+    res.json({
+      success: true,
+      data: {
+        total: images.length,
+        images: images
+      }
+    });
+  } catch (error) {
+    console.error('Error listing stored images:', error);
+    res.status(500).json({
+      success: false,
+      error: error.message
+    });
+  }
+});
+
+/**
+ * Delete stored NDVI image
+ * DELETE /api/field-analysis/stored-image/:filename
+ */
+app.delete('/api/field-analysis/stored-image/:filename', (req, res) => {
+  try {
+    if (!ndviImageExportService) {
+      return res.status(503).json({
+        success: false,
+        error: 'Image export service not initialized'
+      });
+    }
+
+    const result = ndviImageExportService.deleteStoredImage(req.params.filename);
+    res.json(result);
+  } catch (error) {
+    console.error('Error deleting stored image:', error);
+    res.status(500).json({
+      success: false,
+      error: error.message
+    });
+  }
+});
+
+/**
+ * Get storage statistics
+ * GET /api/field-analysis/storage-stats
+ */
+app.get('/api/field-analysis/storage-stats', (req, res) => {
+  try {
+    if (!ndviImageExportService) {
+      return res.status(503).json({
+        success: false,
+        error: 'Image export service not initialized'
+      });
+    }
+
+    const stats = ndviImageExportService.getStorageStats();
+    res.json({
+      success: true,
+      data: stats
+    });
+  } catch (error) {
+    console.error('Error getting storage stats:', error);
     res.status(500).json({
       success: false,
       error: error.message

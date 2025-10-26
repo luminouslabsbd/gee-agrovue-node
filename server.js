@@ -11,6 +11,8 @@ const NDVITwoYearTimeSeriesService = require('./services/ndviTwoYearTimeSeriesSe
 const FieldDataUpdateService = require('./services/fieldDataUpdateService');
 const NDVIImageExportService = require('./services/ndviImageExportService');
 const TimeSeriesImageStorageService = require('./services/timeSeriesImageStorageService');
+const NDVIImageGenerationService = require('./services/ndviImageGenerationService');
+const NDVILegendService = require('./services/ndviLegendService');
 
 const app = express();
 const PORT = process.env.PORT || 3000;
@@ -25,6 +27,8 @@ let ndviTwoYearTimeSeriesService;
 let fieldDataUpdateService;
 let ndviImageExportService;
 let timeSeriesImageStorageService;
+let ndviImageGenerationService;
+let ndviLegendService;
 
 async function initializeEarthEngine() {
   try {
@@ -66,8 +70,14 @@ async function initializeEarthEngine() {
             ndviImageExportService = new NDVIImageExportService(ee);
             console.log('✅ NDVI Image Export Service initialized');
             // Initialize time series image storage service
-            timeSeriesImageStorageService = new TimeSeriesImageStorageService();
+            timeSeriesImageStorageService = new TimeSeriesImageStorageService(ee);
             console.log('✅ Time Series Image Storage Service initialized');
+            // Initialize NDVI image generation service
+            ndviImageGenerationService = new NDVIImageGenerationService(ee);
+            console.log('✅ NDVI Image Generation Service initialized');
+            // Initialize NDVI legend service
+            ndviLegendService = new NDVILegendService();
+            console.log('✅ NDVI Legend Service initialized');
           },
           (error) => {
             console.error('❌ Earth Engine initialization error:', error);
@@ -395,9 +405,10 @@ app.post('/api/field-analysis/two-year-time-series', async (req, res) => {
 
     // Save images to server and get download URLs
     console.log(`💾 Saving time series images for field ${fieldId}...`);
-    const enhancedResult = timeSeriesImageStorageService.saveTimeSeriesImages(
+    const enhancedResult = await timeSeriesImageStorageService.saveTimeSeriesImages(
       timeSeriesResult,
-      fieldId
+      fieldId,
+      fieldBoundary
     );
 
     res.json({
@@ -859,6 +870,61 @@ app.delete('/api/field-analysis/time-series/:seriesId', (req, res) => {
     res.json(result);
   } catch (error) {
     console.error('Error deleting time series:', error);
+    res.status(500).json({
+      success: false,
+      error: error.message
+    });
+  }
+});
+
+// Get NDVI Legend/Scale
+app.get('/api/ndvi-legend', (_, res) => {
+  try {
+    if (!ndviLegendService) {
+      return res.status(503).json({
+        success: false,
+        error: 'Legend service not initialized'
+      });
+    }
+
+    res.json({
+      success: true,
+      data: ndviLegendService.getLegendJSON(),
+      html: ndviLegendService.getLegendHTML(),
+      css: ndviLegendService.getLegendCSS()
+    });
+  } catch (error) {
+    console.error('Error getting NDVI legend:', error);
+    res.status(500).json({
+      success: false,
+      error: error.message
+    });
+  }
+});
+
+// Get NDVI Color Visualization Information
+app.get('/api/ndvi-color-visualization', (_, res) => {
+  try {
+    if (!ndviTwoYearTimeSeriesService) {
+      return res.status(503).json({
+        success: false,
+        error: 'NDVI service not initialized'
+      });
+    }
+
+    const colorVizService = ndviTwoYearTimeSeriesService.colorVisualizationService;
+
+    res.json({
+      success: true,
+      data: {
+        scale: colorVizService.getNDVIScale(),
+        legend: colorVizService.getLegendData(),
+        visualization_params: colorVizService.getVisualizationParams(),
+        description: 'NDVI Color Visualization with proper color mapping for each range'
+      }
+    });
+  } catch (error) {
+    console.error('Error getting NDVI color visualization:', error);
     res.status(500).json({
       success: false,
       error: error.message

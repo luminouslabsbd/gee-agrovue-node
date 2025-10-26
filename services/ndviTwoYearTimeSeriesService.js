@@ -1,28 +1,34 @@
 /**
  * NDVI 2-Year Time Series Service
  * Generates 2-year NDVI time series data with field images
- * 
+ *
  * Features:
  * - 2-year historical NDVI data
  * - Monthly and weekly intervals
- * - Field image generation
+ * - Field image generation with proper NDVI color visualization
  * - Statistics and trends
  * - Data export capabilities
+ * - Cloud masking for cleaner data
  */
+
+const NDVIColorVisualizationService = require('./ndviColorVisualizationService');
 
 class NDVITwoYearTimeSeriesService {
   constructor(ee) {
     this.ee = ee;
     this.SENTINEL2_DATASET = 'COPERNICUS/S2_SR';
     this.CLOUD_FILTER = 30;
-    
+
+    // Initialize color visualization service
+    this.colorVisualizationService = new NDVIColorVisualizationService(ee);
+
     // NDVI Visualization Parameters
     this.NDVI_VIS_PARAMS = {
       min: -1,
       max: 1,
       palette: ['#d73027', '#fc8d59', '#fee090', '#e0f3f8', '#91bfdb', '#4575b4']
     };
-    
+
     // Field Visualization Parameters
     this.FIELD_VIS_PARAMS = {
       min: -1,
@@ -61,19 +67,19 @@ class NDVITwoYearTimeSeriesService {
 
       // Fetch NDVI data for each date
       const timeSeriesData = [];
-      const fieldImages = [];
 
       for (const date of dates) {
         const nextDate = this.addDays(date, intervalType === 'monthly' ? 30 : 7);
-        
-        // Get Sentinel-2 image collection
+
+        // Get Sentinel-2 image collection with cloud filtering
         const imageCollection = this.ee.ImageCollection(this.SENTINEL2_DATASET)
           .filterBounds(geometry)
           .filterDate(date, nextDate)
-          .filter(this.ee.Filter.lt('CLOUDY_PIXEL_PERCENTAGE', this.CLOUD_FILTER));
+          .filter(this.ee.Filter.lt('CLOUDY_PIXEL_PERCENTAGE', this.CLOUD_FILTER))
+          .map(img => this.maskClouds(img));  // Apply cloud masking
 
         if (imageCollection.size().getInfo() > 0) {
-          // Calculate NDVI
+          // Calculate NDVI with cloud masking
           const ndvi = imageCollection
             .map(img => img.normalizedDifference(['B8', 'B4']).rename('NDVI'))
             .mean();
@@ -89,26 +95,43 @@ class NDVITwoYearTimeSeriesService {
             maxPixels: 1e9
           }).getInfo();
 
-          // Get map ID for visualization
-          const mapId = ndvi.getMapId(this.NDVI_VIS_PARAMS);
+          const meanNdvi = stats.NDVI_mean || 0;
+
+          // Calculate suitability metrics
+          const suitability = this.calculateSuitability(meanNdvi);
+
+          // Get thumbnail URL for the NDVI image with proper visualization
+          // IMPORTANT: Clip the NDVI image to the field boundary before generating thumbnail
+          const clippedNdvi = ndvi.clip(geometry);
+
+          // Use color visualization service for proper NDVI color mapping
+          // This ensures exact color mapping for each NDVI range
+          const thumbUrl = this.colorVisualizationService.getColorMappedThumbURL(
+            clippedNdvi,
+            geometry,
+            512
+          );
 
           timeSeriesData.push({
             date: date,
-            mean_ndvi: stats.NDVI_mean || 0,
+            mean_ndvi: meanNdvi,
             std_ndvi: stats.NDVI_stdDev || 0,
             min_ndvi: stats.NDVI_min || 0,
             max_ndvi: stats.NDVI_max || 0,
-            map_id: mapId.mapid,
-            map_token: mapId.token,
-            map_url: `https://earthengine.googleapis.com/map/${mapId.mapid}/{z}/{x}/{y}?token=${mapId.token}`,
-            image_available: true
-          });
-
-          fieldImages.push({
-            date: date,
-            map_id: mapId.mapid,
-            map_token: mapId.token,
-            map_url: `https://earthengine.googleapis.com/map/${mapId.mapid}/{z}/{x}/{y}?token=${mapId.token}`
+            suitability_status: suitability.status,
+            suitability_percentage: suitability.percentage,
+            confidence_level: suitability.confidence,
+            image_available: true,
+            thumb_url: thumbUrl,  // Add thumbnail URL for downloading
+            geometry: fieldBoundary,  // Add geometry for image generation
+            ndvi_scale: {
+              poor: { range: '-1 to 0', color: '#d73027' },
+              sparse: { range: '0 to 0.2', color: '#fc8d59' },
+              bare: { range: '0.2 to 0.4', color: '#fee090' },
+              moderate: { range: '0.4 to 0.6', color: '#e0f3f8' },
+              good: { range: '0.6 to 0.8', color: '#91bfdb' },
+              excellent: { range: '0.8 to 1', color: '#4575b4' }
+            }
           });
         }
       }
@@ -118,12 +141,12 @@ class NDVITwoYearTimeSeriesService {
 
       return {
         field_id: fieldId,
+        field_boundary: fieldBoundary,  // Include field boundary for image generation
         start_date: startDateStr,
         end_date: endDateStr,
         interval_type: intervalType,
         total_data_points: timeSeriesData.length,
         time_series: timeSeriesData,
-        field_images: fieldImages,
         trends: trends,
         statistics: {
           overall_mean_ndvi: this.calculateMean(timeSeriesData.map(d => d.mean_ndvi)),
@@ -306,6 +329,79 @@ class NDVITwoYearTimeSeriesService {
     const mean = this.calculateMean(values);
     const squareDiffs = values.map(value => Math.pow(value - mean, 2));
     return Math.sqrt(this.calculateMean(squareDiffs));
+  }
+
+  /**
+   * Mask clouds and cloud shadows in Sentinel-2 image
+   * Uses SCL (Scene Classification Layer) band for Sentinel-2 Level 2A
+   * @param {ee.Image} image - Sentinel-2 image
+   * @returns {ee.Image} Cloud-masked image
+   */
+  maskClouds(image) {
+    try {
+      // For Sentinel-2 Level 2A, use SCL (Scene Classification Layer) band
+      // SCL values: 0=No Data, 1=Saturated/Defective, 2=Dark Area Pixels, 3=Cloud Shadows,
+      //             4=Vegetation, 5=Not Vegetated, 6=Water, 7=Unclassified, 8=Cloud Medium,
+      //             9=Cloud High, 10=Thin Cirrus, 11=Snow/Ice
+
+      const scl = image.select('SCL');
+
+      // Create mask for valid pixels (exclude clouds, shadows, and snow)
+      // Keep only: vegetation (4), not vegetated (5), water (6), unclassified (7)
+      const mask = scl.eq(4)
+        .or(scl.eq(5))
+        .or(scl.eq(6))
+        .or(scl.eq(7));
+
+      // Apply the mask to all bands
+      return image.updateMask(mask);
+    } catch (error) {
+      console.warn('Cloud masking error:', error);
+      return image;  // Return original image if masking fails
+    }
+  }
+
+  /**
+   * Calculate suitability metrics based on NDVI value
+   * @param {Number} ndviValue - NDVI value (-1 to 1)
+   * @returns {Object} Suitability status, percentage, and confidence
+   */
+  calculateSuitability(ndviValue) {
+    let status = 'Poor';
+    let percentage = 0;
+    let confidence = 'Low';
+
+    if (ndviValue < 0) {
+      status = 'Poor';
+      percentage = 0;
+      confidence = 'High';
+    } else if (ndviValue < 0.2) {
+      status = 'Sparse';
+      percentage = Math.round(ndviValue * 100 / 0.2);
+      confidence = 'High';
+    } else if (ndviValue < 0.4) {
+      status = 'Bare';
+      percentage = Math.round((ndviValue - 0.2) * 100 / 0.2 + 20);
+      confidence = 'High';
+    } else if (ndviValue < 0.6) {
+      status = 'Moderate';
+      percentage = Math.round((ndviValue - 0.4) * 100 / 0.2 + 40);
+      confidence = 'Very High';
+    } else if (ndviValue < 0.8) {
+      status = 'Good';
+      percentage = Math.round((ndviValue - 0.6) * 100 / 0.2 + 60);
+      confidence = 'Very High';
+    } else {
+      status = 'Excellent';
+      percentage = Math.round((ndviValue - 0.8) * 100 / 0.2 + 80);
+      confidence = 'Very High';
+    }
+
+    return {
+      status,
+      percentage: Math.min(100, Math.max(0, percentage)),
+      confidence
+    };
   }
 }
 

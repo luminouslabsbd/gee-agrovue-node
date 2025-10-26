@@ -169,7 +169,6 @@ describe('NDVITwoYearTimeSeriesService', () => {
 
       expect(result).toHaveProperty('field_id', 'TEST-FIELD-001');
       expect(result).toHaveProperty('time_series');
-      expect(result).toHaveProperty('field_images');
       expect(result).toHaveProperty('trends');
       expect(result).toHaveProperty('statistics');
       expect(result).toHaveProperty('metadata');

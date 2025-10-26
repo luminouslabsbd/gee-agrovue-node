@@ -40,7 +40,7 @@ describe('TimeSeriesImageStorageService', () => {
   });
 
   describe('Save Time Series Images', () => {
-    test('should save time series images with download URLs', () => {
+    test('should save time series images with download URLs', async () => {
       const mockTimeSeriesData = {
         field_id: 'TEST-FIELD-001',
         start_date: '2023-10-26',
@@ -54,9 +54,9 @@ describe('TimeSeriesImageStorageService', () => {
             std_ndvi: 0.05,
             min_ndvi: 0.15,
             max_ndvi: 0.55,
-            map_id: 'test-map-id-1',
-            map_token: 'test-token-1',
-            map_url: 'https://earthengine.googleapis.com/map/test-map-id-1/{z}/{x}/{y}?token=test-token-1',
+            suitability_status: 'Bare',
+            suitability_percentage: 95,
+            confidence_level: 'High',
             image_available: true
           },
           {
@@ -65,9 +65,9 @@ describe('TimeSeriesImageStorageService', () => {
             std_ndvi: 0.06,
             min_ndvi: 0.18,
             max_ndvi: 0.58,
-            map_id: 'test-map-id-2',
-            map_token: 'test-token-2',
-            map_url: 'https://earthengine.googleapis.com/map/test-map-id-2/{z}/{x}/{y}?token=test-token-2',
+            suitability_status: 'Moderate',
+            suitability_percentage: 100,
+            confidence_level: 'Very High',
             image_available: true
           },
           {
@@ -76,18 +76,10 @@ describe('TimeSeriesImageStorageService', () => {
             std_ndvi: 0.05,
             min_ndvi: 0.16,
             max_ndvi: 0.56,
-            map_id: 'test-map-id-3',
-            map_token: 'test-token-3',
-            map_url: 'https://earthengine.googleapis.com/map/test-map-id-3/{z}/{x}/{y}?token=test-token-3',
+            suitability_status: 'Moderate',
+            suitability_percentage: 95,
+            confidence_level: 'Very High',
             image_available: true
-          }
-        ],
-        field_images: [
-          {
-            date: '2023-10-26',
-            map_id: 'test-map-id-1',
-            map_token: 'test-token-1',
-            map_url: 'https://earthengine.googleapis.com/map/test-map-id-1/{z}/{x}/{y}?token=test-token-1'
           }
         ],
         trends: { trend: 'stable', change_percentage: 8.57 },
@@ -105,18 +97,20 @@ describe('TimeSeriesImageStorageService', () => {
         }
       };
 
-      const result = service.saveTimeSeriesImages(mockTimeSeriesData, 'TEST-FIELD-001');
+      const result = await service.saveTimeSeriesImages(mockTimeSeriesData, 'TEST-FIELD-001');
 
       expect(result).toHaveProperty('series_id');
       expect(result).toHaveProperty('storage_info');
       expect(result.time_series.length).toBe(3);
-      expect(result.time_series[0]).toHaveProperty('download_url');
-      expect(result.time_series[0].download_url).toContain('/time-series-images/');
-      expect(result.time_series[0]).toHaveProperty('token_available');
+      expect(result.time_series[0]).toHaveProperty('image_url');
+      expect(result.time_series[0].image_url).toContain('/time-series-images/');
+      expect(result.time_series[0]).toHaveProperty('suitability_status');
+      expect(result.time_series[0]).toHaveProperty('suitability_percentage');
+      expect(result.time_series[0]).toHaveProperty('confidence_level');
       expect(result.time_series[0]).toHaveProperty('stored_at');
     });
 
-    test('should create series directory with images', () => {
+    test('should create series directory with images', async () => {
       const mockTimeSeriesData = {
         field_id: 'TEST-FIELD-002',
         start_date: '2023-10-26',
@@ -130,13 +124,12 @@ describe('TimeSeriesImageStorageService', () => {
             std_ndvi: 0.05,
             min_ndvi: 0.15,
             max_ndvi: 0.55,
-            map_id: 'test-map-id',
-            map_token: 'test-token',
-            map_url: 'https://earthengine.googleapis.com/map/test-map-id/{z}/{x}/{y}?token=test-token',
+            suitability_status: 'Bare',
+            suitability_percentage: 95,
+            confidence_level: 'High',
             image_available: true
           }
         ],
-        field_images: [],
         trends: { trend: 'stable', change_percentage: 0 },
         statistics: {
           overall_mean_ndvi: 0.35,
@@ -152,14 +145,14 @@ describe('TimeSeriesImageStorageService', () => {
         }
       };
 
-      const result = service.saveTimeSeriesImages(mockTimeSeriesData, 'TEST-FIELD-002');
+      const result = await service.saveTimeSeriesImages(mockTimeSeriesData, 'TEST-FIELD-002');
       const seriesDir = path.join(testStorageDir, result.series_id);
 
       expect(fs.existsSync(seriesDir)).toBe(true);
       expect(fs.existsSync(path.join(seriesDir, 'series_metadata.json'))).toBe(true);
     });
 
-    test('should handle empty map token gracefully', () => {
+    test('should handle empty map token gracefully', async () => {
       const mockTimeSeriesData = {
         field_id: 'TEST-FIELD-003',
         start_date: '2023-10-26',
@@ -173,13 +166,12 @@ describe('TimeSeriesImageStorageService', () => {
             std_ndvi: 0.05,
             min_ndvi: 0.15,
             max_ndvi: 0.55,
-            map_id: 'test-map-id',
-            map_token: '',
-            map_url: 'https://earthengine.googleapis.com/map/test-map-id/{z}/{x}/{y}?token=',
+            suitability_status: 'Bare',
+            suitability_percentage: 95,
+            confidence_level: 'High',
             image_available: true
           }
         ],
-        field_images: [],
         trends: { trend: 'stable', change_percentage: 0 },
         statistics: {
           overall_mean_ndvi: 0.35,
@@ -195,10 +187,12 @@ describe('TimeSeriesImageStorageService', () => {
         }
       };
 
-      const result = service.saveTimeSeriesImages(mockTimeSeriesData, 'TEST-FIELD-003');
+      const result = await service.saveTimeSeriesImages(mockTimeSeriesData, 'TEST-FIELD-003');
 
-      expect(result.time_series[0].token_available).toBe(false);
-      expect(result.time_series[0]).toHaveProperty('download_url');
+      expect(result.time_series[0]).toHaveProperty('suitability_status');
+      expect(result.time_series[0]).toHaveProperty('suitability_percentage');
+      expect(result.time_series[0]).toHaveProperty('confidence_level');
+      expect(result.time_series[0]).toHaveProperty('image_url');
     });
   });
 
@@ -250,7 +244,7 @@ describe('TimeSeriesImageStorageService', () => {
   });
 
   describe('Delete Series', () => {
-    test('should delete stored series', () => {
+    test('should delete stored series', async () => {
       const mockTimeSeriesData = {
         field_id: 'TEST-FIELD-DELETE',
         start_date: '2023-10-26',
@@ -264,13 +258,12 @@ describe('TimeSeriesImageStorageService', () => {
             std_ndvi: 0.05,
             min_ndvi: 0.15,
             max_ndvi: 0.55,
-            map_id: 'test-map-id',
-            map_token: 'test-token',
-            map_url: 'https://earthengine.googleapis.com/map/test-map-id/{z}/{x}/{y}?token=test-token',
+            suitability_status: 'Bare',
+            suitability_percentage: 95,
+            confidence_level: 'High',
             image_available: true
           }
         ],
-        field_images: [],
         trends: { trend: 'stable', change_percentage: 0 },
         statistics: {
           overall_mean_ndvi: 0.35,
@@ -286,7 +279,7 @@ describe('TimeSeriesImageStorageService', () => {
         }
       };
 
-      const result = service.saveTimeSeriesImages(mockTimeSeriesData, 'TEST-FIELD-DELETE');
+      const result = await service.saveTimeSeriesImages(mockTimeSeriesData, 'TEST-FIELD-DELETE');
       const seriesId = result.series_id;
 
       const deleteResult = service.deleteStoredSeries(seriesId);

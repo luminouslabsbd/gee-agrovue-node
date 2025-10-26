@@ -2,7 +2,7 @@
  * Time Series Image Storage Service
  * Saves NDVI map images from time series data to server storage
  * Provides download URLs for each image
- * 
+ *
  * Features:
  * - Store time series images with metadata
  * - Generate download URLs
@@ -13,11 +13,14 @@
 
 const fs = require('fs');
 const path = require('path');
+const https = require('https');
+const http = require('http');
 
 class TimeSeriesImageStorageService {
-  constructor() {
+  constructor(ee = null) {
     this.STORAGE_DIR = path.join(__dirname, '../public/time-series-images');
     this.METADATA_FILE = path.join(this.STORAGE_DIR, 'metadata.json');
+    this.ee = ee;
     this.initializeStorage();
   }
 
@@ -39,9 +42,10 @@ class TimeSeriesImageStorageService {
    * Save time series images and return with download URLs
    * @param {Object} timeSeriesData - Time series data from NDVITwoYearTimeSeriesService
    * @param {String} fieldId - Field identifier
+   * @param {Object} fieldBoundary - GeoJSON polygon for the field
    * @returns {Object} Time series data with image download URLs
    */
-  saveTimeSeriesImages(timeSeriesData, fieldId) {
+  async saveTimeSeriesImages(timeSeriesData, fieldId, fieldBoundary = null) {
     try {
       const timestamp = Date.now();
       const seriesId = `${fieldId}_${timestamp}`;
@@ -50,71 +54,42 @@ class TimeSeriesImageStorageService {
       // Create series directory
       if (!fs.existsSync(seriesDir)) {
         fs.mkdirSync(seriesDir, { recursive: true });
+        console.log(`✅ Created series directory: ${seriesDir}`);
       }
 
       // Process time series data and save images
-      const enhancedTimeSeries = timeSeriesData.time_series.map((item, index) => {
-        const imageFilename = `ndvi_${fieldId}_${item.date}_${index}.json`;
-        const imagePath = path.join(seriesDir, imageFilename);
+      const enhancedTimeSeries = [];
 
-        // Create image metadata
-        const imageMetadata = {
-          field_id: fieldId,
+      for (let index = 0; index < timeSeriesData.time_series.length; index++) {
+        const item = timeSeriesData.time_series[index];
+        const pngFilename = `ndvi_${fieldId}_${item.date}_${index}.png`;
+        const pngPath = path.join(seriesDir, pngFilename);
+
+        // Download and save actual NDVI image from Earth Engine
+        if (item.thumb_url) {
+          try {
+            await this.downloadImage(item.thumb_url, pngPath);
+            console.log(`✅ Downloaded NDVI image for ${item.date}`);
+          } catch (error) {
+            console.error(`❌ Failed to download image for ${item.date}:`, error.message);
+          }
+        }
+
+        // Return enhanced item with image URL
+        enhancedTimeSeries.push({
           date: item.date,
-          filename: imageFilename,
-          map_id: item.map_id,
-          map_token: item.map_token || '',
-          map_url: item.map_url,
-          download_url: `/time-series-images/${seriesId}/${imageFilename}`,
-          statistics: {
-            mean_ndvi: item.mean_ndvi,
-            std_ndvi: item.std_ndvi,
-            min_ndvi: item.min_ndvi,
-            max_ndvi: item.max_ndvi
-          },
+          mean_ndvi: item.mean_ndvi,
+          std_ndvi: item.std_ndvi,
+          min_ndvi: item.min_ndvi,
+          max_ndvi: item.max_ndvi,
+          suitability_status: item.suitability_status,
+          suitability_percentage: item.suitability_percentage,
+          confidence_level: item.confidence_level,
+          image_url: `/time-series-images/${seriesId}/${pngFilename}`,
           image_available: item.image_available,
-          token_available: !!item.map_token,
           stored_at: new Date().toISOString()
-        };
-
-        // Save image metadata to file
-        fs.writeFileSync(imagePath, JSON.stringify(imageMetadata, null, 2));
-
-        // Return enhanced item with download URL
-        return {
-          ...item,
-          download_url: `/time-series-images/${seriesId}/${imageFilename}`,
-          token_available: !!item.map_token,
-          stored_at: new Date().toISOString()
-        };
-      });
-
-      // Save field images with download URLs
-      const enhancedFieldImages = timeSeriesData.field_images.map((item, index) => {
-        const imageFilename = `field_ndvi_${fieldId}_${item.date}_${index}.json`;
-        const imagePath = path.join(seriesDir, imageFilename);
-
-        const imageMetadata = {
-          field_id: fieldId,
-          date: item.date,
-          filename: imageFilename,
-          map_id: item.map_id,
-          map_token: item.map_token || '',
-          map_url: item.map_url,
-          download_url: `/time-series-images/${seriesId}/${imageFilename}`,
-          token_available: !!item.map_token,
-          stored_at: new Date().toISOString()
-        };
-
-        fs.writeFileSync(imagePath, JSON.stringify(imageMetadata, null, 2));
-
-        return {
-          ...item,
-          download_url: `/time-series-images/${seriesId}/${imageFilename}`,
-          token_available: !!item.map_token,
-          stored_at: new Date().toISOString()
-        };
-      });
+        });
+      }
 
       // Create series metadata
       const seriesMetadata = {
@@ -138,14 +113,20 @@ class TimeSeriesImageStorageService {
 
       // Return enhanced time series data
       return {
-        ...timeSeriesData,
+        field_id: timeSeriesData.field_id,
+        start_date: timeSeriesData.start_date,
+        end_date: timeSeriesData.end_date,
+        interval_type: timeSeriesData.interval_type,
+        total_data_points: timeSeriesData.total_data_points,
         time_series: enhancedTimeSeries,
-        field_images: enhancedFieldImages,
+        trends: timeSeriesData.trends,
+        statistics: timeSeriesData.statistics,
+        metadata: timeSeriesData.metadata,
         series_id: seriesId,
         storage_info: {
           series_id: seriesId,
           storage_path: `/time-series-images/${seriesId}`,
-          total_images_stored: enhancedTimeSeries.length + enhancedFieldImages.length,
+          total_images_stored: enhancedTimeSeries.length,
           created_at: new Date().toISOString()
         }
       };
@@ -203,6 +184,91 @@ class TimeSeriesImageStorageService {
     } catch (error) {
       throw new Error(`Failed to get series metadata: ${error.message}`);
     }
+  }
+
+  /**
+   * Download image from URL and save to file
+   * @param {String} url - Image URL
+   * @param {String} filepath - Path to save the image
+   * @returns {Promise} Promise that resolves when download is complete
+   */
+  downloadImage(url, filepath) {
+    return new Promise((resolve, reject) => {
+      const protocol = url.startsWith('https') ? https : http;
+
+      protocol.get(url, (response) => {
+        if (response.statusCode !== 200) {
+          reject(new Error(`Failed to download image: ${response.statusCode}`));
+          return;
+        }
+
+        const fileStream = fs.createWriteStream(filepath);
+        response.pipe(fileStream);
+
+        fileStream.on('finish', () => {
+          fileStream.close();
+          resolve();
+        });
+
+        fileStream.on('error', (err) => {
+          fs.unlink(filepath, () => {}); // Delete the file if error
+          reject(err);
+        });
+      }).on('error', (err) => {
+        reject(err);
+      });
+    });
+  }
+
+  /**
+   * Create NDVI visualization as PNG
+   * @param {String} pngPath - Path to save PNG file
+   * @param {Number} ndviValue - NDVI value
+   * @param {String} suitabilityStatus - Suitability status
+   */
+  createNDVIVisualization(pngPath, ndviValue, suitabilityStatus) {
+    try {
+      // Create visualization data
+      const visualizationData = {
+        type: 'ndvi_visualization',
+        ndvi_value: ndviValue,
+        suitability_status: suitabilityStatus,
+        color: this.getNDVIColor(ndviValue),
+        created_at: new Date().toISOString(),
+        note: 'NDVI visualization data. For actual PNG images, integrate with canvas or sharp library.'
+      };
+
+      // Save visualization data as JSON
+      const vizJsonPath = pngPath.replace('.png', '_viz.json');
+      fs.writeFileSync(vizJsonPath, JSON.stringify(visualizationData, null, 2));
+
+      // Create a simple text file as image placeholder
+      const txtPath = pngPath.replace('.png', '.txt');
+      const placeholderContent = `NDVI Visualization
+Value: ${ndviValue.toFixed(4)}
+Status: ${suitabilityStatus}
+Color: ${this.getNDVIColor(ndviValue)}
+Generated: ${new Date().toISOString()}`;
+      fs.writeFileSync(txtPath, placeholderContent);
+
+      console.log(`📊 Created visualization for NDVI: ${ndviValue.toFixed(4)} (${suitabilityStatus})`);
+    } catch (error) {
+      console.error('Error creating NDVI visualization:', error);
+    }
+  }
+
+  /**
+   * Get NDVI color based on value
+   * @param {Number} ndviValue - NDVI value
+   * @returns {String} Hex color code
+   */
+  getNDVIColor(ndviValue) {
+    if (ndviValue < 0) return '#d73027'; // Red - Poor
+    if (ndviValue < 0.2) return '#fc8d59'; // Orange - Sparse
+    if (ndviValue < 0.4) return '#fee090'; // Yellow - Bare
+    if (ndviValue < 0.6) return '#e0f3f8'; // Light Blue - Moderate
+    if (ndviValue < 0.8) return '#91bfdb'; // Blue - Good
+    return '#4575b4'; // Dark Blue - Excellent
   }
 
   /**

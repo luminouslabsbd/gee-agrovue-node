@@ -10,6 +10,7 @@ const NDVITimeSeriesMapService = require('./services/ndviTimeSeriesMapService');
 const NDVITwoYearTimeSeriesService = require('./services/ndviTwoYearTimeSeriesService');
 const FieldDataUpdateService = require('./services/fieldDataUpdateService');
 const NDVIImageExportService = require('./services/ndviImageExportService');
+const TimeSeriesImageStorageService = require('./services/timeSeriesImageStorageService');
 
 const app = express();
 const PORT = process.env.PORT || 3000;
@@ -23,6 +24,7 @@ let ndviTimeSeriesMapService;
 let ndviTwoYearTimeSeriesService;
 let fieldDataUpdateService;
 let ndviImageExportService;
+let timeSeriesImageStorageService;
 
 async function initializeEarthEngine() {
   try {
@@ -63,6 +65,9 @@ async function initializeEarthEngine() {
             // Initialize NDVI image export service
             ndviImageExportService = new NDVIImageExportService(ee);
             console.log('✅ NDVI Image Export Service initialized');
+            // Initialize time series image storage service
+            timeSeriesImageStorageService = new TimeSeriesImageStorageService();
+            console.log('✅ Time Series Image Storage Service initialized');
           },
           (error) => {
             console.error('❌ Earth Engine initialization error:', error);
@@ -388,10 +393,17 @@ app.post('/api/field-analysis/two-year-time-series', async (req, res) => {
       interval
     );
 
+    // Save images to server and get download URLs
+    console.log(`💾 Saving time series images for field ${fieldId}...`);
+    const enhancedResult = timeSeriesImageStorageService.saveTimeSeriesImages(
+      timeSeriesResult,
+      fieldId
+    );
+
     res.json({
       success: true,
-      data: timeSeriesResult,
-      message: '2-year time series generated successfully'
+      data: enhancedResult,
+      message: '2-year time series generated and images saved successfully'
     });
 
   } catch (error) {
@@ -746,6 +758,107 @@ app.get('/api/field-analysis/storage-stats', (req, res) => {
     });
   } catch (error) {
     console.error('Error getting storage stats:', error);
+    res.status(500).json({
+      success: false,
+      error: error.message
+    });
+  }
+});
+
+/**
+ * Time Series Image Management Endpoints
+ */
+
+// Get time series metadata
+app.get('/api/field-analysis/time-series/:seriesId', (req, res) => {
+  try {
+    if (!timeSeriesImageStorageService) {
+      return res.status(503).json({
+        success: false,
+        error: 'Storage service not initialized'
+      });
+    }
+
+    const metadata = timeSeriesImageStorageService.getSeriesMetadata(req.params.seriesId);
+    res.json({
+      success: true,
+      data: metadata
+    });
+  } catch (error) {
+    console.error('Error getting series metadata:', error);
+    res.status(404).json({
+      success: false,
+      error: error.message
+    });
+  }
+});
+
+// List all time series
+app.get('/api/field-analysis/time-series-list', (req, res) => {
+  try {
+    if (!timeSeriesImageStorageService) {
+      return res.status(503).json({
+        success: false,
+        error: 'Storage service not initialized'
+      });
+    }
+
+    const { fieldId } = req.query;
+    const series = timeSeriesImageStorageService.listStoredSeries(fieldId);
+    res.json({
+      success: true,
+      data: {
+        total: series.length,
+        series: series
+      }
+    });
+  } catch (error) {
+    console.error('Error listing time series:', error);
+    res.status(500).json({
+      success: false,
+      error: error.message
+    });
+  }
+});
+
+// Get time series storage statistics
+app.get('/api/field-analysis/time-series-stats', (req, res) => {
+  try {
+    if (!timeSeriesImageStorageService) {
+      return res.status(503).json({
+        success: false,
+        error: 'Storage service not initialized'
+      });
+    }
+
+    const stats = timeSeriesImageStorageService.getStorageStats();
+    res.json({
+      success: true,
+      data: stats
+    });
+  } catch (error) {
+    console.error('Error getting time series stats:', error);
+    res.status(500).json({
+      success: false,
+      error: error.message
+    });
+  }
+});
+
+// Delete time series
+app.delete('/api/field-analysis/time-series/:seriesId', (req, res) => {
+  try {
+    if (!timeSeriesImageStorageService) {
+      return res.status(503).json({
+        success: false,
+        error: 'Storage service not initialized'
+      });
+    }
+
+    const result = timeSeriesImageStorageService.deleteStoredSeries(req.params.seriesId);
+    res.json(result);
+  } catch (error) {
+    console.error('Error deleting time series:', error);
     res.status(500).json({
       success: false,
       error: error.message

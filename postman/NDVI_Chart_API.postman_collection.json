@@ -1,0 +1,128 @@
+{
+  "info": {
+    "name": "NDVI Chart API - Water, Vegetation & Soil Analysis",
+    "_postman_id": "ndvi-chart-api-001",
+    "description": "Complete API collection for NDVI Chart generation with water, vegetation, and soil analysis using Google Earth Engine",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "item": [
+    {
+      "name": "Generate NDVI Chart - Monthly",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json",
+            "type": "text"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"fieldBoundary\": {\n    \"type\": \"Polygon\",\n    \"coordinates\": [\n      [\n        [12.633435130119326, 42.6498850799555],\n        [12.633585333824158, 42.64952208649428],\n        [12.633628249168396, 42.64908806979262],\n        [12.633499503135681, 42.64897759233047],\n        [12.63356387615204, 42.64877241938018],\n        [12.63375699520111, 42.648488332639424],\n        [12.633907198905947, 42.64795961219534],\n        [12.634164690971376, 42.64786491552187],\n        [12.634711861610413, 42.64787280691682],\n        [12.635602355003359, 42.64807009146552],\n        [12.63606369495392, 42.64803063460584],\n        [12.636653780937197, 42.64803063460584],\n        [12.63683617115021, 42.64825159269771],\n        [12.636954188346865, 42.64829894075813],\n        [12.636353373527529, 42.64893024478662],\n        [12.63555943965912, 42.64979038621333],\n        [12.635216116905214, 42.65020072472159],\n        [12.634583115577698, 42.65020072472159],\n        [12.63383209705353, 42.65014548700316],\n        [12.633435130119326, 42.6498850799555]\n      ]\n    ]\n  },\n  \"fieldId\": \"ITALY-FIELD-001\",\n  \"startDate\": \"2024-01-01\",\n  \"endDate\": \"2024-10-26\",\n  \"interval\": \"monthly\"\n}"
+        },
+        "url": {
+          "raw": "http://localhost:3000/api/field-analysis/ndvi-chart",
+          "protocol": "http",
+          "host": ["localhost"],
+          "port": "3000",
+          "path": ["api", "field-analysis", "ndvi-chart"]
+        },
+        "description": "Generate NDVI chart with monthly intervals showing water, vegetation, and soil analysis"
+      },
+      "response": []
+    },
+    {
+      "name": "Generate NDVI Chart - Weekly",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json",
+            "type": "text"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"fieldBoundary\": {\n    \"type\": \"Polygon\",\n    \"coordinates\": [\n      [\n        [12.633435130119326, 42.6498850799555],\n        [12.633585333824158, 42.64952208649428],\n        [12.633628249168396, 42.64908806979262],\n        [12.633499503135681, 42.64897759233047],\n        [12.63356387615204, 42.64877241938018],\n        [12.63375699520111, 42.648488332639424],\n        [12.633907198905947, 42.64795961219534],\n        [12.634164690971376, 42.64786491552187],\n        [12.634711861610413, 42.64787280691682],\n        [12.635602355003359, 42.64807009146552],\n        [12.63606369495392, 42.64803063460584],\n        [12.636653780937197, 42.64803063460584],\n        [12.63683617115021, 42.64825159269771],\n        [12.636954188346865, 42.64829894075813],\n        [12.636353373527529, 42.64893024478662],\n        [12.63555943965912, 42.64979038621333],\n        [12.635216116905214, 42.65020072472159],\n        [12.634583115577698, 42.65020072472159],\n        [12.63383209705353, 42.65014548700316],\n        [12.633435130119326, 42.6498850799555]\n      ]\n    ]\n  },\n  \"fieldId\": \"ITALY-FIELD-001\",\n  \"startDate\": \"2024-08-01\",\n  \"endDate\": \"2024-10-26\",\n  \"interval\": \"weekly\"\n}"
+        },
+        "url": {
+          "raw": "http://localhost:3000/api/field-analysis/ndvi-chart",
+          "protocol": "http",
+          "host": ["localhost"],
+          "port": "3000",
+          "path": ["api", "field-analysis", "ndvi-chart"]
+        },
+        "description": "Generate NDVI chart with weekly intervals for detailed monitoring"
+      },
+      "response": []
+    },
+    {
+      "name": "Generate NDVI Chart - Quarterly",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json",
+            "type": "text"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"fieldBoundary\": {\n    \"type\": \"Polygon\",\n    \"coordinates\": [\n      [\n        [12.633435130119326, 42.6498850799555],\n        [12.633585333824158, 42.64952208649428],\n        [12.633628249168396, 42.64908806979262],\n        [12.633499503135681, 42.64897759233047],\n        [12.63356387615204, 42.64877241938018],\n        [12.63375699520111, 42.648488332639424],\n        [12.633907198905947, 42.64795961219534],\n        [12.634164690971376, 42.64786491552187],\n        [12.634711861610413, 42.64787280691682],\n        [12.635602355003359, 42.64807009146552],\n        [12.63606369495392, 42.64803063460584],\n        [12.636653780937197, 42.64803063460584],\n        [12.63683617115021, 42.64825159269771],\n        [12.636954188346865, 42.64829894075813],\n        [12.636353373527529, 42.64893024478662],\n        [12.63555943965912, 42.64979038621333],\n        [12.635216116905214, 42.65020072472159],\n        [12.634583115577698, 42.65020072472159],\n        [12.63383209705353, 42.65014548700316],\n        [12.633435130119326, 42.6498850799555]\n      ]\n    ]\n  },\n  \"fieldId\": \"ITALY-FIELD-001\",\n  \"startDate\": \"2023-01-01\",\n  \"endDate\": \"2024-10-26\",\n  \"interval\": \"quarterly\"\n}"
+        },
+        "url": {
+          "raw": "http://localhost:3000/api/field-analysis/ndvi-chart",
+          "protocol": "http",
+          "host": ["localhost"],
+          "port": "3000",
+          "path": ["api", "field-analysis", "ndvi-chart"]
+        },
+        "description": "Generate NDVI chart with quarterly intervals for long-term trends"
+      },
+      "response": []
+    },
+    {
+      "name": "Health Check",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "http://localhost:3000/api/health",
+          "protocol": "http",
+          "host": ["localhost"],
+          "port": "3000",
+          "path": ["api", "health"]
+        },
+        "description": "Check if the server is running"
+      },
+      "response": []
+    },
+    {
+      "name": "Earth Engine Status",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "http://localhost:3000/api/ee-status",
+          "protocol": "http",
+          "host": ["localhost"],
+          "port": "3000",
+          "path": ["api", "ee-status"]
+        },
+        "description": "Check Earth Engine initialization status"
+      },
+      "response": []
+    }
+  ],
+  "variable": [
+    {
+      "key": "baseUrl",
+      "value": "http://localhost:3000",
+      "type": "string"
+    }
+  ]
+}
+

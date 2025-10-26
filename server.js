@@ -13,6 +13,7 @@ const NDVIImageExportService = require('./services/ndviImageExportService');
 const TimeSeriesImageStorageService = require('./services/timeSeriesImageStorageService');
 const NDVIImageGenerationService = require('./services/ndviImageGenerationService');
 const NDVILegendService = require('./services/ndviLegendService');
+const NDVIChartService = require('./services/ndviChartService');
 
 const app = express();
 const PORT = process.env.PORT || 3000;
@@ -29,6 +30,7 @@ let ndviImageExportService;
 let timeSeriesImageStorageService;
 let ndviImageGenerationService;
 let ndviLegendService;
+let ndviChartService;
 
 async function initializeEarthEngine() {
   try {
@@ -78,6 +80,9 @@ async function initializeEarthEngine() {
             // Initialize NDVI legend service
             ndviLegendService = new NDVILegendService();
             console.log('✅ NDVI Legend Service initialized');
+            // Initialize NDVI chart service
+            ndviChartService = new NDVIChartService(ee);
+            console.log('✅ NDVI Chart Service initialized');
           },
           (error) => {
             console.error('❌ Earth Engine initialization error:', error);
@@ -925,6 +930,84 @@ app.get('/api/ndvi-color-visualization', (_, res) => {
     });
   } catch (error) {
     console.error('Error getting NDVI color visualization:', error);
+    res.status(500).json({
+      success: false,
+      error: error.message
+    });
+  }
+});
+
+/**
+ * Generate NDVI Chart with Water, Vegetation, and Soil Analysis
+ * POST /api/field-analysis/ndvi-chart
+ *
+ * Request Body:
+ * {
+ *   "fieldBoundary": { "type": "Polygon", "coordinates": [...] },
+ *   "fieldId": "string",
+ *   "startDate": "YYYY-MM-DD",
+ *   "endDate": "YYYY-MM-DD",
+ *   "interval": "daily|weekly|monthly|quarterly" (optional, default: monthly)
+ * }
+ */
+app.post('/api/field-analysis/ndvi-chart', async (req, res) => {
+  try {
+    if (!ndviChartService) {
+      return res.status(503).json({
+        success: false,
+        error: 'NDVI Chart Service not initialized'
+      });
+    }
+
+    const { fieldBoundary, fieldId, startDate, endDate, interval } = req.body;
+
+    // Validate required fields
+    if (!fieldBoundary || !fieldId || !startDate || !endDate) {
+      return res.status(400).json({
+        success: false,
+        error: 'Missing required fields: fieldBoundary, fieldId, startDate, endDate'
+      });
+    }
+
+    // Validate field boundary
+    if (!fieldBoundary.type || !fieldBoundary.coordinates) {
+      return res.status(400).json({
+        success: false,
+        error: 'Invalid fieldBoundary format. Must be a GeoJSON Polygon or MultiPolygon'
+      });
+    }
+
+    // Validate dates
+    const start = new Date(startDate);
+    const end = new Date(endDate);
+    if (isNaN(start.getTime()) || isNaN(end.getTime())) {
+      return res.status(400).json({
+        success: false,
+        error: 'Invalid date format. Use YYYY-MM-DD'
+      });
+    }
+
+    if (start >= end) {
+      return res.status(400).json({
+        success: false,
+        error: 'startDate must be before endDate'
+      });
+    }
+
+    console.log(`📊 Generating NDVI chart for field ${fieldId}`);
+
+    // Generate NDVI chart
+    const chartData = await ndviChartService.generateNDVIChart(
+      fieldBoundary,
+      fieldId,
+      startDate,
+      endDate,
+      interval || 'monthly'
+    );
+
+    res.json(chartData);
+  } catch (error) {
+    console.error('Error generating NDVI chart:', error);
     res.status(500).json({
       success: false,
       error: error.message

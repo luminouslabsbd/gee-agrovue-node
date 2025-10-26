@@ -15,6 +15,10 @@ const NDVIImageGenerationService = require('./services/ndviImageGenerationServic
 const NDVILegendService = require('./services/ndviLegendService');
 const NDVIChartService = require('./services/ndviChartService');
 const FloodDetectionService = require('./services/floodDetectionService');
+const CropGrowthTrackingService = require('./services/cropGrowthTrackingService');
+const CropAnalyticsService = require('./services/cropAnalyticsService');
+const CropPredictionService = require('./services/cropPredictionService');
+const CropChartService = require('./services/cropChartService');
 
 const app = express();
 const PORT = process.env.PORT || 3000;
@@ -33,6 +37,10 @@ let ndviImageGenerationService;
 let ndviLegendService;
 let ndviChartService;
 let floodDetectionService;
+let cropGrowthTrackingService;
+let cropAnalyticsService;
+let cropPredictionService;
+let cropChartService;
 
 async function initializeEarthEngine() {
   try {
@@ -88,6 +96,18 @@ async function initializeEarthEngine() {
             // Initialize flood detection service
             floodDetectionService = new FloodDetectionService(ee);
             console.log('✅ Flood Detection Service initialized');
+            // Initialize crop growth tracking service
+            cropGrowthTrackingService = new CropGrowthTrackingService(ee);
+            console.log('✅ Crop Growth Tracking Service initialized');
+            // Initialize crop analytics service
+            cropAnalyticsService = new CropAnalyticsService(ee);
+            console.log('✅ Crop Analytics Service initialized');
+            // Initialize crop prediction service
+            cropPredictionService = new CropPredictionService(ee);
+            console.log('✅ Crop Prediction Service initialized');
+            // Initialize crop chart service
+            cropChartService = new CropChartService(ee);
+            console.log('✅ Crop Chart Service initialized');
           },
           (error) => {
             console.error('❌ Earth Engine initialization error:', error);
@@ -1138,6 +1158,362 @@ app.post('/api/field-analysis/flood-time-series', async (req, res) => {
     res.json(timeSeriesData);
   } catch (error) {
     console.error('Error generating flood time series:', error);
+    res.status(500).json({
+      success: false,
+      error: error.message
+    });
+  }
+});
+
+/**
+ * Crop Growth Tracking API
+ * POST /api/crop-analysis/track-growth
+ *
+ * Track crop growth stages and phenology
+ */
+app.post('/api/crop-analysis/track-growth', async (req, res) => {
+  try {
+    if (!cropGrowthTrackingService) {
+      return res.status(503).json({
+        success: false,
+        error: 'Crop Growth Tracking Service not initialized'
+      });
+    }
+
+    const { fieldBoundary, fieldId, cropType, plantingDate, currentDate } = req.body;
+
+    if (!fieldBoundary || !fieldId || !cropType || !plantingDate) {
+      return res.status(400).json({
+        success: false,
+        error: 'Missing required fields: fieldBoundary, fieldId, cropType, plantingDate'
+      });
+    }
+
+    console.log(`🌱 Tracking crop growth for ${cropType} in field ${fieldId}`);
+
+    const growthData = await cropGrowthTrackingService.trackCropGrowth(
+      fieldBoundary,
+      fieldId,
+      cropType,
+      plantingDate,
+      currentDate
+    );
+
+    res.json(growthData);
+  } catch (error) {
+    console.error('Error tracking crop growth:', error);
+    res.status(500).json({
+      success: false,
+      error: error.message
+    });
+  }
+});
+
+/**
+ * Crop Type Classification API
+ * POST /api/crop-analysis/classify-crop
+ *
+ * Classify crop type based on NDVI pattern
+ */
+app.post('/api/crop-analysis/classify-crop', async (req, res) => {
+  try {
+    if (!cropGrowthTrackingService) {
+      return res.status(503).json({
+        success: false,
+        error: 'Crop Growth Tracking Service not initialized'
+      });
+    }
+
+    const { fieldBoundary, fieldId, startDate, endDate } = req.body;
+
+    if (!fieldBoundary || !fieldId || !startDate || !endDate) {
+      return res.status(400).json({
+        success: false,
+        error: 'Missing required fields: fieldBoundary, fieldId, startDate, endDate'
+      });
+    }
+
+    console.log(`🔍 Classifying crop type for field ${fieldId}`);
+
+    const classificationData = await cropGrowthTrackingService.classifyCropType(
+      fieldBoundary,
+      fieldId,
+      startDate,
+      endDate
+    );
+
+    res.json(classificationData);
+  } catch (error) {
+    console.error('Error classifying crop type:', error);
+    res.status(500).json({
+      success: false,
+      error: error.message
+    });
+  }
+});
+
+/**
+ * Crop Performance Analytics API
+ * POST /api/crop-analysis/performance
+ *
+ * Analyze crop performance with yield estimation
+ */
+app.post('/api/crop-analysis/performance', async (req, res) => {
+  try {
+    if (!cropAnalyticsService) {
+      return res.status(503).json({
+        success: false,
+        error: 'Crop Analytics Service not initialized'
+      });
+    }
+
+    const { fieldBoundary, fieldId, cropType, startDate, endDate, fieldArea } = req.body;
+
+    if (!fieldBoundary || !fieldId || !cropType || !startDate || !endDate || !fieldArea) {
+      return res.status(400).json({
+        success: false,
+        error: 'Missing required fields: fieldBoundary, fieldId, cropType, startDate, endDate, fieldArea'
+      });
+    }
+
+    console.log(`📊 Analyzing crop performance for ${cropType} in field ${fieldId}`);
+
+    const performanceData = await cropAnalyticsService.analyzeCropPerformance(
+      fieldBoundary,
+      fieldId,
+      cropType,
+      startDate,
+      endDate,
+      fieldArea
+    );
+
+    res.json(performanceData);
+  } catch (error) {
+    console.error('Error analyzing crop performance:', error);
+    res.status(500).json({
+      success: false,
+      error: error.message
+    });
+  }
+});
+
+/**
+ * Crop Yield Estimation API
+ * POST /api/crop-analysis/estimate-yield
+ *
+ * Estimate crop yield based on NDVI
+ */
+app.post('/api/crop-analysis/estimate-yield', async (req, res) => {
+  try {
+    if (!cropAnalyticsService) {
+      return res.status(503).json({
+        success: false,
+        error: 'Crop Analytics Service not initialized'
+      });
+    }
+
+    const { fieldBoundary, fieldId, cropType, startDate, endDate, fieldArea } = req.body;
+
+    if (!fieldBoundary || !fieldId || !cropType || !startDate || !endDate || !fieldArea) {
+      return res.status(400).json({
+        success: false,
+        error: 'Missing required fields: fieldBoundary, fieldId, cropType, startDate, endDate, fieldArea'
+      });
+    }
+
+    console.log(`🌾 Estimating yield for ${cropType} in field ${fieldId}`);
+
+    const yieldData = await cropAnalyticsService.estimateYield(
+      fieldBoundary,
+      fieldId,
+      cropType,
+      startDate,
+      endDate,
+      fieldArea
+    );
+
+    res.json(yieldData);
+  } catch (error) {
+    console.error('Error estimating yield:', error);
+    res.status(500).json({
+      success: false,
+      error: error.message
+    });
+  }
+});
+
+/**
+ * Crop Stress Detection API
+ * POST /api/crop-analysis/detect-stress
+ *
+ * Detect crop stress events
+ */
+app.post('/api/crop-analysis/detect-stress', async (req, res) => {
+  try {
+    if (!cropAnalyticsService) {
+      return res.status(503).json({
+        success: false,
+        error: 'Crop Analytics Service not initialized'
+      });
+    }
+
+    const { fieldBoundary, fieldId, startDate, endDate } = req.body;
+
+    if (!fieldBoundary || !fieldId || !startDate || !endDate) {
+      return res.status(400).json({
+        success: false,
+        error: 'Missing required fields: fieldBoundary, fieldId, startDate, endDate'
+      });
+    }
+
+    console.log(`🔍 Detecting stress for field ${fieldId}`);
+
+    const stressData = await cropAnalyticsService.detectStress(
+      fieldBoundary,
+      fieldId,
+      startDate,
+      endDate
+    );
+
+    res.json(stressData);
+  } catch (error) {
+    console.error('Error detecting stress:', error);
+    res.status(500).json({
+      success: false,
+      error: error.message
+    });
+  }
+});
+
+/**
+ * Crop Yield Prediction API
+ * POST /api/crop-analysis/predict-yield
+ *
+ * Predict crop yield with growth forecasting
+ */
+app.post('/api/crop-analysis/predict-yield', async (req, res) => {
+  try {
+    if (!cropPredictionService) {
+      return res.status(503).json({
+        success: false,
+        error: 'Crop Prediction Service not initialized'
+      });
+    }
+
+    const { fieldBoundary, fieldId, cropType, plantingDate, currentDate, fieldArea, historicalYield } = req.body;
+
+    if (!fieldBoundary || !fieldId || !cropType || !plantingDate || !currentDate || !fieldArea) {
+      return res.status(400).json({
+        success: false,
+        error: 'Missing required fields: fieldBoundary, fieldId, cropType, plantingDate, currentDate, fieldArea'
+      });
+    }
+
+    console.log(`🔮 Predicting yield for ${cropType} in field ${fieldId}`);
+
+    const predictionData = await cropPredictionService.predictCropYield(
+      fieldBoundary,
+      fieldId,
+      cropType,
+      plantingDate,
+      currentDate,
+      fieldArea,
+      historicalYield
+    );
+
+    res.json(predictionData);
+  } catch (error) {
+    console.error('Error predicting yield:', error);
+    res.status(500).json({
+      success: false,
+      error: error.message
+    });
+  }
+});
+
+/**
+ * Crop Growth Forecast API
+ * POST /api/crop-analysis/forecast-growth
+ *
+ * Forecast future crop growth
+ */
+app.post('/api/crop-analysis/forecast-growth', async (req, res) => {
+  try {
+    if (!cropPredictionService) {
+      return res.status(503).json({
+        success: false,
+        error: 'Crop Prediction Service not initialized'
+      });
+    }
+
+    const { fieldBoundary, fieldId, cropType, plantingDate, currentDate, forecastDays } = req.body;
+
+    if (!fieldBoundary || !fieldId || !cropType || !plantingDate || !currentDate) {
+      return res.status(400).json({
+        success: false,
+        error: 'Missing required fields: fieldBoundary, fieldId, cropType, plantingDate, currentDate'
+      });
+    }
+
+    console.log(`📈 Forecasting growth for ${cropType} in field ${fieldId}`);
+
+    const forecastData = await cropPredictionService.forecastGrowth(
+      fieldBoundary,
+      fieldId,
+      cropType,
+      plantingDate,
+      currentDate,
+      forecastDays || 30
+    );
+
+    res.json(forecastData);
+  } catch (error) {
+    console.error('Error forecasting growth:', error);
+    res.status(500).json({
+      success: false,
+      error: error.message
+    });
+  }
+});
+
+/**
+ * Comprehensive Crop Chart API
+ * POST /api/crop-analysis/crop-chart
+ *
+ * Generate comprehensive crop chart with NDVI and crop data
+ */
+app.post('/api/crop-analysis/crop-chart', async (req, res) => {
+  try {
+    if (!cropChartService) {
+      return res.status(503).json({
+        success: false,
+        error: 'Crop Chart Service not initialized'
+      });
+    }
+
+    const { fieldBoundary, fieldId, cropType, plantingDate, currentDate, fieldArea } = req.body;
+
+    if (!fieldBoundary || !fieldId || !cropType || !plantingDate || !currentDate || !fieldArea) {
+      return res.status(400).json({
+        success: false,
+        error: 'Missing required fields: fieldBoundary, fieldId, cropType, plantingDate, currentDate, fieldArea'
+      });
+    }
+
+    console.log(`📊 Generating comprehensive crop chart for ${cropType} in field ${fieldId}`);
+
+    const chartData = await cropChartService.generateCropChart(
+      fieldBoundary,
+      fieldId,
+      cropType,
+      plantingDate,
+      currentDate,
+      fieldArea
+    );
+
+    res.json(chartData);
+  } catch (error) {
+    console.error('Error generating crop chart:', error);
     res.status(500).json({
       success: false,
       error: error.message

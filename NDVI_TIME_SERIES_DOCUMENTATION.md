@@ -147,22 +147,22 @@ Content-Type: application/json
 ### Example 1: Basic Time Series (10-day interval)
 
 ```bash
-curl -X POST http://localhost:3000/api/field-analysis/time-series \
-  -H "Content-Type: application/json" \
-  -d '{
-    "fieldBoundary": {
-      "type": "Polygon",
-      "coordinates": [[[90.37110641598703, 23.841231509287553],
-                       [90.37093743681908, 23.84014467798467],
-                       [90.37123516201974, 23.84014713133873],
-                       [90.3713531792164, 23.840186384997345],
-                       [90.37110641598703, 23.841231509287553]]]
-    },
-    "fieldId": "NGR-KD-12345",
-    "startDate": "2025-01-01",
-    "endDate": "2025-12-31",
-    "intervalDays": 10
-  }'
+  curl -X POST http://localhost:3000/api/field-analysis/time-series \
+    -H "Content-Type: application/json" \
+    -d '{
+      "fieldBoundary": {
+        "type": "Polygon",
+        "coordinates": [[[90.37110641598703, 23.841231509287553],
+                        [90.37093743681908, 23.84014467798467],
+                        [90.37123516201974, 23.84014713133873],
+                        [90.3713531792164, 23.840186384997345],
+                        [90.37110641598703, 23.841231509287553]]]
+      },
+      "fieldId": "NGR-KD-12345",
+      "startDate": "2025-01-01",
+      "endDate": "2025-12-31",
+      "intervalDays": 10
+    }'
 ```
 
 ### Example 2: High-Resolution Monitoring (5-day interval)

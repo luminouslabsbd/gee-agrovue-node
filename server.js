@@ -19,6 +19,7 @@ const CropGrowthTrackingService = require('./services/cropGrowthTrackingService'
 const CropAnalyticsService = require('./services/cropAnalyticsService');
 const CropPredictionService = require('./services/cropPredictionService');
 const CropChartService = require('./services/cropChartService');
+const ZoneImageGenerationService = require('./services/zoneImageGenerationService');
 
 const app = express();
 const PORT = process.env.PORT || 3000;
@@ -41,6 +42,7 @@ let cropGrowthTrackingService;
 let cropAnalyticsService;
 let cropPredictionService;
 let cropChartService;
+let zoneImageGenerationService;
 
 async function initializeEarthEngine() {
   try {
@@ -108,6 +110,9 @@ async function initializeEarthEngine() {
             // Initialize crop chart service
             cropChartService = new CropChartService(ee);
             console.log('✅ Crop Chart Service initialized');
+            // Initialize zone image generation service
+            zoneImageGenerationService = new ZoneImageGenerationService(ee);
+            console.log('✅ Zone Image Generation Service initialized');
           },
           (error) => {
             console.error('❌ Earth Engine initialization error:', error);
@@ -1514,6 +1519,125 @@ app.post('/api/crop-analysis/crop-chart', async (req, res) => {
     res.json(chartData);
   } catch (error) {
     console.error('Error generating crop chart:', error);
+    res.status(500).json({
+      success: false,
+      error: error.message
+    });
+  }
+});
+
+/**
+ * Generate Zone Image with NDVI, Zones, and Crop Yield
+ * POST /api/field-analysis/zone-image
+ *
+ * Request body:
+ * {
+ *   "fieldBoundary": { GeoJSON polygon },
+ *   "fieldId": "FIELD-001",
+ *   "date": "2024-10-26",
+ *   "gridSize": 50,
+ *   "cropType": "rice"
+ * }
+ */
+app.post('/api/field-analysis/zone-image', async (req, res) => {
+  try {
+    if (!eeInitialized || !zoneImageGenerationService) {
+      return res.status(503).json({
+        success: false,
+        error: 'Zone Image Generation Service not initialized yet. Please try again in a moment.'
+      });
+    }
+
+    const { fieldBoundary, fieldId, date, gridSize, cropType } = req.body;
+
+    // Validate required fields
+    if (!fieldBoundary || !fieldId) {
+      return res.status(400).json({
+        success: false,
+        error: 'Missing required fields: fieldBoundary and fieldId are required'
+      });
+    }
+
+    // Use current date if not provided
+    const analysisDate = date || new Date().toISOString().split('T')[0];
+    const gridSizeMeters = gridSize || 50;
+    const crop = cropType || 'rice';
+
+    console.log(`📊 Generating zone image for field ${fieldId} with ${crop} crop...`);
+
+    const result = await zoneImageGenerationService.generateZoneImage(
+      fieldBoundary,
+      fieldId,
+      analysisDate,
+      gridSizeMeters,
+      crop
+    );
+
+    res.json(result);
+
+  } catch (error) {
+    console.error('Error generating zone image:', error);
+    res.status(500).json({
+      success: false,
+      error: error.message
+    });
+  }
+});
+
+/**
+ * Get Zone Image Metadata
+ * GET /api/field-analysis/zone-image/:imageId
+ */
+app.get('/api/field-analysis/zone-image/:imageId', (req, res) => {
+  try {
+    const { imageId } = req.params;
+    const metadataPath = path.join(__dirname, 'public', 'zone-images', imageId, 'metadata.json');
+
+    if (!fs.existsSync(metadataPath)) {
+      return res.status(404).json({
+        success: false,
+        error: 'Zone image not found'
+      });
+    }
+
+    const metadata = JSON.parse(fs.readFileSync(metadataPath, 'utf8'));
+    res.json({
+      success: true,
+      metadata: metadata
+    });
+
+  } catch (error) {
+    console.error('Error retrieving zone image metadata:', error);
+    res.status(500).json({
+      success: false,
+      error: error.message
+    });
+  }
+});
+
+/**
+ * List All Zone Images
+ * GET /api/field-analysis/zone-images
+ */
+app.get('/api/field-analysis/zone-images', (req, res) => {
+  try {
+    const indexPath = path.join(__dirname, 'public', 'zone-images', 'index.json');
+
+    if (!fs.existsSync(indexPath)) {
+      return res.json({
+        success: true,
+        images: []
+      });
+    }
+
+    const index = JSON.parse(fs.readFileSync(indexPath, 'utf8'));
+    res.json({
+      success: true,
+      images: index.images
+    });
+
+  } catch (error) {
+    console.error('Error listing zone images:', error);
     res.status(500).json({
       success: false,
       error: error.message

@@ -1,30 +1,40 @@
-const express = require('express');
-const cors = require('cors');
-const path = require('path');
-const fs = require('fs');
-require('dotenv').config();
+const express = require("express");
+const cors = require("cors");
+const path = require("path");
+const fs = require("fs");
+require("dotenv").config();
 
-const FieldAnalysisService = require('./services/fieldAnalysisService');
-const NDVITimeSeriesService = require('./services/ndviTimeSeriesService');
-const NDVITimeSeriesMapService = require('./services/ndviTimeSeriesMapService');
-const NDVITwoYearTimeSeriesService = require('./services/ndviTwoYearTimeSeriesService');
-const FieldDataUpdateService = require('./services/fieldDataUpdateService');
-const NDVIImageExportService = require('./services/ndviImageExportService');
-const TimeSeriesImageStorageService = require('./services/timeSeriesImageStorageService');
-const NDVIImageGenerationService = require('./services/ndviImageGenerationService');
-const NDVILegendService = require('./services/ndviLegendService');
-const NDVIChartService = require('./services/ndviChartService');
-const FloodDetectionService = require('./services/floodDetectionService');
-const CropGrowthTrackingService = require('./services/cropGrowthTrackingService');
-const CropAnalyticsService = require('./services/cropAnalyticsService');
-const CropPredictionService = require('./services/cropPredictionService');
-const CropChartService = require('./services/cropChartService');
-const ZoneImageGenerationService = require('./services/zoneImageGenerationService');
+// MongoDB Database
+const database = require("./config/database");
+const models = require("./models");
+
+// Authentication
+const { verifyToken, optionalAuth } = require("./middleware/auth");
+const authController = require("./controllers/authController");
+console.log("✅ Auth Controller loaded:", Object.keys(authController));
+
+const FieldAnalysisService = require("./services/fieldAnalysisService");
+const NDVITimeSeriesService = require("./services/ndviTimeSeriesService");
+const NDVITimeSeriesMapService = require("./services/ndviTimeSeriesMapService");
+const NDVITwoYearTimeSeriesService = require("./services/ndviTwoYearTimeSeriesService");
+const FieldDataUpdateService = require("./services/fieldDataUpdateService");
+const NDVIImageExportService = require("./services/ndviImageExportService");
+const TimeSeriesImageStorageService = require("./services/timeSeriesImageStorageService");
+const NDVIImageGenerationService = require("./services/ndviImageGenerationService");
+const NDVILegendService = require("./services/ndviLegendService");
+const NDVIChartService = require("./services/ndviChartService");
+const FloodDetectionService = require("./services/floodDetectionService");
+const CropGrowthTrackingService = require("./services/cropGrowthTrackingService");
+const CropAnalyticsService = require("./services/cropAnalyticsService");
+const CropPredictionService = require("./services/cropPredictionService");
+const CropChartService = require("./services/cropChartService");
+const ZoneImageGenerationService = require("./services/zoneImageGenerationService");
 
 const app = express();
 const PORT = process.env.PORT || 3000;
 
-// Load Earth Engine credentials
+// Database and Earth Engine status
+let dbInitialized = false;
 let ee;
 let eeInitialized = false;
 let fieldAnalysisService;
@@ -46,118 +56,193 @@ let zoneImageGenerationService;
 
 async function initializeEarthEngine() {
   try {
-    ee = require('@google/earthengine');
+    ee = require("@google/earthengine");
 
     // Load service account credentials
-    const credentialsPath = path.join(__dirname, 'credentials.json');
-    const credentials = JSON.parse(fs.readFileSync(credentialsPath, 'utf8'));
+    const credentialsPath = path.join(__dirname, "credentials.json");
+    const credentials = JSON.parse(fs.readFileSync(credentialsPath, "utf8"));
 
     // Initialize Earth Engine with service account credentials
     ee.data.authenticateViaPrivateKey(
       credentials,
       () => {
-        console.log('✅ Earth Engine authenticated with service account');
+        console.log("✅ Earth Engine authenticated with service account");
 
         // Initialize after authentication
         ee.initialize(
           null,
           null,
           () => {
-            console.log('✅ Earth Engine initialized successfully');
+            console.log("✅ Earth Engine initialized successfully");
             eeInitialized = true;
             // Initialize field analysis service
             fieldAnalysisService = new FieldAnalysisService(ee);
-            console.log('✅ Field Analysis Service initialized');
+            console.log("✅ Field Analysis Service initialized");
             // Initialize NDVI time series service
             ndviTimeSeriesService = new NDVITimeSeriesService(ee);
-            console.log('✅ NDVI Time Series Service initialized');
+            console.log("✅ NDVI Time Series Service initialized");
             // Initialize NDVI time series map service
             ndviTimeSeriesMapService = new NDVITimeSeriesMapService(ee);
-            console.log('✅ NDVI Time Series Map Service initialized');
+            console.log("✅ NDVI Time Series Map Service initialized");
             // Initialize NDVI 2-year time series service
             ndviTwoYearTimeSeriesService = new NDVITwoYearTimeSeriesService(ee);
-            console.log('✅ NDVI 2-Year Time Series Service initialized');
+            console.log("✅ NDVI 2-Year Time Series Service initialized");
             // Initialize field data update service
-            fieldDataUpdateService = new FieldDataUpdateService(ee, ndviTwoYearTimeSeriesService);
-            console.log('✅ Field Data Update Service initialized');
+            fieldDataUpdateService = new FieldDataUpdateService(
+              ee,
+              ndviTwoYearTimeSeriesService
+            );
+            console.log("✅ Field Data Update Service initialized");
             // Initialize NDVI image export service
             ndviImageExportService = new NDVIImageExportService(ee);
-            console.log('✅ NDVI Image Export Service initialized');
+            console.log("✅ NDVI Image Export Service initialized");
             // Initialize time series image storage service
-            timeSeriesImageStorageService = new TimeSeriesImageStorageService(ee);
-            console.log('✅ Time Series Image Storage Service initialized');
+            timeSeriesImageStorageService = new TimeSeriesImageStorageService(
+              ee
+            );
+            console.log("✅ Time Series Image Storage Service initialized");
             // Initialize NDVI image generation service
             ndviImageGenerationService = new NDVIImageGenerationService(ee);
-            console.log('✅ NDVI Image Generation Service initialized');
+            console.log("✅ NDVI Image Generation Service initialized");
             // Initialize NDVI legend service
             ndviLegendService = new NDVILegendService();
-            console.log('✅ NDVI Legend Service initialized');
+            console.log("✅ NDVI Legend Service initialized");
             // Initialize NDVI chart service
             ndviChartService = new NDVIChartService(ee);
-            console.log('✅ NDVI Chart Service initialized');
+            console.log("✅ NDVI Chart Service initialized");
             // Initialize flood detection service
             floodDetectionService = new FloodDetectionService(ee);
-            console.log('✅ Flood Detection Service initialized');
+            console.log("✅ Flood Detection Service initialized");
             // Initialize crop growth tracking service
             cropGrowthTrackingService = new CropGrowthTrackingService(ee);
-            console.log('✅ Crop Growth Tracking Service initialized');
+            console.log("✅ Crop Growth Tracking Service initialized");
             // Initialize crop analytics service
             cropAnalyticsService = new CropAnalyticsService(ee);
-            console.log('✅ Crop Analytics Service initialized');
+            console.log("✅ Crop Analytics Service initialized");
             // Initialize crop prediction service
             cropPredictionService = new CropPredictionService(ee);
-            console.log('✅ Crop Prediction Service initialized');
+            console.log("✅ Crop Prediction Service initialized");
             // Initialize crop chart service
             cropChartService = new CropChartService(ee);
-            console.log('✅ Crop Chart Service initialized');
+            console.log("✅ Crop Chart Service initialized");
             // Initialize zone image generation service
             zoneImageGenerationService = new ZoneImageGenerationService(ee);
-            console.log('✅ Zone Image Generation Service initialized');
+            console.log("✅ Zone Image Generation Service initialized");
           },
           (error) => {
-            console.error('❌ Earth Engine initialization error:', error);
+            console.error("❌ Earth Engine initialization error:", error);
           }
         );
       },
       (error) => {
-        console.error('❌ Authentication error:', error);
+        console.error("❌ Authentication error:", error);
       }
     );
-
   } catch (error) {
-    console.error('Error initializing Earth Engine:', error);
+    console.error("Error initializing Earth Engine:", error);
   }
 }
 
-// Initialize Earth Engine on startup
-initializeEarthEngine();
+// Initialize MongoDB
+async function initializeDatabase() {
+  try {
+    await database.connect();
+    dbInitialized = true;
+    console.log("✅ MongoDB initialization complete");
+  } catch (error) {
+    console.error("❌ MongoDB initialization failed:", error.message);
+    console.warn("⚠️  Server will continue without database persistence");
+    dbInitialized = false;
+  }
+}
+
+// Initialize both MongoDB and Earth Engine on startup
+async function initializeServices() {
+  await initializeDatabase();
+  await initializeEarthEngine();
+}
+
+initializeServices();
 
 // Middleware
 app.use(cors());
 app.use(express.json());
-app.use(express.static('public'));
+
+// ============================================
+// AUTHENTICATION ROUTES (Public - No Token Required)
+// ============================================
+
+// Test route
+app.post("/api/auth/test", (req, res) => {
+  res.json({ message: "Test route works!" });
+});
+
+/**
+ * Register a new user
+ * POST /api/auth/register
+ * Body: { name, email, password, phone, country, status }
+ */
+app.post(
+  "/api/auth/register",
+  authController.registerValidation,
+  authController.register
+);
+
+/**
+ * Login user
+ * POST /api/auth/login
+ * Body: { email, password }
+ */
+app.post(
+  "/api/auth/login",
+  authController.loginValidation,
+  authController.login
+);
+
+/**
+ * Get current user profile (Protected)
+ * GET /api/auth/me
+ * Headers: { Authorization: Bearer <token> }
+ */
+app.get("/api/auth/me", verifyToken, authController.getProfile);
+
+/**
+ * Update user profile (Protected)
+ * PUT /api/auth/profile
+ * Headers: { Authorization: Bearer <token> }
+ * Body: { name, phone, country, preferences }
+ */
+app.put("/api/auth/profile", verifyToken, authController.updateProfile);
+
+console.log("✅ Authentication routes registered");
+
+// ============================================
+// PUBLIC ROUTES (No Authentication Required)
+// ============================================
 
 // Routes
-app.get('/', (req, res) => {
-  res.sendFile(path.join(__dirname, 'public', 'index.html'));
+app.get("/", (req, res) => {
+  res.sendFile(path.join(__dirname, "public", "index.html"));
 });
 
 // API endpoint to get Earth Engine data
-app.get('/api/ndvi', async (req, res) => {
+app.get("/api/ndvi", async (req, res) => {
   try {
     if (!eeInitialized) {
       return res.status(503).json({
         success: false,
-        error: 'Earth Engine not initialized yet. Please try again in a moment.'
+        error:
+          "Earth Engine not initialized yet. Please try again in a moment.",
       });
     }
 
     // Example: Get NDVI data for a region
     const geometry = ee.Geometry.Rectangle([-120, 40, -119, 41]); // Example coordinates
-    const dataset = ee.ImageCollection('MODIS/006/MOD13Q1')
+    const dataset = ee
+      .ImageCollection("MODIS/006/MOD13Q1")
       .filterBounds(geometry)
-      .filterDate('2023-01-01', '2023-12-31')
-      .select('NDVI');
+      .filterDate("2023-01-01", "2023-12-31")
+      .select("NDVI");
 
     const ndvi = dataset.mean();
 
@@ -165,7 +250,7 @@ app.get('/api/ndvi', async (req, res) => {
     const visParams = {
       min: 0,
       max: 9000,
-      palette: ['blue', 'white', 'green']
+      palette: ["blue", "white", "green"],
     };
 
     const mapId = ndvi.getMapId(visParams);
@@ -173,41 +258,43 @@ app.get('/api/ndvi', async (req, res) => {
     res.json({
       success: true,
       mapId: mapId,
-      message: 'NDVI data retrieved successfully'
+      message: "NDVI data retrieved successfully",
     });
   } catch (error) {
-    console.error('Error fetching Earth Engine data:', error);
+    console.error("Error fetching Earth Engine data:", error);
     res.status(500).json({
       success: false,
-      error: error.message
+      error: error.message,
     });
   }
 });
 
 // API endpoint to get satellite imagery
-app.get('/api/satellite', async (req, res) => {
+app.get("/api/satellite", async (req, res) => {
   try {
     if (!eeInitialized) {
       return res.status(503).json({
         success: false,
-        error: 'Earth Engine not initialized yet. Please try again in a moment.'
+        error:
+          "Earth Engine not initialized yet. Please try again in a moment.",
       });
     }
 
     // Example: Get Sentinel-2 satellite imagery
     const geometry = ee.Geometry.Rectangle([-120, 40, -119, 41]);
-    const dataset = ee.ImageCollection('COPERNICUS/S2_SR')
+    const dataset = ee
+      .ImageCollection("COPERNICUS/S2_SR")
       .filterBounds(geometry)
-      .filterDate('2023-06-01', '2023-08-31')
-      .filter(ee.Filter.lt('CLOUDY_PIXEL_PERCENTAGE', 20))
-      .select(['B4', 'B3', 'B2']); // Red, Green, Blue bands
+      .filterDate("2023-06-01", "2023-08-31")
+      .filter(ee.Filter.lt("CLOUDY_PIXEL_PERCENTAGE", 20))
+      .select(["B4", "B3", "B2"]); // Red, Green, Blue bands
 
     const image = dataset.median();
 
     const visParams = {
       min: 0,
       max: 3000,
-      gamma: 1.4
+      gamma: 1.4,
     };
 
     const mapId = image.getMapId(visParams);
@@ -215,110 +302,129 @@ app.get('/api/satellite', async (req, res) => {
     res.json({
       success: true,
       mapId: mapId,
-      message: 'Satellite imagery retrieved successfully'
+      message: "Satellite imagery retrieved successfully",
     });
   } catch (error) {
-    console.error('Error fetching satellite data:', error);
+    console.error("Error fetching satellite data:", error);
     res.status(500).json({
       success: false,
-      error: error.message
+      error: error.message,
     });
   }
 });
 
 // NDVI Time Series Map endpoint - Generate NDVI maps for time series
 // ⚠️ IMPORTANT: This MUST come BEFORE /api/field-analysis to avoid route shadowing
-app.post('/api/field-analysis/time-series-map', async (req, res) => {
-  try {
-    if (!eeInitialized || !ndviTimeSeriesMapService) {
-      return res.status(503).json({
+app.post(
+  "/api/field-analysis/time-series-map",
+  verifyToken,
+  async (req, res) => {
+    try {
+      if (!eeInitialized || !ndviTimeSeriesMapService) {
+        return res.status(503).json({
+          success: false,
+          error:
+            "Earth Engine not initialized yet. Please try again in a moment.",
+        });
+      }
+
+      const { fieldBoundary, fieldId, startDate, endDate, intervalDays } =
+        req.body;
+
+      // Validate input
+      if (!fieldBoundary || !fieldId) {
+        return res.status(400).json({
+          success: false,
+          error: "Missing required fields: fieldBoundary and fieldId",
+        });
+      }
+
+      if (fieldBoundary.type !== "Polygon") {
+        return res.status(400).json({
+          success: false,
+          error: "Only Polygon geometries are supported",
+        });
+      }
+
+      // Set default dates if not provided
+      const end = endDate || new Date().toISOString().split("T")[0];
+      const start =
+        startDate ||
+        new Date(Date.now() - 365 * 24 * 60 * 60 * 1000)
+          .toISOString()
+          .split("T")[0];
+      const interval = intervalDays || 10;
+
+      console.log(
+        `🗺️  Generating time series maps for field ${fieldId} from ${start} to ${end} with ${interval}-day intervals`
+      );
+
+      // Generate time series maps
+      const mapsResult = await ndviTimeSeriesMapService.generateTimeSeriesMaps(
+        fieldBoundary,
+        fieldId,
+        start,
+        end,
+        interval
+      );
+
+      res.json({
+        success: true,
+        data: mapsResult,
+        message: "Time series maps generated successfully",
+      });
+    } catch (error) {
+      console.error("Error generating time series maps:", error);
+      res.status(500).json({
         success: false,
-        error: 'Earth Engine not initialized yet. Please try again in a moment.'
+        error: error.message,
       });
     }
-
-    const { fieldBoundary, fieldId, startDate, endDate, intervalDays } = req.body;
-
-    // Validate input
-    if (!fieldBoundary || !fieldId) {
-      return res.status(400).json({
-        success: false,
-        error: 'Missing required fields: fieldBoundary and fieldId'
-      });
-    }
-
-    if (fieldBoundary.type !== 'Polygon') {
-      return res.status(400).json({
-        success: false,
-        error: 'Only Polygon geometries are supported'
-      });
-    }
-
-    // Set default dates if not provided
-    const end = endDate || new Date().toISOString().split('T')[0];
-    const start = startDate || new Date(Date.now() - 365 * 24 * 60 * 60 * 1000).toISOString().split('T')[0];
-    const interval = intervalDays || 10;
-
-    console.log(`🗺️  Generating time series maps for field ${fieldId} from ${start} to ${end} with ${interval}-day intervals`);
-
-    // Generate time series maps
-    const mapsResult = await ndviTimeSeriesMapService.generateTimeSeriesMaps(
-      fieldBoundary,
-      fieldId,
-      start,
-      end,
-      interval
-    );
-
-    res.json({
-      success: true,
-      data: mapsResult,
-      message: 'Time series maps generated successfully'
-    });
-
-  } catch (error) {
-    console.error('Error generating time series maps:', error);
-    res.status(500).json({
-      success: false,
-      error: error.message
-    });
   }
-});
+);
 
 // NDVI Time Series endpoint - Generate historical NDVI trends
 // ⚠️ IMPORTANT: This MUST come BEFORE /api/field-analysis to avoid route shadowing
-app.post('/api/field-analysis/time-series', async (req, res) => {
+app.post("/api/field-analysis/time-series", verifyToken, async (req, res) => {
   try {
     if (!eeInitialized || !ndviTimeSeriesService) {
       return res.status(503).json({
         success: false,
-        error: 'Earth Engine not initialized yet. Please try again in a moment.'
+        error:
+          "Earth Engine not initialized yet. Please try again in a moment.",
       });
     }
 
-    const { fieldBoundary, fieldId, startDate, endDate, intervalDays } = req.body;
+    const { fieldBoundary, fieldId, startDate, endDate, intervalDays } =
+      req.body;
 
     // Validate input
     if (!fieldBoundary || !fieldId) {
       return res.status(400).json({
         success: false,
-        error: 'Missing required fields: fieldBoundary and fieldId'
+        error: "Missing required fields: fieldBoundary and fieldId",
       });
     }
 
-    if (fieldBoundary.type !== 'Polygon') {
+    if (fieldBoundary.type !== "Polygon") {
       return res.status(400).json({
         success: false,
-        error: 'Only Polygon geometries are supported'
+        error: "Only Polygon geometries are supported",
       });
     }
 
     // Set default dates if not provided
-    const end = endDate || new Date().toISOString().split('T')[0];
-    const start = startDate || new Date(Date.now() - 365 * 24 * 60 * 60 * 1000).toISOString().split('T')[0];
+    const end = endDate || new Date().toISOString().split("T")[0];
+    const start =
+      startDate ||
+      new Date(Date.now() - 365 * 24 * 60 * 60 * 1000)
+        .toISOString()
+        .split("T")[0];
     const interval = intervalDays || 10; // Default to 10 days
 
-    console.log(`📈 Generating time series for field ${fieldId} from ${start} to ${end} with ${interval}-day intervals`);
+    console.log(
+      `📈 Generating time series for field ${fieldId} from ${start} to ${end} with ${interval}-day intervals`
+    );
 
     // Generate time series
     const timeSeriesResult = await ndviTimeSeriesService.generateTimeSeries(
@@ -332,25 +438,29 @@ app.post('/api/field-analysis/time-series', async (req, res) => {
     res.json({
       success: true,
       data: timeSeriesResult,
-      message: 'Time series generated successfully'
+      message: "Time series generated successfully",
     });
-
   } catch (error) {
-    console.error('Error generating time series:', error);
+    console.error("Error generating time series:", error);
     res.status(500).json({
       success: false,
-      error: error.message
+      error: error.message,
     });
   }
 });
 
+// ============================================
+// PROTECTED ROUTES (Authentication Required)
+// ============================================
+
 // Field Analysis endpoint - Analyze NDVI for farm field boundaries
-app.post('/api/field-analysis', async (req, res) => {
+app.post("/api/field-analysis", verifyToken, async (req, res) => {
   try {
     if (!eeInitialized || !fieldAnalysisService) {
       return res.status(503).json({
         success: false,
-        error: 'Earth Engine not initialized yet. Please try again in a moment.'
+        error:
+          "Earth Engine not initialized yet. Please try again in a moment.",
       });
     }
 
@@ -360,20 +470,24 @@ app.post('/api/field-analysis', async (req, res) => {
     if (!fieldBoundary || !fieldId) {
       return res.status(400).json({
         success: false,
-        error: 'Missing required fields: fieldBoundary and fieldId'
+        error: "Missing required fields: fieldBoundary and fieldId",
       });
     }
 
-    if (fieldBoundary.type !== 'Polygon') {
+    if (fieldBoundary.type !== "Polygon") {
       return res.status(400).json({
         success: false,
-        error: 'Only Polygon geometries are supported'
+        error: "Only Polygon geometries are supported",
       });
     }
 
     // Set default dates if not provided
-    const end = endDate || new Date().toISOString().split('T')[0];
-    const start = startDate || new Date(Date.now() - 30 * 24 * 60 * 60 * 1000).toISOString().split('T')[0];
+    const end = endDate || new Date().toISOString().split("T")[0];
+    const start =
+      startDate ||
+      new Date(Date.now() - 30 * 24 * 60 * 60 * 1000)
+        .toISOString()
+        .split("T")[0];
 
     console.log(`📊 Analyzing field ${fieldId} from ${start} to ${end}`);
 
@@ -385,89 +499,142 @@ app.post('/api/field-analysis', async (req, res) => {
       end
     );
 
+    // Save to MongoDB if connected
+    if (dbInitialized) {
+      try {
+        // Save or update field
+        await models.Field.findOneAndUpdate(
+          { field_id: fieldId },
+          {
+            field_id: fieldId,
+            user_id: req.user.user_id,
+            boundary: fieldBoundary,
+            area_sqm: analysisResult.hectares * 10000,
+            area_hectares: analysisResult.hectares,
+            status: "active",
+            updated_at: new Date(),
+          },
+          { upsert: true, new: true }
+        );
+
+        // Save field analysis
+        const fieldAnalysis = new models.FieldAnalysis({
+          field_id: fieldId,
+          user_id: req.user.user_id,
+          analysis_date: new Date(analysisResult.date),
+          ndvi: analysisResult.ndvi,
+          quality: analysisResult.quality,
+          interpretation: analysisResult.interpretation,
+          hectares: analysisResult.hectares,
+          satellite_info: {
+            platform: "Sentinel-2",
+            sensor: "MSI",
+            resolution: "10m",
+            bands_used: ["B4", "B8"],
+          },
+        });
+        await fieldAnalysis.save();
+        console.log(
+          `✅ Field analysis saved to MongoDB for ${fieldId} by user ${req.user.email}`
+        );
+      } catch (dbError) {
+        console.error("❌ Error saving to MongoDB:", dbError.message);
+        // Continue without failing the request
+      }
+    }
+
     res.json({
       success: true,
       data: analysisResult,
-      message: 'Field analysis completed successfully'
+      message: "Field analysis completed successfully",
+      saved_to_db: dbInitialized,
     });
-
   } catch (error) {
-    console.error('Error analyzing field:', error);
+    console.error("Error analyzing field:", error);
     res.status(500).json({
       success: false,
-      error: error.message
+      error: error.message,
     });
   }
 });
 
 // 2-Year NDVI Time Series endpoint
-app.post('/api/field-analysis/two-year-time-series', async (req, res) => {
-  try {
-    if (!eeInitialized || !ndviTwoYearTimeSeriesService) {
-      return res.status(503).json({
+app.post(
+  "/api/field-analysis/two-year-time-series",
+  verifyToken,
+  async (req, res) => {
+    try {
+      if (!eeInitialized || !ndviTwoYearTimeSeriesService) {
+        return res.status(503).json({
+          success: false,
+          error:
+            "Earth Engine not initialized yet. Please try again in a moment.",
+        });
+      }
+
+      const { fieldBoundary, fieldId, intervalType } = req.body;
+
+      // Validate input
+      if (!fieldBoundary || !fieldId) {
+        return res.status(400).json({
+          success: false,
+          error: "Missing required fields: fieldBoundary and fieldId",
+        });
+      }
+
+      if (fieldBoundary.type !== "Polygon") {
+        return res.status(400).json({
+          success: false,
+          error: "Only Polygon geometries are supported",
+        });
+      }
+
+      const interval = intervalType || "monthly"; // Default to monthly
+
+      console.log(
+        `📊 Generating 2-year time series for field ${fieldId} with ${interval} intervals`
+      );
+
+      // Generate 2-year time series
+      const timeSeriesResult =
+        await ndviTwoYearTimeSeriesService.generateTwoYearTimeSeries(
+          fieldBoundary,
+          fieldId,
+          interval
+        );
+
+      // Save images to server and get download URLs
+      console.log(`💾 Saving time series images for field ${fieldId}...`);
+      const enhancedResult =
+        await timeSeriesImageStorageService.saveTimeSeriesImages(
+          timeSeriesResult,
+          fieldId,
+          fieldBoundary
+        );
+
+      res.json({
+        success: true,
+        data: enhancedResult,
+        message: "2-year time series generated and images saved successfully",
+      });
+    } catch (error) {
+      console.error("Error generating 2-year time series:", error);
+      res.status(500).json({
         success: false,
-        error: 'Earth Engine not initialized yet. Please try again in a moment.'
+        error: error.message,
       });
     }
-
-    const { fieldBoundary, fieldId, intervalType } = req.body;
-
-    // Validate input
-    if (!fieldBoundary || !fieldId) {
-      return res.status(400).json({
-        success: false,
-        error: 'Missing required fields: fieldBoundary and fieldId'
-      });
-    }
-
-    if (fieldBoundary.type !== 'Polygon') {
-      return res.status(400).json({
-        success: false,
-        error: 'Only Polygon geometries are supported'
-      });
-    }
-
-    const interval = intervalType || 'monthly'; // Default to monthly
-
-    console.log(`📊 Generating 2-year time series for field ${fieldId} with ${interval} intervals`);
-
-    // Generate 2-year time series
-    const timeSeriesResult = await ndviTwoYearTimeSeriesService.generateTwoYearTimeSeries(
-      fieldBoundary,
-      fieldId,
-      interval
-    );
-
-    // Save images to server and get download URLs
-    console.log(`💾 Saving time series images for field ${fieldId}...`);
-    const enhancedResult = await timeSeriesImageStorageService.saveTimeSeriesImages(
-      timeSeriesResult,
-      fieldId,
-      fieldBoundary
-    );
-
-    res.json({
-      success: true,
-      data: enhancedResult,
-      message: '2-year time series generated and images saved successfully'
-    });
-
-  } catch (error) {
-    console.error('Error generating 2-year time series:', error);
-    res.status(500).json({
-      success: false,
-      error: error.message
-    });
   }
-});
+);
 
 // NDVI Field Image endpoint
-app.post('/api/field-analysis/field-image', async (req, res) => {
+app.post("/api/field-analysis/field-image", verifyToken, async (req, res) => {
   try {
     if (!eeInitialized || !ndviTwoYearTimeSeriesService) {
       return res.status(503).json({
         success: false,
-        error: 'Earth Engine not initialized yet. Please try again in a moment.'
+        error:
+          "Earth Engine not initialized yet. Please try again in a moment.",
       });
     }
 
@@ -477,14 +644,14 @@ app.post('/api/field-analysis/field-image', async (req, res) => {
     if (!fieldBoundary || !fieldId || !date) {
       return res.status(400).json({
         success: false,
-        error: 'Missing required fields: fieldBoundary, fieldId, and date'
+        error: "Missing required fields: fieldBoundary, fieldId, and date",
       });
     }
 
-    if (fieldBoundary.type !== 'Polygon') {
+    if (fieldBoundary.type !== "Polygon") {
       return res.status(400).json({
         success: false,
-        error: 'Only Polygon geometries are supported'
+        error: "Only Polygon geometries are supported",
       });
     }
 
@@ -500,25 +667,25 @@ app.post('/api/field-analysis/field-image', async (req, res) => {
     res.json({
       success: true,
       data: fieldImage,
-      message: 'Field image generated successfully'
+      message: "Field image generated successfully",
     });
-
   } catch (error) {
-    console.error('Error generating field image:', error);
+    console.error("Error generating field image:", error);
     res.status(500).json({
       success: false,
-      error: error.message
+      error: error.message,
     });
   }
 });
 
 // Update Field Data endpoint
-app.post('/api/field-analysis/update-field', async (req, res) => {
+app.post("/api/field-analysis/update-field", verifyToken, async (req, res) => {
   try {
     if (!eeInitialized || !fieldDataUpdateService) {
       return res.status(503).json({
         success: false,
-        error: 'Earth Engine not initialized yet. Please try again in a moment.'
+        error:
+          "Earth Engine not initialized yet. Please try again in a moment.",
       });
     }
 
@@ -528,7 +695,7 @@ app.post('/api/field-analysis/update-field', async (req, res) => {
     if (!fieldId || !newBoundary) {
       return res.status(400).json({
         success: false,
-        error: 'Missing required fields: fieldId and newBoundary'
+        error: "Missing required fields: fieldId and newBoundary",
       });
     }
 
@@ -544,68 +711,71 @@ app.post('/api/field-analysis/update-field', async (req, res) => {
     res.json({
       success: true,
       data: updateResult,
-      message: 'Field updated successfully'
+      message: "Field updated successfully",
     });
-
   } catch (error) {
-    console.error('Error updating field:', error);
+    console.error("Error updating field:", error);
     res.status(500).json({
       success: false,
-      error: error.message
+      error: error.message,
     });
   }
 });
 
 // Recalculate NDVI endpoint
-app.post('/api/field-analysis/recalculate-ndvi', async (req, res) => {
-  try {
-    if (!eeInitialized || !fieldDataUpdateService) {
-      return res.status(503).json({
+app.post(
+  "/api/field-analysis/recalculate-ndvi",
+  verifyToken,
+  async (req, res) => {
+    try {
+      if (!eeInitialized || !fieldDataUpdateService) {
+        return res.status(503).json({
+          success: false,
+          error:
+            "Earth Engine not initialized yet. Please try again in a moment.",
+        });
+      }
+
+      const { fieldId, date } = req.body;
+
+      // Validate input
+      if (!fieldId || !date) {
+        return res.status(400).json({
+          success: false,
+          error: "Missing required fields: fieldId and date",
+        });
+      }
+
+      console.log(`🔄 Recalculating NDVI for field ${fieldId} on ${date}`);
+
+      // Recalculate NDVI
+      const recalculateResult = await fieldDataUpdateService.recalculateNDVI(
+        fieldId,
+        date
+      );
+
+      res.json({
+        success: true,
+        data: recalculateResult,
+        message: "NDVI recalculated successfully",
+      });
+    } catch (error) {
+      console.error("Error recalculating NDVI:", error);
+      res.status(500).json({
         success: false,
-        error: 'Earth Engine not initialized yet. Please try again in a moment.'
+        error: error.message,
       });
     }
-
-    const { fieldId, date } = req.body;
-
-    // Validate input
-    if (!fieldId || !date) {
-      return res.status(400).json({
-        success: false,
-        error: 'Missing required fields: fieldId and date'
-      });
-    }
-
-    console.log(`🔄 Recalculating NDVI for field ${fieldId} on ${date}`);
-
-    // Recalculate NDVI
-    const recalculateResult = await fieldDataUpdateService.recalculateNDVI(
-      fieldId,
-      date
-    );
-
-    res.json({
-      success: true,
-      data: recalculateResult,
-      message: 'NDVI recalculated successfully'
-    });
-
-  } catch (error) {
-    console.error('Error recalculating NDVI:', error);
-    res.status(500).json({
-      success: false,
-      error: error.message
-    });
   }
-});
+);
 
 // Get Field Data endpoint
-app.get('/api/field-analysis/field-data/:fieldId', (req, res) => {
+app.get("/api/field-analysis/field-data/:fieldId", (req, res) => {
   try {
     if (!fieldDataUpdateService) {
       return res.status(503).json({
         success: false,
-        error: 'Field Data Update Service not initialized'
+        error: "Field Data Update Service not initialized",
       });
     }
 
@@ -615,25 +785,24 @@ app.get('/api/field-analysis/field-data/:fieldId', (req, res) => {
     res.json({
       success: true,
       data: fieldData,
-      message: 'Field data retrieved successfully'
+      message: "Field data retrieved successfully",
     });
-
   } catch (error) {
-    console.error('Error retrieving field data:', error);
+    console.error("Error retrieving field data:", error);
     res.status(404).json({
       success: false,
-      error: error.message
+      error: error.message,
     });
   }
 });
 
 // Get Change History endpoint
-app.get('/api/field-analysis/change-history/:fieldId', (req, res) => {
+app.get("/api/field-analysis/change-history/:fieldId", (req, res) => {
   try {
     if (!fieldDataUpdateService) {
       return res.status(503).json({
         success: false,
-        error: 'Field Data Update Service not initialized'
+        error: "Field Data Update Service not initialized",
       });
     }
 
@@ -643,14 +812,13 @@ app.get('/api/field-analysis/change-history/:fieldId', (req, res) => {
     res.json({
       success: true,
       data: history,
-      message: 'Change history retrieved successfully'
+      message: "Change history retrieved successfully",
     });
-
   } catch (error) {
-    console.error('Error retrieving change history:', error);
+    console.error("Error retrieving change history:", error);
     res.status(500).json({
       success: false,
-      error: error.message
+      error: error.message,
     });
   }
 });
@@ -663,66 +831,70 @@ app.get('/api/field-analysis/change-history/:fieldId', (req, res) => {
  * Export and store NDVI image
  * POST /api/field-analysis/export-ndvi-image
  */
-app.post('/api/field-analysis/export-ndvi-image', async (req, res) => {
-  try {
-    if (!eeInitialized) {
-      return res.status(503).json({
+app.post(
+  "/api/field-analysis/export-ndvi-image",
+  verifyToken,
+  async (req, res) => {
+    try {
+      if (!eeInitialized) {
+        return res.status(503).json({
+          success: false,
+          error: "Earth Engine not initialized yet",
+        });
+      }
+
+      const { fieldBoundary, fieldId, date } = req.body;
+
+      if (!fieldBoundary || !fieldId || !date) {
+        return res.status(400).json({
+          success: false,
+          error: "Missing required parameters: fieldBoundary, fieldId, date",
+        });
+      }
+
+      const result = await ndviImageExportService.exportAndStoreNDVIImage(
+        fieldBoundary,
+        fieldId,
+        date
+      );
+
+      res.json({
+        success: true,
+        data: result,
+      });
+    } catch (error) {
+      console.error("Error exporting NDVI image:", error);
+      res.status(500).json({
         success: false,
-        error: 'Earth Engine not initialized yet'
+        error: error.message,
       });
     }
-
-    const { fieldBoundary, fieldId, date } = req.body;
-
-    if (!fieldBoundary || !fieldId || !date) {
-      return res.status(400).json({
-        success: false,
-        error: 'Missing required parameters: fieldBoundary, fieldId, date'
-      });
-    }
-
-    const result = await ndviImageExportService.exportAndStoreNDVIImage(
-      fieldBoundary,
-      fieldId,
-      date
-    );
-
-    res.json({
-      success: true,
-      data: result
-    });
-  } catch (error) {
-    console.error('Error exporting NDVI image:', error);
-    res.status(500).json({
-      success: false,
-      error: error.message
-    });
   }
-});
+);
 
 /**
  * Get stored NDVI image metadata
  * GET /api/field-analysis/stored-image/:filename
  */
-app.get('/api/field-analysis/stored-image/:filename', (req, res) => {
+app.get("/api/field-analysis/stored-image/:filename", (req, res) => {
   try {
     if (!ndviImageExportService) {
       return res.status(503).json({
         success: false,
-        error: 'Image export service not initialized'
+        error: "Image export service not initialized",
       });
     }
 
     const metadata = ndviImageExportService.getStoredImage(req.params.filename);
     res.json({
       success: true,
-      data: metadata
+      data: metadata,
     });
   } catch (error) {
-    console.error('Error getting stored image:', error);
+    console.error("Error getting stored image:", error);
     res.status(404).json({
       success: false,
-      error: error.message
+      error: error.message,
     });
   }
 });
@@ -732,12 +904,12 @@ app.get('/api/field-analysis/stored-image/:filename', (req, res) => {
  * GET /api/field-analysis/stored-images
  * Query params: fieldId (optional)
  */
-app.get('/api/field-analysis/stored-images', (req, res) => {
+app.get("/api/field-analysis/stored-images", (req, res) => {
   try {
     if (!ndviImageExportService) {
       return res.status(503).json({
         success: false,
-        error: 'Image export service not initialized'
+        error: "Image export service not initialized",
       });
     }
 
@@ -748,14 +920,14 @@ app.get('/api/field-analysis/stored-images', (req, res) => {
       success: true,
       data: {
         total: images.length,
-        images: images
-      }
+        images: images,
+      },
     });
   } catch (error) {
-    console.error('Error listing stored images:', error);
+    console.error("Error listing stored images:", error);
     res.status(500).json({
       success: false,
-      error: error.message
+      error: error.message,
     });
   }
 });
@@ -764,22 +936,24 @@ app.get('/api/field-analysis/stored-images', (req, res) => {
  * Delete stored NDVI image
  * DELETE /api/field-analysis/stored-image/:filename
  */
-app.delete('/api/field-analysis/stored-image/:filename', (req, res) => {
+app.delete("/api/field-analysis/stored-image/:filename", (req, res) => {
   try {
     if (!ndviImageExportService) {
       return res.status(503).json({
         success: false,
-        error: 'Image export service not initialized'
+        error: "Image export service not initialized",
       });
     }
 
-    const result = ndviImageExportService.deleteStoredImage(req.params.filename);
+    const result = ndviImageExportService.deleteStoredImage(
+      req.params.filename
+    );
     res.json(result);
   } catch (error) {
-    console.error('Error deleting stored image:', error);
+    console.error("Error deleting stored image:", error);
     res.status(500).json({
       success: false,
-      error: error.message
+      error: error.message,
     });
   }
 });
@@ -788,25 +962,25 @@ app.delete('/api/field-analysis/stored-image/:filename', (req, res) => {
  * Get storage statistics
  * GET /api/field-analysis/storage-stats
  */
-app.get('/api/field-analysis/storage-stats', (req, res) => {
+app.get("/api/field-analysis/storage-stats", (req, res) => {
   try {
     if (!ndviImageExportService) {
       return res.status(503).json({
         success: false,
-        error: 'Image export service not initialized'
+        error: "Image export service not initialized",
       });
     }
 
     const stats = ndviImageExportService.getStorageStats();
     res.json({
       success: true,
-      data: stats
+      data: stats,
     });
   } catch (error) {
-    console.error('Error getting storage stats:', error);
+    console.error("Error getting storage stats:", error);
     res.status(500).json({
       success: false,
-      error: error.message
+      error: error.message,
     });
   }
 });
@@ -816,36 +990,38 @@ app.get('/api/field-analysis/storage-stats', (req, res) => {
  */
 
 // Get time series metadata
-app.get('/api/field-analysis/time-series/:seriesId', (req, res) => {
+app.get("/api/field-analysis/time-series/:seriesId", (req, res) => {
   try {
     if (!timeSeriesImageStorageService) {
       return res.status(503).json({
         success: false,
-        error: 'Storage service not initialized'
+        error: "Storage service not initialized",
       });
     }
 
-    const metadata = timeSeriesImageStorageService.getSeriesMetadata(req.params.seriesId);
+    const metadata = timeSeriesImageStorageService.getSeriesMetadata(
+      req.params.seriesId
+    );
     res.json({
       success: true,
-      data: metadata
+      data: metadata,
     });
   } catch (error) {
-    console.error('Error getting series metadata:', error);
+    console.error("Error getting series metadata:", error);
     res.status(404).json({
       success: false,
-      error: error.message
+      error: error.message,
     });
   }
 });
 
 // List all time series
-app.get('/api/field-analysis/time-series-list', (req, res) => {
+app.get("/api/field-analysis/time-series-list", (req, res) => {
   try {
     if (!timeSeriesImageStorageService) {
       return res.status(503).json({
         success: false,
-        error: 'Storage service not initialized'
+        error: "Storage service not initialized",
       });
     }
 
@@ -855,70 +1031,72 @@ app.get('/api/field-analysis/time-series-list', (req, res) => {
       success: true,
       data: {
         total: series.length,
-        series: series
-      }
+        series: series,
+      },
     });
   } catch (error) {
-    console.error('Error listing time series:', error);
+    console.error("Error listing time series:", error);
     res.status(500).json({
       success: false,
-      error: error.message
+      error: error.message,
     });
   }
 });
 
 // Get time series storage statistics
-app.get('/api/field-analysis/time-series-stats', (req, res) => {
+app.get("/api/field-analysis/time-series-stats", (req, res) => {
   try {
     if (!timeSeriesImageStorageService) {
       return res.status(503).json({
         success: false,
-        error: 'Storage service not initialized'
+        error: "Storage service not initialized",
       });
     }
 
     const stats = timeSeriesImageStorageService.getStorageStats();
     res.json({
       success: true,
-      data: stats
+      data: stats,
     });
   } catch (error) {
-    console.error('Error getting time series stats:', error);
+    console.error("Error getting time series stats:", error);
     res.status(500).json({
       success: false,
-      error: error.message
+      error: error.message,
     });
   }
 });
 
 // Delete time series
-app.delete('/api/field-analysis/time-series/:seriesId', (req, res) => {
+app.delete("/api/field-analysis/time-series/:seriesId", (req, res) => {
   try {
     if (!timeSeriesImageStorageService) {
       return res.status(503).json({
         success: false,
-        error: 'Storage service not initialized'
+        error: "Storage service not initialized",
       });
     }
 
-    const result = timeSeriesImageStorageService.deleteStoredSeries(req.params.seriesId);
+    const result = timeSeriesImageStorageService.deleteStoredSeries(
+      req.params.seriesId
+    );
     res.json(result);
   } catch (error) {
-    console.error('Error deleting time series:', error);
+    console.error("Error deleting time series:", error);
     res.status(500).json({
       success: false,
-      error: error.message
+      error: error.message,
     });
   }
 });
 
 // Get NDVI Legend/Scale
-app.get('/api/ndvi-legend', (_, res) => {
+app.get("/api/ndvi-legend", (_, res) => {
   try {
     if (!ndviLegendService) {
       return res.status(503).json({
         success: false,
-        error: 'Legend service not initialized'
+        error: "Legend service not initialized",
       });
     }
 
@@ -926,28 +1104,29 @@ app.get('/api/ndvi-legend', (_, res) => {
       success: true,
       data: ndviLegendService.getLegendJSON(),
       html: ndviLegendService.getLegendHTML(),
-      css: ndviLegendService.getLegendCSS()
+      css: ndviLegendService.getLegendCSS(),
     });
   } catch (error) {
-    console.error('Error getting NDVI legend:', error);
+    console.error("Error getting NDVI legend:", error);
     res.status(500).json({
       success: false,
-      error: error.message
+      error: error.message,
     });
   }
 });
 
 // Get NDVI Color Visualization Information
-app.get('/api/ndvi-color-visualization', (_, res) => {
+app.get("/api/ndvi-color-visualization", (_, res) => {
   try {
     if (!ndviTwoYearTimeSeriesService) {
       return res.status(503).json({
         success: false,
-        error: 'NDVI service not initialized'
+        error: "NDVI service not initialized",
       });
     }
 
-    const colorVizService = ndviTwoYearTimeSeriesService.colorVisualizationService;
+    const colorVizService =
+      ndviTwoYearTimeSeriesService.colorVisualizationService;
 
     res.json({
       success: true,
@@ -955,14 +1134,15 @@ app.get('/api/ndvi-color-visualization', (_, res) => {
         scale: colorVizService.getNDVIScale(),
         legend: colorVizService.getLegendData(),
         visualization_params: colorVizService.getVisualizationParams(),
-        description: 'NDVI Color Visualization with proper color mapping for each range'
-      }
+        description:
+          "NDVI Color Visualization with proper color mapping for each range",
+      },
     });
   } catch (error) {
-    console.error('Error getting NDVI color visualization:', error);
+    console.error("Error getting NDVI color visualization:", error);
     res.status(500).json({
       success: false,
-      error: error.message
+      error: error.message,
     });
   }
 });
@@ -980,12 +1160,12 @@ app.get('/api/ndvi-color-visualization', (_, res) => {
  *   "interval": "daily|weekly|monthly|quarterly" (optional, default: monthly)
  * }
  */
-app.post('/api/field-analysis/ndvi-chart', async (req, res) => {
+app.post("/api/field-analysis/ndvi-chart", verifyToken, async (req, res) => {
   try {
     if (!ndviChartService) {
       return res.status(503).json({
         success: false,
-        error: 'NDVI Chart Service not initialized'
+        error: "NDVI Chart Service not initialized",
       });
     }
 
@@ -995,7 +1175,8 @@ app.post('/api/field-analysis/ndvi-chart', async (req, res) => {
     if (!fieldBoundary || !fieldId || !startDate || !endDate) {
       return res.status(400).json({
         success: false,
-        error: 'Missing required fields: fieldBoundary, fieldId, startDate, endDate'
+        error:
+          "Missing required fields: fieldBoundary, fieldId, startDate, endDate",
       });
     }
 
@@ -1003,7 +1184,8 @@ app.post('/api/field-analysis/ndvi-chart', async (req, res) => {
     if (!fieldBoundary.type || !fieldBoundary.coordinates) {
       return res.status(400).json({
         success: false,
-        error: 'Invalid fieldBoundary format. Must be a GeoJSON Polygon or MultiPolygon'
+        error:
+          "Invalid fieldBoundary format. Must be a GeoJSON Polygon or MultiPolygon",
       });
     }
 
@@ -1013,14 +1195,14 @@ app.post('/api/field-analysis/ndvi-chart', async (req, res) => {
     if (isNaN(start.getTime()) || isNaN(end.getTime())) {
       return res.status(400).json({
         success: false,
-        error: 'Invalid date format. Use YYYY-MM-DD'
+        error: "Invalid date format. Use YYYY-MM-DD",
       });
     }
 
     if (start >= end) {
       return res.status(400).json({
         success: false,
-        error: 'startDate must be before endDate'
+        error: "startDate must be before endDate",
       });
     }
 
@@ -1032,15 +1214,15 @@ app.post('/api/field-analysis/ndvi-chart', async (req, res) => {
       fieldId,
       startDate,
       endDate,
-      interval || 'monthly'
+      interval || "monthly"
     );
 
     res.json(chartData);
   } catch (error) {
-    console.error('Error generating NDVI chart:', error);
+    console.error("Error generating NDVI chart:", error);
     res.status(500).json({
       success: false,
-      error: error.message
+      error: error.message,
     });
   }
 });
@@ -1052,51 +1234,56 @@ app.post('/api/field-analysis/ndvi-chart', async (req, res) => {
  * Detects current flood status and historical floods for a field
  * Uses Sentinel-1 SAR imagery for water extent analysis
  */
-app.post('/api/field-analysis/flood-detection', async (req, res) => {
-  try {
-    if (!floodDetectionService) {
-      return res.status(503).json({
+app.post(
+  "/api/field-analysis/flood-detection",
+  verifyToken,
+  async (req, res) => {
+    try {
+      if (!floodDetectionService) {
+        return res.status(503).json({
+          success: false,
+          error: "Flood Detection Service not initialized",
+        });
+      }
+
+      const { fieldBoundary, fieldId, currentDate } = req.body;
+
+      // Validate required fields
+      if (!fieldBoundary || !fieldId) {
+        return res.status(400).json({
+          success: false,
+          error: "Missing required fields: fieldBoundary, fieldId",
+        });
+      }
+
+      // Validate field boundary
+      if (!fieldBoundary.type || !fieldBoundary.coordinates) {
+        return res.status(400).json({
+          success: false,
+          error:
+            "Invalid fieldBoundary format. Must be a GeoJSON Polygon or MultiPolygon",
+        });
+      }
+
+      console.log(`🌊 Detecting floods for field ${fieldId}`);
+
+      // Detect floods
+      const floodData = await floodDetectionService.detectFloods(
+        fieldBoundary,
+        fieldId,
+        currentDate
+      );
+
+      res.json(floodData);
+    } catch (error) {
+      console.error("Error detecting floods:", error);
+      res.status(500).json({
         success: false,
-        error: 'Flood Detection Service not initialized'
+        error: error.message,
       });
     }
-
-    const { fieldBoundary, fieldId, currentDate } = req.body;
-
-    // Validate required fields
-    if (!fieldBoundary || !fieldId) {
-      return res.status(400).json({
-        success: false,
-        error: 'Missing required fields: fieldBoundary, fieldId'
-      });
-    }
-
-    // Validate field boundary
-    if (!fieldBoundary.type || !fieldBoundary.coordinates) {
-      return res.status(400).json({
-        success: false,
-        error: 'Invalid fieldBoundary format. Must be a GeoJSON Polygon or MultiPolygon'
-      });
-    }
-
-    console.log(`🌊 Detecting floods for field ${fieldId}`);
-
-    // Detect floods
-    const floodData = await floodDetectionService.detectFloods(
-      fieldBoundary,
-      fieldId,
-      currentDate
-    );
-
-    res.json(floodData);
-  } catch (error) {
-    console.error('Error detecting floods:', error);
-    res.status(500).json({
-      success: false,
-      error: error.message
-    });
   }
-});
+);
 
 /**
  * Flood Time Series API
@@ -1105,70 +1292,78 @@ app.post('/api/field-analysis/flood-detection', async (req, res) => {
  * Generates flood time series data for a field
  * Shows water extent changes over time
  */
-app.post('/api/field-analysis/flood-time-series', async (req, res) => {
-  try {
-    if (!floodDetectionService) {
-      return res.status(503).json({
+app.post(
+  "/api/field-analysis/flood-time-series",
+  verifyToken,
+  async (req, res) => {
+    try {
+      if (!floodDetectionService) {
+        return res.status(503).json({
+          success: false,
+          error: "Flood Detection Service not initialized",
+        });
+      }
+
+      const { fieldBoundary, fieldId, startDate, endDate, intervalDays } =
+        req.body;
+
+      // Validate required fields
+      if (!fieldBoundary || !fieldId || !startDate || !endDate) {
+        return res.status(400).json({
+          success: false,
+          error:
+            "Missing required fields: fieldBoundary, fieldId, startDate, endDate",
+        });
+      }
+
+      // Validate field boundary
+      if (!fieldBoundary.type || !fieldBoundary.coordinates) {
+        return res.status(400).json({
+          success: false,
+          error:
+            "Invalid fieldBoundary format. Must be a GeoJSON Polygon or MultiPolygon",
+        });
+      }
+
+      // Validate dates
+      const start = new Date(startDate);
+      const end = new Date(endDate);
+      if (isNaN(start.getTime()) || isNaN(end.getTime())) {
+        return res.status(400).json({
+          success: false,
+          error: "Invalid date format. Use YYYY-MM-DD",
+        });
+      }
+
+      if (start >= end) {
+        return res.status(400).json({
+          success: false,
+          error: "startDate must be before endDate",
+        });
+      }
+
+      console.log(`📊 Generating flood time series for field ${fieldId}`);
+
+      // Generate flood time series
+      const timeSeriesData =
+        await floodDetectionService.generateFloodTimeSeries(
+          fieldBoundary,
+          fieldId,
+          startDate,
+          endDate,
+          intervalDays || 30
+        );
+
+      res.json(timeSeriesData);
+    } catch (error) {
+      console.error("Error generating flood time series:", error);
+      res.status(500).json({
         success: false,
-        error: 'Flood Detection Service not initialized'
+        error: error.message,
       });
     }
-
-    const { fieldBoundary, fieldId, startDate, endDate, intervalDays } = req.body;
-
-    // Validate required fields
-    if (!fieldBoundary || !fieldId || !startDate || !endDate) {
-      return res.status(400).json({
-        success: false,
-        error: 'Missing required fields: fieldBoundary, fieldId, startDate, endDate'
-      });
-    }
-
-    // Validate field boundary
-    if (!fieldBoundary.type || !fieldBoundary.coordinates) {
-      return res.status(400).json({
-        success: false,
-        error: 'Invalid fieldBoundary format. Must be a GeoJSON Polygon or MultiPolygon'
-      });
-    }
-
-    // Validate dates
-    const start = new Date(startDate);
-    const end = new Date(endDate);
-    if (isNaN(start.getTime()) || isNaN(end.getTime())) {
-      return res.status(400).json({
-        success: false,
-        error: 'Invalid date format. Use YYYY-MM-DD'
-      });
-    }
-
-    if (start >= end) {
-      return res.status(400).json({
-        success: false,
-        error: 'startDate must be before endDate'
-      });
-    }
-
-    console.log(`📊 Generating flood time series for field ${fieldId}`);
-
-    // Generate flood time series
-    const timeSeriesData = await floodDetectionService.generateFloodTimeSeries(
-      fieldBoundary,
-      fieldId,
-      startDate,
-      endDate,
-      intervalDays || 30
-    );
-
-    res.json(timeSeriesData);
-  } catch (error) {
-    console.error('Error generating flood time series:', error);
-    res.status(500).json({
-      success: false,
-      error: error.message
-    });
   }
-});
+);
 
 /**
  * Crop Growth Tracking API
@@ -1176,21 +1371,23 @@ app.post('/api/field-analysis/flood-time-series', async (req, res) => {
  *
  * Track crop growth stages and phenology
  */
-app.post('/api/crop-analysis/track-growth', async (req, res) => {
+app.post("/api/crop-analysis/track-growth", verifyToken, async (req, res) => {
   try {
     if (!cropGrowthTrackingService) {
       return res.status(503).json({
         success: false,
-        error: 'Crop Growth Tracking Service not initialized'
+        error: "Crop Growth Tracking Service not initialized",
       });
     }
 
-    const { fieldBoundary, fieldId, cropType, plantingDate, currentDate } = req.body;
+    const { fieldBoundary, fieldId, cropType, plantingDate, currentDate } =
+      req.body;
 
     if (!fieldBoundary || !fieldId || !cropType || !plantingDate) {
       return res.status(400).json({
         success: false,
-        error: 'Missing required fields: fieldBoundary, fieldId, cropType, plantingDate'
+        error:
+          "Missing required fields: fieldBoundary, fieldId, cropType, plantingDate",
       });
     }
 
@@ -1206,10 +1403,10 @@ app.post('/api/crop-analysis/track-growth', async (req, res) => {
 
     res.json(growthData);
   } catch (error) {
-    console.error('Error tracking crop growth:', error);
+    console.error("Error tracking crop growth:", error);
     res.status(500).json({
       success: false,
-      error: error.message
+      error: error.message,
     });
   }
 });
@@ -1220,12 +1417,12 @@ app.post('/api/crop-analysis/track-growth', async (req, res) => {
  *
  * Classify crop type based on NDVI pattern
  */
-app.post('/api/crop-analysis/classify-crop', async (req, res) => {
+app.post("/api/crop-analysis/classify-crop", verifyToken, async (req, res) => {
   try {
     if (!cropGrowthTrackingService) {
       return res.status(503).json({
         success: false,
-        error: 'Crop Growth Tracking Service not initialized'
+        error: "Crop Growth Tracking Service not initialized",
       });
     }
 
@@ -1234,7 +1431,8 @@ app.post('/api/crop-analysis/classify-crop', async (req, res) => {
     if (!fieldBoundary || !fieldId || !startDate || !endDate) {
       return res.status(400).json({
         success: false,
-        error: 'Missing required fields: fieldBoundary, fieldId, startDate, endDate'
+        error:
+          "Missing required fields: fieldBoundary, fieldId, startDate, endDate",
       });
     }
 
@@ -1249,10 +1447,10 @@ app.post('/api/crop-analysis/classify-crop', async (req, res) => {
 
     res.json(classificationData);
   } catch (error) {
-    console.error('Error classifying crop type:', error);
+    console.error("Error classifying crop type:", error);
     res.status(500).json({
       success: false,
-      error: error.message
+      error: error.message,
     });
   }
 });
@@ -1263,25 +1461,36 @@ app.post('/api/crop-analysis/classify-crop', async (req, res) => {
  *
  * Analyze crop performance with yield estimation
  */
-app.post('/api/crop-analysis/performance', async (req, res) => {
+app.post("/api/crop-analysis/performance", verifyToken, async (req, res) => {
   try {
     if (!cropAnalyticsService) {
       return res.status(503).json({
         success: false,
-        error: 'Crop Analytics Service not initialized'
+        error: "Crop Analytics Service not initialized",
       });
     }
 
-    const { fieldBoundary, fieldId, cropType, startDate, endDate, fieldArea } = req.body;
+    const { fieldBoundary, fieldId, cropType, startDate, endDate, fieldArea } =
+      req.body;
 
-    if (!fieldBoundary || !fieldId || !cropType || !startDate || !endDate || !fieldArea) {
+    if (
+      !fieldBoundary ||
+      !fieldId ||
+      !cropType ||
+      !startDate ||
+      !endDate ||
+      !fieldArea
+    ) {
       return res.status(400).json({
         success: false,
-        error: 'Missing required fields: fieldBoundary, fieldId, cropType, startDate, endDate, fieldArea'
+        error:
+          "Missing required fields: fieldBoundary, fieldId, cropType, startDate, endDate, fieldArea",
       });
     }
 
-    console.log(`📊 Analyzing crop performance for ${cropType} in field ${fieldId}`);
+    console.log(
+      `📊 Analyzing crop performance for ${cropType} in field ${fieldId}`
+    );
 
     const performanceData = await cropAnalyticsService.analyzeCropPerformance(
       fieldBoundary,
@@ -1294,10 +1503,10 @@ app.post('/api/crop-analysis/performance', async (req, res) => {
 
     res.json(performanceData);
   } catch (error) {
-    console.error('Error analyzing crop performance:', error);
+    console.error("Error analyzing crop performance:", error);
     res.status(500).json({
       success: false,
-      error: error.message
+      error: error.message,
     });
   }
 });
@@ -1308,21 +1517,30 @@ app.post('/api/crop-analysis/performance', async (req, res) => {
  *
  * Estimate crop yield based on NDVI
  */
-app.post('/api/crop-analysis/estimate-yield', async (req, res) => {
+app.post("/api/crop-analysis/estimate-yield", verifyToken, async (req, res) => {
   try {
     if (!cropAnalyticsService) {
       return res.status(503).json({
         success: false,
-        error: 'Crop Analytics Service not initialized'
+        error: "Crop Analytics Service not initialized",
       });
     }
 
-    const { fieldBoundary, fieldId, cropType, startDate, endDate, fieldArea } = req.body;
+    const { fieldBoundary, fieldId, cropType, startDate, endDate, fieldArea } =
+      req.body;
 
-    if (!fieldBoundary || !fieldId || !cropType || !startDate || !endDate || !fieldArea) {
+    if (
+      !fieldBoundary ||
+      !fieldId ||
+      !cropType ||
+      !startDate ||
+      !endDate ||
+      !fieldArea
+    ) {
       return res.status(400).json({
         success: false,
-        error: 'Missing required fields: fieldBoundary, fieldId, cropType, startDate, endDate, fieldArea'
+        error:
+          "Missing required fields: fieldBoundary, fieldId, cropType, startDate, endDate, fieldArea",
       });
     }
 
@@ -1339,10 +1557,10 @@ app.post('/api/crop-analysis/estimate-yield', async (req, res) => {
 
     res.json(yieldData);
   } catch (error) {
-    console.error('Error estimating yield:', error);
+    console.error("Error estimating yield:", error);
     res.status(500).json({
       success: false,
-      error: error.message
+      error: error.message,
     });
   }
 });
@@ -1353,12 +1571,12 @@ app.post('/api/crop-analysis/estimate-yield', async (req, res) => {
  *
  * Detect crop stress events
  */
-app.post('/api/crop-analysis/detect-stress', async (req, res) => {
+app.post("/api/crop-analysis/detect-stress", verifyToken, async (req, res) => {
   try {
     if (!cropAnalyticsService) {
       return res.status(503).json({
         success: false,
-        error: 'Crop Analytics Service not initialized'
+        error: "Crop Analytics Service not initialized",
       });
     }
 
@@ -1367,7 +1585,8 @@ app.post('/api/crop-analysis/detect-stress', async (req, res) => {
     if (!fieldBoundary || !fieldId || !startDate || !endDate) {
       return res.status(400).json({
         success: false,
-        error: 'Missing required fields: fieldBoundary, fieldId, startDate, endDate'
+        error:
+          "Missing required fields: fieldBoundary, fieldId, startDate, endDate",
       });
     }
 
@@ -1382,10 +1601,10 @@ app.post('/api/crop-analysis/detect-stress', async (req, res) => {
 
     res.json(stressData);
   } catch (error) {
-    console.error('Error detecting stress:', error);
+    console.error("Error detecting stress:", error);
     res.status(500).json({
       success: false,
-      error: error.message
+      error: error.message,
     });
   }
 });
@@ -1396,21 +1615,37 @@ app.post('/api/crop-analysis/detect-stress', async (req, res) => {
  *
  * Predict crop yield with growth forecasting
  */
-app.post('/api/crop-analysis/predict-yield', async (req, res) => {
+app.post("/api/crop-analysis/predict-yield", verifyToken, async (req, res) => {
   try {
     if (!cropPredictionService) {
       return res.status(503).json({
         success: false,
-        error: 'Crop Prediction Service not initialized'
+        error: "Crop Prediction Service not initialized",
       });
     }
 
-    const { fieldBoundary, fieldId, cropType, plantingDate, currentDate, fieldArea, historicalYield } = req.body;
+    const {
+      fieldBoundary,
+      fieldId,
+      cropType,
+      plantingDate,
+      currentDate,
+      fieldArea,
+      historicalYield,
+    } = req.body;
 
-    if (!fieldBoundary || !fieldId || !cropType || !plantingDate || !currentDate || !fieldArea) {
+    if (
+      !fieldBoundary ||
+      !fieldId ||
+      !cropType ||
+      !plantingDate ||
+      !currentDate ||
+      !fieldArea
+    ) {
       return res.status(400).json({
         success: false,
-        error: 'Missing required fields: fieldBoundary, fieldId, cropType, plantingDate, currentDate, fieldArea'
+        error:
+          "Missing required fields: fieldBoundary, fieldId, cropType, plantingDate, currentDate, fieldArea",
       });
     }
 
@@ -1428,10 +1663,10 @@ app.post('/api/crop-analysis/predict-yield', async (req, res) => {
 
     res.json(predictionData);
   } catch (error) {
-    console.error('Error predicting yield:', error);
+    console.error("Error predicting yield:", error);
     res.status(500).json({
       success: false,
-      error: error.message
+      error: error.message,
     });
   }
 });
@@ -1442,44 +1677,62 @@ app.post('/api/crop-analysis/predict-yield', async (req, res) => {
  *
  * Forecast future crop growth
  */
-app.post('/api/crop-analysis/forecast-growth', async (req, res) => {
-  try {
-    if (!cropPredictionService) {
-      return res.status(503).json({
+app.post(
+  "/api/crop-analysis/forecast-growth",
+  verifyToken,
+  async (req, res) => {
+    try {
+      if (!cropPredictionService) {
+        return res.status(503).json({
+          success: false,
+          error: "Crop Prediction Service not initialized",
+        });
+      }
+
+      const {
+        fieldBoundary,
+        fieldId,
+        cropType,
+        plantingDate,
+        currentDate,
+        forecastDays,
+      } = req.body;
+
+      if (
+        !fieldBoundary ||
+        !fieldId ||
+        !cropType ||
+        !plantingDate ||
+        !currentDate
+      ) {
+        return res.status(400).json({
+          success: false,
+          error:
+            "Missing required fields: fieldBoundary, fieldId, cropType, plantingDate, currentDate",
+        });
+      }
+
+      console.log(`📈 Forecasting growth for ${cropType} in field ${fieldId}`);
+
+      const forecastData = await cropPredictionService.forecastGrowth(
+        fieldBoundary,
+        fieldId,
+        cropType,
+        plantingDate,
+        currentDate,
+        forecastDays || 30
+      );
+
+      res.json(forecastData);
+    } catch (error) {
+      console.error("Error forecasting growth:", error);
+      res.status(500).json({
         success: false,
-        error: 'Crop Prediction Service not initialized'
+        error: error.message,
       });
     }
-
-    const { fieldBoundary, fieldId, cropType, plantingDate, currentDate, forecastDays } = req.body;
-
-    if (!fieldBoundary || !fieldId || !cropType || !plantingDate || !currentDate) {
-      return res.status(400).json({
-        success: false,
-        error: 'Missing required fields: fieldBoundary, fieldId, cropType, plantingDate, currentDate'
-      });
-    }
-
-    console.log(`📈 Forecasting growth for ${cropType} in field ${fieldId}`);
-
-    const forecastData = await cropPredictionService.forecastGrowth(
-      fieldBoundary,
-      fieldId,
-      cropType,
-      plantingDate,
-      currentDate,
-      forecastDays || 30
-    );
-
-    res.json(forecastData);
-  } catch (error) {
-    console.error('Error forecasting growth:', error);
-    res.status(500).json({
-      success: false,
-      error: error.message
-    });
   }
-});
+);
 
 /**
  * Comprehensive Crop Chart API
@@ -1487,25 +1740,42 @@ app.post('/api/crop-analysis/forecast-growth', async (req, res) => {
  *
  * Generate comprehensive crop chart with NDVI and crop data
  */
-app.post('/api/crop-analysis/crop-chart', async (req, res) => {
+app.post("/api/crop-analysis/crop-chart", verifyToken, async (req, res) => {
   try {
     if (!cropChartService) {
       return res.status(503).json({
         success: false,
-        error: 'Crop Chart Service not initialized'
+        error: "Crop Chart Service not initialized",
       });
     }
 
-    const { fieldBoundary, fieldId, cropType, plantingDate, currentDate, fieldArea } = req.body;
+    const {
+      fieldBoundary,
+      fieldId,
+      cropType,
+      plantingDate,
+      currentDate,
+      fieldArea,
+    } = req.body;
 
-    if (!fieldBoundary || !fieldId || !cropType || !plantingDate || !currentDate || !fieldArea) {
+    if (
+      !fieldBoundary ||
+      !fieldId ||
+      !cropType ||
+      !plantingDate ||
+      !currentDate ||
+      !fieldArea
+    ) {
       return res.status(400).json({
         success: false,
-        error: 'Missing required fields: fieldBoundary, fieldId, cropType, plantingDate, currentDate, fieldArea'
+        error:
+          "Missing required fields: fieldBoundary, fieldId, cropType, plantingDate, currentDate, fieldArea",
       });
     }
 
-    console.log(`📊 Generating comprehensive crop chart for ${cropType} in field ${fieldId}`);
+    console.log(
+      `📊 Generating comprehensive crop chart for ${cropType} in field ${fieldId}`
+    );
 
     const chartData = await cropChartService.generateCropChart(
       fieldBoundary,
@@ -1518,10 +1788,10 @@ app.post('/api/crop-analysis/crop-chart', async (req, res) => {
 
     res.json(chartData);
   } catch (error) {
-    console.error('Error generating crop chart:', error);
+    console.error("Error generating crop chart:", error);
     res.status(500).json({
       success: false,
-      error: error.message
+      error: error.message,
     });
   }
 });
@@ -1539,12 +1809,13 @@ app.post('/api/crop-analysis/crop-chart', async (req, res) => {
  *   "cropType": "rice"
  * }
  */
-app.post('/api/field-analysis/zone-image', async (req, res) => {
+app.post("/api/field-analysis/zone-image", verifyToken, async (req, res) => {
   try {
     if (!eeInitialized || !zoneImageGenerationService) {
       return res.status(503).json({
         success: false,
-        error: 'Zone Image Generation Service not initialized yet. Please try again in a moment.'
+        error:
+          "Zone Image Generation Service not initialized yet. Please try again in a moment.",
       });
     }
 
@@ -1554,16 +1825,19 @@ app.post('/api/field-analysis/zone-image', async (req, res) => {
     if (!fieldBoundary || !fieldId) {
       return res.status(400).json({
         success: false,
-        error: 'Missing required fields: fieldBoundary and fieldId are required'
+        error:
+          "Missing required fields: fieldBoundary and fieldId are required",
       });
     }
 
     // Use current date if not provided
-    const analysisDate = date || new Date().toISOString().split('T')[0];
+    const analysisDate = date || new Date().toISOString().split("T")[0];
     const gridSizeMeters = gridSize || 50;
-    const crop = cropType || 'rice';
+    const crop = cropType || "rice";
 
-    console.log(`📊 Generating zone image for field ${fieldId} with ${crop} crop...`);
+    console.log(
+      `📊 Generating zone image for field ${fieldId} with ${crop} crop...`
+    );
 
     const result = await zoneImageGenerationService.generateZoneImage(
       fieldBoundary,
@@ -1574,12 +1848,11 @@ app.post('/api/field-analysis/zone-image', async (req, res) => {
     );
 
     res.json(result);
-
   } catch (error) {
-    console.error('Error generating zone image:', error);
+    console.error("Error generating zone image:", error);
     res.status(500).json({
       success: false,
-      error: error.message
+      error: error.message,
     });
   }
 });
@@ -1588,29 +1861,34 @@ app.post('/api/field-analysis/zone-image', async (req, res) => {
  * Get Zone Image Metadata
  * GET /api/field-analysis/zone-image/:imageId
  */
-app.get('/api/field-analysis/zone-image/:imageId', (req, res) => {
+app.get("/api/field-analysis/zone-image/:imageId", (req, res) => {
   try {
     const { imageId } = req.params;
-    const metadataPath = path.join(__dirname, 'public', 'zone-images', imageId, 'metadata.json');
+    const metadataPath = path.join(
+      __dirname,
+      "public",
+      "zone-images",
+      imageId,
+      "metadata.json"
+    );
 
     if (!fs.existsSync(metadataPath)) {
       return res.status(404).json({
         success: false,
-        error: 'Zone image not found'
+        error: "Zone image not found",
       });
     }
 
-    const metadata = JSON.parse(fs.readFileSync(metadataPath, 'utf8'));
+    const metadata = JSON.parse(fs.readFileSync(metadataPath, "utf8"));
     res.json({
       success: true,
-      metadata: metadata
+      metadata: metadata,
     });
-
   } catch (error) {
-    console.error('Error retrieving zone image metadata:', error);
+    console.error("Error retrieving zone image metadata:", error);
     res.status(500).json({
       success: false,
-      error: error.message
+      error: error.message,
     });
   }
 });
@@ -1619,55 +1897,67 @@ app.get('/api/field-analysis/zone-image/:imageId', (req, res) => {
  * List All Zone Images
  * GET /api/field-analysis/zone-images
  */
-app.get('/api/field-analysis/zone-images', (req, res) => {
+app.get("/api/field-analysis/zone-images", (req, res) => {
   try {
-    const indexPath = path.join(__dirname, 'public', 'zone-images', 'index.json');
+    const indexPath = path.join(
+      __dirname,
+      "public",
+      "zone-images",
+      "index.json"
+    );
 
     if (!fs.existsSync(indexPath)) {
       return res.json({
         success: true,
-        images: []
+        images: [],
       });
     }
 
-    const index = JSON.parse(fs.readFileSync(indexPath, 'utf8'));
+    const index = JSON.parse(fs.readFileSync(indexPath, "utf8"));
     res.json({
       success: true,
-      images: index.images
+      images: index.images,
     });
-
   } catch (error) {
-    console.error('Error listing zone images:', error);
+    console.error("Error listing zone images:", error);
     res.status(500).json({
       success: false,
-      error: error.message
+      error: error.message,
     });
   }
 });
 
 // Health check endpoint
-app.get('/api/health', (_, res) => {
+app.get("/api/health", (_, res) => {
   res.json({
-    status: 'ok',
-    message: 'Server is running',
-    earthEngineInitialized: eeInitialized
+    status: "ok",
+    message: "Server is running",
+    earthEngineInitialized: eeInitialized,
   });
 });
 
 // Earth Engine status endpoint
-app.get('/api/ee-status', (_, res) => {
+app.get("/api/ee-status", (_, res) => {
   res.json({
     initialized: eeInitialized,
-    projectId: 'marine-pillar-465804-p5',
-    message: eeInitialized ? 'Earth Engine is ready' : 'Earth Engine is initializing...'
+    projectId: "marine-pillar-465804-p5",
+    message: eeInitialized
+      ? "Earth Engine is ready"
+      : "Earth Engine is initializing...",
   });
 });
 
+// Serve static files AFTER all API routes
+app.use(express.static("public"));
+
 // Start server
 app.listen(PORT, () => {
-  console.log(`🌍 Google Earth Engine Server running on http://localhost:${PORT}`);
+  console.log(
+    `🌍 Google Earth Engine Server running on http://localhost:${PORT}`
+  );
   console.log(`📍 Open your browser and navigate to http://localhost:${PORT}`);
-  console.log(`\n⚠️  Note: To use Earth Engine data, you need to authenticate first:`);
+  console.log(
+    `\n⚠️  Note: To use Earth Engine data, you need to authenticate first:`
+  );
   console.log(`   Run: npx ee authenticate`);
 });
-

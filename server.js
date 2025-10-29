@@ -4,7 +4,7 @@ const path = require("path");
 const fs = require("fs");
 require("dotenv").config();
 
-// MongoDB Database
+// MySQL Database with Sequelize
 const database = require("./config/database");
 const models = require("./models");
 
@@ -143,20 +143,20 @@ async function initializeEarthEngine() {
   }
 }
 
-// Initialize MongoDB
+// Initialize MySQL Database
 async function initializeDatabase() {
   try {
-    await database.connect();
+    await database.connectDatabase();
     dbInitialized = true;
-    console.log("✅ MongoDB initialization complete");
+    console.log("✅ MySQL initialization complete");
   } catch (error) {
-    console.error("❌ MongoDB initialization failed:", error.message);
+    console.error("❌ MySQL initialization failed:", error.message);
     console.warn("⚠️  Server will continue without database persistence");
     dbInitialized = false;
   }
 }
 
-// Initialize both MongoDB and Earth Engine on startup
+// Initialize both MySQL and Earth Engine on startup
 async function initializeServices() {
   await initializeDatabase();
   await initializeEarthEngine();
@@ -499,46 +499,67 @@ app.post("/api/field-analysis", verifyToken, async (req, res) => {
       end
     );
 
-    // Save to MongoDB if connected
+    // Save to MySQL if connected
     if (dbInitialized) {
       try {
-        // Save or update field
-        await models.Field.findOneAndUpdate(
-          { field_id: fieldId },
-          {
+        // Save or update field (upsert)
+        const [field, created] = await models.Field.findOrCreate({
+          where: { field_id: fieldId },
+          defaults: {
             field_id: fieldId,
             user_id: req.user.user_id,
-            boundary: fieldBoundary,
+            boundary_type: fieldBoundary.type,
+            boundary_coordinates: JSON.stringify(fieldBoundary.coordinates),
             area_sqm: analysisResult.hectares * 10000,
             area_hectares: analysisResult.hectares,
             status: "active",
-            updated_at: new Date(),
           },
-          { upsert: true, new: true }
-        );
+        });
+
+        if (!created) {
+          // Update existing field
+          await field.update({
+            user_id: req.user.user_id,
+            boundary_type: fieldBoundary.type,
+            boundary_coordinates: JSON.stringify(fieldBoundary.coordinates),
+            area_sqm: analysisResult.hectares * 10000,
+            area_hectares: analysisResult.hectares,
+          });
+        }
 
         // Save field analysis
-        const fieldAnalysis = new models.FieldAnalysis({
+        await models.FieldAnalysis.create({
           field_id: fieldId,
           user_id: req.user.user_id,
           analysis_date: new Date(analysisResult.date),
-          ndvi: analysisResult.ndvi,
-          quality: analysisResult.quality,
-          interpretation: analysisResult.interpretation,
+          ndvi_mean: analysisResult.ndvi.mean,
+          ndvi_std: analysisResult.ndvi.std,
+          ndvi_min: analysisResult.ndvi.min,
+          ndvi_max: analysisResult.ndvi.max,
+          ndvi_median: analysisResult.ndvi.median,
+          ndvi_percentile_25: analysisResult.ndvi.percentile_25,
+          ndvi_percentile_75: analysisResult.ndvi.percentile_75,
+          cloud_cover: analysisResult.quality.cloud_cover,
+          pixel_count: analysisResult.quality.pixel_count,
+          data_source: analysisResult.quality.data_source,
+          acquisition_date: analysisResult.quality.acquisition_date,
+          confidence: analysisResult.quality.confidence,
+          interpretation_status: analysisResult.interpretation.status,
+          interpretation_description: analysisResult.interpretation.description,
+          interpretation_color: analysisResult.interpretation.color,
+          interpretation_recommendation:
+            analysisResult.interpretation.recommendation,
           hectares: analysisResult.hectares,
-          satellite_info: {
-            platform: "Sentinel-2",
-            sensor: "MSI",
-            resolution: "10m",
-            bands_used: ["B4", "B8"],
-          },
+          satellite_platform: "Sentinel-2",
+          satellite_sensor: "MSI",
+          satellite_resolution: "10m",
+          satellite_bands: JSON.stringify(["B4", "B8"]),
         });
-        await fieldAnalysis.save();
         console.log(
-          `✅ Field analysis saved to MongoDB for ${fieldId} by user ${req.user.email}`
+          `✅ Field analysis saved to MySQL for ${fieldId} by user ${req.user.email}`
         );
       } catch (dbError) {
-        console.error("❌ Error saving to MongoDB:", dbError.message);
+        console.error("❌ Error saving to MySQL:", dbError.message);
         // Continue without failing the request
       }
     }

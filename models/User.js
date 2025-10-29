@@ -1,166 +1,156 @@
 /**
- * User Model
+ * User Model (Sequelize/MySQL)
  * Stores user authentication and profile information
  */
 
-const mongoose = require('mongoose');
+const { DataTypes } = require('sequelize');
 const bcrypt = require('bcryptjs');
+const { sequelize } = require('../config/database');
 
-const userSchema = new mongoose.Schema({
-  // User identification
+const User = sequelize.define('User', {
+  id: {
+    type: DataTypes.INTEGER,
+    primaryKey: true,
+    autoIncrement: true
+  },
   user_id: {
-    type: String,
-    required: true,
+    type: DataTypes.STRING(100),
+    allowNull: false,
     unique: true,
-    index: true
+    comment: 'Unique user identifier'
   },
-  
-  // Authentication
   email: {
-    type: String,
-    required: true,
+    type: DataTypes.STRING(255),
+    allowNull: false,
     unique: true,
-    lowercase: true,
-    trim: true,
-    index: true
+    validate: {
+      isEmail: true
+    },
+    comment: 'User email address'
   },
-  
   password: {
-    type: String,
-    required: true,
-    minlength: 6
+    type: DataTypes.STRING(255),
+    allowNull: false,
+    comment: 'Hashed password'
   },
-  
-  // Profile information
   name: {
-    type: String,
-    required: true,
-    trim: true
+    type: DataTypes.STRING(255),
+    allowNull: false,
+    comment: 'User full name'
   },
-  
   phone: {
-    type: String,
-    required: true,
-    trim: true
+    type: DataTypes.STRING(50),
+    allowNull: false,
+    comment: 'User phone number'
   },
-  
   country: {
-    type: String,
-    required: true,
-    trim: true
+    type: DataTypes.STRING(100),
+    allowNull: false,
+    comment: 'User country'
   },
-  
-  // Account status
   status: {
-    type: String,
-    enum: ['active', 'inactive', 'suspended'],
-    default: 'active',
-    required: true
+    type: DataTypes.ENUM('active', 'inactive', 'suspended'),
+    defaultValue: 'active',
+    allowNull: false,
+    comment: 'Account status'
   },
-  
-  // User role and permissions
   role: {
-    type: String,
-    enum: ['admin', 'farmer', 'agronomist', 'viewer'],
-    default: 'farmer'
+    type: DataTypes.ENUM('admin', 'farmer', 'agronomist', 'viewer'),
+    defaultValue: 'farmer',
+    comment: 'User role'
   },
-  
-  // Associated fields
-  fields: [{
-    type: String,
-    ref: 'Field'
-  }],
-  
-  // Preferences
-  preferences: {
-    language: {
-      type: String,
-      default: 'en'
-    },
-    units: {
-      type: String,
-      enum: ['metric', 'imperial'],
-      default: 'metric'
-    },
-    notifications: {
-      email: { type: Boolean, default: true },
-      sms: { type: Boolean, default: false }
-    }
+  language: {
+    type: DataTypes.STRING(10),
+    defaultValue: 'en',
+    comment: 'Preferred language'
   },
-  
-  // Last login
-  last_login: Date,
-  
-  // API usage tracking
-  api_usage: {
-    total_requests: { type: Number, default: 0 },
-    last_request: Date,
-    monthly_limit: { type: Number, default: 10000 },
-    current_month_usage: { type: Number, default: 0 }
+  units: {
+    type: DataTypes.ENUM('metric', 'imperial'),
+    defaultValue: 'metric',
+    comment: 'Preferred units'
   },
-  
-  // Timestamps
-  created_at: {
-    type: Date,
-    default: Date.now
+  email_notifications: {
+    type: DataTypes.BOOLEAN,
+    defaultValue: true,
+    comment: 'Email notifications enabled'
   },
-  
-  updated_at: {
-    type: Date,
-    default: Date.now
+  sms_notifications: {
+    type: DataTypes.BOOLEAN,
+    defaultValue: false,
+    comment: 'SMS notifications enabled'
+  },
+  last_login: {
+    type: DataTypes.DATE,
+    comment: 'Last login timestamp'
+  },
+  total_requests: {
+    type: DataTypes.INTEGER,
+    defaultValue: 0,
+    comment: 'Total API requests'
+  },
+  last_request: {
+    type: DataTypes.DATE,
+    comment: 'Last API request timestamp'
+  },
+  monthly_limit: {
+    type: DataTypes.INTEGER,
+    defaultValue: 10000,
+    comment: 'Monthly API request limit'
+  },
+  current_month_usage: {
+    type: DataTypes.INTEGER,
+    defaultValue: 0,
+    comment: 'Current month API usage'
   }
 }, {
-  timestamps: { createdAt: 'created_at', updatedAt: 'updated_at' }
+  tableName: 'users',
+  indexes: [
+    { fields: ['email'] },
+    { fields: ['user_id'] },
+    { fields: ['status'] },
+    { fields: ['country'] }
+  ],
+  hooks: {
+    beforeCreate: async (user) => {
+      if (user.password) {
+        const salt = await bcrypt.genSalt(10);
+        user.password = await bcrypt.hash(user.password, salt);
+      }
+    },
+    beforeUpdate: async (user) => {
+      if (user.changed('password')) {
+        const salt = await bcrypt.genSalt(10);
+        user.password = await bcrypt.hash(user.password, salt);
+      }
+    }
+  }
 });
 
-// Indexes
-userSchema.index({ email: 1 });
-userSchema.index({ status: 1 });
-userSchema.index({ country: 1 });
-
-// Hash password before saving
-userSchema.pre('save', async function(next) {
-  if (!this.isModified('password')) {
-    return next();
-  }
-  
-  try {
-    const salt = await bcrypt.genSalt(10);
-    this.password = await bcrypt.hash(this.password, salt);
-    next();
-  } catch (error) {
-    next(error);
-  }
-});
-
-// Method to compare password
-userSchema.methods.comparePassword = async function(candidatePassword) {
+// Instance methods
+User.prototype.comparePassword = async function(candidatePassword) {
   return await bcrypt.compare(candidatePassword, this.password);
 };
 
-// Method to hide password in JSON
-userSchema.methods.toJSON = function() {
-  const obj = this.toObject();
-  delete obj.password;
-  return obj;
+User.prototype.toJSON = function() {
+  const values = Object.assign({}, this.get());
+  delete values.password;
+  return values;
 };
 
-// Method to increment API usage
-userSchema.methods.incrementApiUsage = function() {
-  this.api_usage.total_requests += 1;
-  this.api_usage.current_month_usage += 1;
-  this.api_usage.last_request = new Date();
-  return this.save();
+User.prototype.incrementApiUsage = async function() {
+  this.total_requests += 1;
+  this.current_month_usage += 1;
+  this.last_request = new Date();
+  await this.save();
 };
 
-// Static methods
-userSchema.statics.findByEmail = function(email) {
-  return this.findOne({ email: email.toLowerCase() }).exec();
+// Class methods
+User.findByEmail = async function(email) {
+  return await this.findOne({ where: { email: email.toLowerCase() } });
 };
 
-userSchema.statics.getActiveUsers = function() {
-  return this.find({ status: 'active' }).exec();
+User.getActiveUsers = async function() {
+  return await this.findAll({ where: { status: 'active' } });
 };
 
-module.exports = mongoose.model('User', userSchema);
-
+module.exports = User;

@@ -1,123 +1,131 @@
 /**
- * MongoDB Database Configuration
- * Handles connection to MongoDB database
+ * MySQL Database Configuration with Sequelize
+ * 
+ * This module handles MySQL connection using Sequelize ORM
+ * Implements auto-migration for tables and columns
  */
 
-const mongoose = require('mongoose');
+const { Sequelize } = require('sequelize');
+require('dotenv').config();
 
-class Database {
-  constructor() {
-    this.connection = null;
-    this.isConnected = false;
+// MySQL connection configuration from environment variables
+const DB_HOST = process.env.DB_HOST || 'localhost';
+const DB_PORT = process.env.DB_PORT || 3306;
+const DB_NAME = process.env.DB_NAME || 'gee_agrovue';
+const DB_USER = process.env.DB_USER || 'root';
+const DB_PASSWORD = process.env.DB_PASSWORD || '';
+
+// Create Sequelize instance
+const sequelize = new Sequelize(DB_NAME, DB_USER, DB_PASSWORD, {
+  host: DB_HOST,
+  port: DB_PORT,
+  dialect: 'mysql',
+  logging: process.env.NODE_ENV === 'development' ? console.log : false,
+  pool: {
+    max: 10,
+    min: 0,
+    acquire: 30000,
+    idle: 10000
+  },
+  define: {
+    timestamps: true,
+    underscored: true,
+    createdAt: 'created_at',
+    updatedAt: 'updated_at'
   }
+});
 
-  /**
-   * Connect to MongoDB
-   * @returns {Promise<void>}
-   */
-  async connect() {
-    try {
-      // MongoDB connection string from environment or default to localhost
-      const mongoURI = process.env.MONGODB_URI || 'mongodb://localhost:27017/gee-agrovue';
-      
-      // Connection options
-      const options = {
-        useNewUrlParser: true,
-        useUnifiedTopology: true,
-        serverSelectionTimeoutMS: 5000,
-        socketTimeoutMS: 45000,
-      };
+// Connection state
+let isConnected = false;
 
-      // Connect to MongoDB
-      this.connection = await mongoose.connect(mongoURI, options);
-      this.isConnected = true;
-
-      console.log('✅ MongoDB connected successfully');
-      console.log(`📊 Database: ${this.connection.connection.name}`);
-      console.log(`🌐 Host: ${this.connection.connection.host}`);
-      console.log(`🔌 Port: ${this.connection.connection.port}`);
-
-      // Handle connection events
-      mongoose.connection.on('error', (err) => {
-        console.error('❌ MongoDB connection error:', err);
-        this.isConnected = false;
-      });
-
-      mongoose.connection.on('disconnected', () => {
-        console.warn('⚠️  MongoDB disconnected');
-        this.isConnected = false;
-      });
-
-      mongoose.connection.on('reconnected', () => {
-        console.log('✅ MongoDB reconnected');
-        this.isConnected = true;
-      });
-
-      // Graceful shutdown
-      process.on('SIGINT', async () => {
-        await this.disconnect();
-        process.exit(0);
-      });
-
-    } catch (error) {
-      console.error('❌ MongoDB connection failed:', error.message);
-      console.error('💡 Make sure MongoDB is running on your local machine');
-      console.error('💡 Start MongoDB with: mongod');
-      this.isConnected = false;
-      throw error;
-    }
-  }
-
-  /**
-   * Disconnect from MongoDB
-   * @returns {Promise<void>}
-   */
-  async disconnect() {
-    try {
-      if (this.connection) {
-        await mongoose.connection.close();
-        this.isConnected = false;
-        console.log('✅ MongoDB disconnected gracefully');
-      }
-    } catch (error) {
-      console.error('❌ Error disconnecting from MongoDB:', error);
-      throw error;
-    }
-  }
-
-  /**
-   * Get connection status
-   * @returns {Object} Connection status
-   */
-  getStatus() {
-    return {
-      isConnected: this.isConnected,
-      readyState: mongoose.connection.readyState,
-      host: mongoose.connection.host,
-      port: mongoose.connection.port,
-      name: mongoose.connection.name,
-      models: Object.keys(mongoose.connection.models)
-    };
-  }
-
-  /**
-   * Clear all collections (for testing)
-   * @returns {Promise<void>}
-   */
-  async clearDatabase() {
-    try {
-      const collections = mongoose.connection.collections;
-      for (const key in collections) {
-        await collections[key].deleteMany({});
-      }
-      console.log('✅ Database cleared');
-    } catch (error) {
-      console.error('❌ Error clearing database:', error);
-      throw error;
-    }
+async function testConnection() {
+  try {
+    await sequelize.authenticate();
+    return true;
+  } catch (error) {
+    console.error('❌ Unable to connect to MySQL:', error.message);
+    return false;
   }
 }
 
-// Export singleton instance
-module.exports = new Database();
+async function connectDatabase(options = {}) {
+  if (isConnected) {
+    console.log('✅ Using existing MySQL connection');
+    return;
+  }
 
+  try {
+    console.log('🔌 Connecting to MySQL...');
+    console.log(`📊 Database: ${DB_NAME}`);
+    console.log(`🌐 Host: ${DB_HOST}:${DB_PORT}`);
+    console.log(`👤 User: ${DB_USER}`);
+    
+    await sequelize.authenticate();
+    isConnected = true;
+    console.log('✅ MySQL connected successfully');
+    
+    const syncOptions = { alter: true, ...options };
+    console.log('🔄 Syncing database models...');
+    await sequelize.sync(syncOptions);
+    console.log('✅ Database models synced successfully');
+    
+    const tables = await sequelize.getQueryInterface().showAllTables();
+    console.log(`📋 Tables in database: ${tables.join(', ')}`);
+    
+  } catch (error) {
+    console.error('❌ MySQL connection error:', error.message);
+    console.error('💡 Make sure MySQL is running on your local machine');
+    throw error;
+  }
+}
+
+async function disconnectDatabase() {
+  if (!isConnected) return;
+  try {
+    await sequelize.close();
+    isConnected = false;
+    console.log('✅ MySQL disconnected successfully');
+  } catch (error) {
+    console.error('❌ MySQL disconnection error:', error.message);
+    throw error;
+  }
+}
+
+function getConnectionStatus() {
+  return isConnected;
+}
+
+function getDatabase() {
+  if (!isConnected) {
+    throw new Error('Database not connected. Call connectDatabase() first.');
+  }
+  return sequelize;
+}
+
+async function forceSyncDatabase() {
+  console.log('⚠️  Force syncing database (this will delete all data)...');
+  await sequelize.sync({ force: true });
+  console.log('✅ Database force synced successfully');
+}
+
+process.on('SIGINT', async () => {
+  console.log('\n🛑 Shutting down gracefully...');
+  await disconnectDatabase();
+  process.exit(0);
+});
+
+process.on('SIGTERM', async () => {
+  console.log('\n🛑 Shutting down gracefully...');
+  await disconnectDatabase();
+  process.exit(0);
+});
+
+module.exports = {
+  sequelize,
+  connectDatabase,
+  disconnectDatabase,
+  getConnectionStatus,
+  getDatabase,
+  testConnection,
+  forceSyncDatabase
+};

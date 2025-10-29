@@ -8,9 +8,13 @@ require("dotenv").config();
 const database = require("./config/database");
 const models = require("./models");
 
+// Field Boundary Helper
+const { resolveFieldBoundary } = require("./utils/fieldBoundaryHelper");
+
 // Authentication
 const { verifyToken, optionalAuth } = require("./middleware/auth");
 const authController = require("./controllers/authController");
+const fieldController = require("./controllers/fieldController");
 console.log("✅ Auth Controller loaded:", Object.keys(authController));
 
 const FieldAnalysisService = require("./services/fieldAnalysisService");
@@ -217,6 +221,50 @@ app.put("/api/auth/profile", verifyToken, authController.updateProfile);
 console.log("✅ Authentication routes registered");
 
 // ============================================
+// FIELD MANAGEMENT ROUTES (Authentication Required)
+// ============================================
+
+/**
+ * Create a new field with auto-generated field_id
+ * POST /api/fields
+ * Headers: { Authorization: Bearer <token> }
+ * Body: { fieldBoundary, name, crop_type, planting_date, harvest_date, farm_name, location, notes, tags }
+ */
+app.post("/api/fields", verifyToken, fieldController.createField);
+
+/**
+ * Get all fields for authenticated user
+ * GET /api/fields
+ * Headers: { Authorization: Bearer <token> }
+ * Query: { status, crop_type, limit, offset }
+ */
+app.get("/api/fields", verifyToken, fieldController.getFields);
+
+/**
+ * Get a single field by field_id
+ * GET /api/fields/:field_id
+ * Headers: { Authorization: Bearer <token> }
+ */
+app.get("/api/fields/:field_id", verifyToken, fieldController.getFieldById);
+
+/**
+ * Update a field
+ * PUT /api/fields/:field_id
+ * Headers: { Authorization: Bearer <token> }
+ * Body: { name, crop_type, planting_date, harvest_date, farm_name, location, notes, tags, status }
+ */
+app.put("/api/fields/:field_id", verifyToken, fieldController.updateField);
+
+/**
+ * Delete a field
+ * DELETE /api/fields/:field_id
+ * Headers: { Authorization: Bearer <token> }
+ */
+app.delete("/api/fields/:field_id", verifyToken, fieldController.deleteField);
+
+console.log("✅ Field management routes registered");
+
+// ============================================
 // PUBLIC ROUTES (No Authentication Required)
 // ============================================
 
@@ -395,22 +443,33 @@ app.post("/api/field-analysis/time-series", verifyToken, async (req, res) => {
       });
     }
 
-    const { fieldBoundary, fieldId, startDate, endDate, intervalDays } =
-      req.body;
+    const { startDate, endDate, intervalDays } = req.body;
 
-    // Validate input
-    if (!fieldBoundary || !fieldId) {
+    // Resolve field boundary (from request or database)
+    let resolvedData;
+    try {
+      resolvedData = await resolveFieldBoundary(req.body, req.user.user_id);
+    } catch (error) {
       return res.status(400).json({
         success: false,
-        error: "Missing required fields: fieldBoundary and fieldId",
+        error: error.message,
       });
     }
 
+    const { fieldBoundary, fieldId, fromDatabase } = resolvedData;
+
+    // Validate field boundary type
     if (fieldBoundary.type !== "Polygon") {
       return res.status(400).json({
         success: false,
         error: "Only Polygon geometries are supported",
       });
+    }
+
+    if (fromDatabase) {
+      console.log(
+        `📍 Using field boundary from database for time-series ${fieldId}`
+      );
     }
 
     // Set default dates if not provided
@@ -464,21 +523,41 @@ app.post("/api/field-analysis", verifyToken, async (req, res) => {
       });
     }
 
-    const { fieldBoundary, fieldId, startDate, endDate } = req.body;
+    const { startDate, endDate, name, crop_type, farm_name, location } =
+      req.body;
 
-    // Validate input
-    if (!fieldBoundary || !fieldId) {
+    // Resolve field boundary (from request or database)
+    // This will auto-create a field with generated ID if fieldBoundary provided without fieldId
+    let resolvedData;
+    try {
+      resolvedData = await resolveFieldBoundary(req.body, req.user.user_id, {
+        autoCreate: true,
+        fieldMetadata: { name, crop_type, farm_name, location },
+      });
+    } catch (error) {
       return res.status(400).json({
         success: false,
-        error: "Missing required fields: fieldBoundary and fieldId",
+        error: error.message,
       });
     }
 
+    const { fieldBoundary, fieldId, fromDatabase, isNew } = resolvedData;
+
+    // Validate field boundary type
     if (fieldBoundary.type !== "Polygon") {
       return res.status(400).json({
         success: false,
         error: "Only Polygon geometries are supported",
       });
+    }
+
+    // Log source of boundary
+    if (isNew) {
+      console.log(`🆕 Created new field with auto-generated ID: ${fieldId}`);
+    } else if (fromDatabase) {
+      console.log(`📍 Using field boundary from database for ${fieldId}`);
+    } else {
+      console.log(`📍 Using field boundary from request for ${fieldId}`);
     }
 
     // Set default dates if not provided
@@ -567,7 +646,11 @@ app.post("/api/field-analysis", verifyToken, async (req, res) => {
     res.json({
       success: true,
       data: analysisResult,
-      message: "Field analysis completed successfully",
+      field_id: fieldId,
+      is_new_field: isNew || false,
+      message: isNew
+        ? `Field created with ID: ${fieldId}. Analysis completed successfully.`
+        : "Field analysis completed successfully",
       saved_to_db: dbInitialized,
     });
   } catch (error) {
@@ -1190,24 +1273,33 @@ app.post("/api/field-analysis/ndvi-chart", verifyToken, async (req, res) => {
       });
     }
 
-    const { fieldBoundary, fieldId, startDate, endDate, interval } = req.body;
+    const { startDate, endDate, interval } = req.body;
 
-    // Validate required fields
-    if (!fieldBoundary || !fieldId || !startDate || !endDate) {
+    // Validate required date fields
+    if (!startDate || !endDate) {
       return res.status(400).json({
         success: false,
-        error:
-          "Missing required fields: fieldBoundary, fieldId, startDate, endDate",
+        error: "Missing required fields: startDate, endDate",
       });
     }
 
-    // Validate field boundary
-    if (!fieldBoundary.type || !fieldBoundary.coordinates) {
+    // Resolve field boundary (from request or database)
+    let resolvedData;
+    try {
+      resolvedData = await resolveFieldBoundary(req.body, req.user.user_id);
+    } catch (error) {
       return res.status(400).json({
         success: false,
-        error:
-          "Invalid fieldBoundary format. Must be a GeoJSON Polygon or MultiPolygon",
+        error: error.message,
       });
+    }
+
+    const { fieldBoundary, fieldId, fromDatabase } = resolvedData;
+
+    if (fromDatabase) {
+      console.log(
+        `📍 Using field boundary from database for NDVI chart ${fieldId}`
+      );
     }
 
     // Validate dates
@@ -1267,23 +1359,25 @@ app.post(
         });
       }
 
-      const { fieldBoundary, fieldId, currentDate } = req.body;
+      const { currentDate } = req.body;
 
-      // Validate required fields
-      if (!fieldBoundary || !fieldId) {
+      // Resolve field boundary (from request or database)
+      let resolvedData;
+      try {
+        resolvedData = await resolveFieldBoundary(req.body, req.user.user_id);
+      } catch (error) {
         return res.status(400).json({
           success: false,
-          error: "Missing required fields: fieldBoundary, fieldId",
+          error: error.message,
         });
       }
 
-      // Validate field boundary
-      if (!fieldBoundary.type || !fieldBoundary.coordinates) {
-        return res.status(400).json({
-          success: false,
-          error:
-            "Invalid fieldBoundary format. Must be a GeoJSON Polygon or MultiPolygon",
-        });
+      const { fieldBoundary, fieldId, fromDatabase } = resolvedData;
+
+      if (fromDatabase) {
+        console.log(
+          `📍 Using field boundary from database for flood detection ${fieldId}`
+        );
       }
 
       console.log(`🌊 Detecting floods for field ${fieldId}`);
@@ -1325,16 +1419,33 @@ app.post(
         });
       }
 
-      const { fieldBoundary, fieldId, startDate, endDate, intervalDays } =
-        req.body;
+      const { startDate, endDate, intervalDays } = req.body;
 
-      // Validate required fields
-      if (!fieldBoundary || !fieldId || !startDate || !endDate) {
+      // Validate required date fields
+      if (!startDate || !endDate) {
         return res.status(400).json({
           success: false,
-          error:
-            "Missing required fields: fieldBoundary, fieldId, startDate, endDate",
+          error: "Missing required fields: startDate, endDate",
         });
+      }
+
+      // Resolve field boundary (from request or database)
+      let resolvedData;
+      try {
+        resolvedData = await resolveFieldBoundary(req.body, req.user.user_id);
+      } catch (error) {
+        return res.status(400).json({
+          success: false,
+          error: error.message,
+        });
+      }
+
+      const { fieldBoundary, fieldId, fromDatabase } = resolvedData;
+
+      if (fromDatabase) {
+        console.log(
+          `📍 Using field boundary from database for flood time-series ${fieldId}`
+        );
       }
 
       // Validate field boundary
@@ -1401,15 +1512,33 @@ app.post("/api/crop-analysis/track-growth", verifyToken, async (req, res) => {
       });
     }
 
-    const { fieldBoundary, fieldId, cropType, plantingDate, currentDate } =
-      req.body;
+    const { cropType, plantingDate, currentDate } = req.body;
 
-    if (!fieldBoundary || !fieldId || !cropType || !plantingDate) {
+    // Validate required fields
+    if (!cropType || !plantingDate) {
       return res.status(400).json({
         success: false,
-        error:
-          "Missing required fields: fieldBoundary, fieldId, cropType, plantingDate",
+        error: "Missing required fields: cropType, plantingDate",
       });
+    }
+
+    // Resolve field boundary (from request or database)
+    let resolvedData;
+    try {
+      resolvedData = await resolveFieldBoundary(req.body, req.user.user_id);
+    } catch (error) {
+      return res.status(400).json({
+        success: false,
+        error: error.message,
+      });
+    }
+
+    const { fieldBoundary, fieldId, fromDatabase } = resolvedData;
+
+    if (fromDatabase) {
+      console.log(
+        `📍 Using field boundary from database for crop growth tracking ${fieldId}`
+      );
     }
 
     console.log(`🌱 Tracking crop growth for ${cropType} in field ${fieldId}`);
@@ -1601,14 +1730,33 @@ app.post("/api/crop-analysis/detect-stress", verifyToken, async (req, res) => {
       });
     }
 
-    const { fieldBoundary, fieldId, startDate, endDate } = req.body;
+    const { startDate, endDate } = req.body;
 
-    if (!fieldBoundary || !fieldId || !startDate || !endDate) {
+    // Validate required date fields
+    if (!startDate || !endDate) {
       return res.status(400).json({
         success: false,
-        error:
-          "Missing required fields: fieldBoundary, fieldId, startDate, endDate",
+        error: "Missing required fields: startDate, endDate",
       });
+    }
+
+    // Resolve field boundary (from request or database)
+    let resolvedData;
+    try {
+      resolvedData = await resolveFieldBoundary(req.body, req.user.user_id);
+    } catch (error) {
+      return res.status(400).json({
+        success: false,
+        error: error.message,
+      });
+    }
+
+    const { fieldBoundary, fieldId, fromDatabase } = resolvedData;
+
+    if (fromDatabase) {
+      console.log(
+        `📍 Using field boundary from database for stress detection ${fieldId}`
+      );
     }
 
     console.log(`🔍 Detecting stress for field ${fieldId}`);
@@ -1840,15 +1988,25 @@ app.post("/api/field-analysis/zone-image", verifyToken, async (req, res) => {
       });
     }
 
-    const { fieldBoundary, fieldId, date, gridSize, cropType } = req.body;
+    const { date, gridSize, cropType } = req.body;
 
-    // Validate required fields
-    if (!fieldBoundary || !fieldId) {
+    // Resolve field boundary (from request or database)
+    let resolvedData;
+    try {
+      resolvedData = await resolveFieldBoundary(req.body, req.user.user_id);
+    } catch (error) {
       return res.status(400).json({
         success: false,
-        error:
-          "Missing required fields: fieldBoundary and fieldId are required",
+        error: error.message,
       });
+    }
+
+    const { fieldBoundary, fieldId, fromDatabase } = resolvedData;
+
+    if (fromDatabase) {
+      console.log(
+        `📍 Using field boundary from database for zone image ${fieldId}`
+      );
     }
 
     // Use current date if not provided

@@ -54,6 +54,28 @@
       "total_images": 17,
       "storage_path": "/Users/luminous_imteaj/Documents/officeWork/Agrovue/gee-agrovue-node/public/time-series-images/FIELD-20251030-79C392_1761803203458",
       "created_at": "2025-10-30T05:48:53.093Z"
+    },
+    {
+      "series_id": "FIELD-20251030-79C392_1761806610757",
+      "field_id": "FIELD-20251030-79C392",
+      "start_date": "2023-10-30",
+      "end_date": "2025-10-30",
+      "interval_type": "monthly",
+      "total_data_points": 17,
+      "total_images": 17,
+      "storage_path": "/Users/luminous_imteaj/Documents/officeWork/Agrovue/gee-agrovue-node/public/time-series-images/FIELD-20251030-79C392_1761806610757",
+      "created_at": "2025-10-30T06:43:54.346Z"
+    },
+    {
+      "series_id": "FIELD-20251030-79C392_1761806758356",
+      "field_id": "FIELD-20251030-79C392",
+      "start_date": "2023-10-30",
+      "end_date": "2025-10-30",
+      "interval_type": "monthly",
+      "total_data_points": 17,
+      "total_images": 17,
+      "storage_path": "/Users/luminous_imteaj/Documents/officeWork/Agrovue/gee-agrovue-node/public/time-series-images/FIELD-20251030-79C392_1761806758356",
+      "created_at": "2025-10-30T06:46:18.402Z"
     }
   ]
 }

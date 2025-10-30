@@ -28,6 +28,7 @@ const NDVIImageGenerationService = require("./services/ndviImageGenerationServic
 const NDVILegendService = require("./services/ndviLegendService");
 const NDVIChartService = require("./services/ndviChartService");
 const FloodDetectionService = require("./services/floodDetectionService");
+const DroughtDetectionService = require("./services/droughtDetectionService");
 const CropGrowthTrackingService = require("./services/cropGrowthTrackingService");
 const CropAnalyticsService = require("./services/cropAnalyticsService");
 const CropPredictionService = require("./services/cropPredictionService");
@@ -52,6 +53,7 @@ let ndviImageGenerationService;
 let ndviLegendService;
 let ndviChartService;
 let floodDetectionService;
+let droughtDetectionService;
 let cropGrowthTrackingService;
 let cropAnalyticsService;
 let cropPredictionService;
@@ -183,6 +185,9 @@ function initializeAllServices() {
     // Initialize flood detection service
     floodDetectionService = new FloodDetectionService(ee);
     console.log("✅ Flood Detection Service initialized");
+    // Initialize drought detection service
+    droughtDetectionService = new DroughtDetectionService(ee);
+    console.log("✅ Drought Detection Service initialized");
     // Initialize crop growth tracking service
     cropGrowthTrackingService = new CropGrowthTrackingService(ee);
     console.log("✅ Crop Growth Tracking Service initialized");
@@ -1605,6 +1610,169 @@ app.post(
       res.json(timeSeriesData);
     } catch (error) {
       console.error("Error generating flood time series:", error);
+      res.status(500).json({
+        success: false,
+        error: error.message,
+      });
+    }
+  }
+);
+
+/**
+ * Drought Detection API
+ * POST /api/field-analysis/drought-detection
+ *
+ * Detects current drought status using multiple indicators:
+ * - NDVI (vegetation stress)
+ * - Precipitation (rainfall deficit)
+ * - Soil Moisture (water availability)
+ * - Evapotranspiration (water demand)
+ * - Temperature (heat stress)
+ */
+app.post(
+  "/api/field-analysis/drought-detection",
+  verifyToken,
+  async (req, res) => {
+    try {
+      if (!droughtDetectionService) {
+        return res.status(503).json({
+          success: false,
+          error: "Drought Detection Service not initialized",
+        });
+      }
+
+      const { currentDate } = req.body;
+
+      // Resolve field boundary (from request or database)
+      let resolvedData;
+      try {
+        resolvedData = await resolveFieldBoundary(req.body, req.user.user_id);
+      } catch (error) {
+        return res.status(400).json({
+          success: false,
+          error: error.message,
+        });
+      }
+
+      const { fieldBoundary, fieldId, fromDatabase } = resolvedData;
+
+      if (fromDatabase) {
+        console.log(
+          `📍 Using field boundary from database for drought detection ${fieldId}`
+        );
+      }
+
+      console.log(`🌵 Detecting drought for field ${fieldId}`);
+
+      // Detect drought
+      const droughtData = await droughtDetectionService.detectDrought(
+        fieldBoundary,
+        fieldId,
+        currentDate
+      );
+
+      res.json(droughtData);
+    } catch (error) {
+      console.error("Error detecting drought:", error);
+      res.status(500).json({
+        success: false,
+        error: error.message,
+      });
+    }
+  }
+);
+
+/**
+ * Drought Time Series API
+ * POST /api/field-analysis/drought-time-series
+ *
+ * Generates drought time series data for a field
+ * Shows drought index changes over time
+ */
+app.post(
+  "/api/field-analysis/drought-time-series",
+  verifyToken,
+  async (req, res) => {
+    try {
+      if (!droughtDetectionService) {
+        return res.status(503).json({
+          success: false,
+          error: "Drought Detection Service not initialized",
+        });
+      }
+
+      const { startDate, endDate, intervalDays } = req.body;
+
+      // Validate required date fields
+      if (!startDate || !endDate) {
+        return res.status(400).json({
+          success: false,
+          error: "Missing required fields: startDate, endDate",
+        });
+      }
+
+      // Resolve field boundary (from request or database)
+      let resolvedData;
+      try {
+        resolvedData = await resolveFieldBoundary(req.body, req.user.user_id);
+      } catch (error) {
+        return res.status(400).json({
+          success: false,
+          error: error.message,
+        });
+      }
+
+      const { fieldBoundary, fieldId, fromDatabase } = resolvedData;
+
+      if (fromDatabase) {
+        console.log(
+          `📍 Using field boundary from database for drought time-series ${fieldId}`
+        );
+      }
+
+      // Validate field boundary
+      if (!fieldBoundary.type || !fieldBoundary.coordinates) {
+        return res.status(400).json({
+          success: false,
+          error:
+            "Invalid fieldBoundary format. Must be a GeoJSON Polygon or MultiPolygon",
+        });
+      }
+
+      // Validate dates
+      const start = new Date(startDate);
+      const end = new Date(endDate);
+      if (isNaN(start.getTime()) || isNaN(end.getTime())) {
+        return res.status(400).json({
+          success: false,
+          error: "Invalid date format. Use YYYY-MM-DD",
+        });
+      }
+
+      if (start >= end) {
+        return res.status(400).json({
+          success: false,
+          error: "startDate must be before endDate",
+        });
+      }
+
+      console.log(
+        `📊 Generating drought time series for field ${fieldId} from ${startDate} to ${endDate}`
+      );
+
+      // Generate drought time series
+      const droughtTimeSeries =
+        await droughtDetectionService.generateDroughtTimeSeries(
+          fieldBoundary,
+          fieldId,
+          startDate,
+          endDate,
+          intervalDays || 30
+        );
+
+      res.json(droughtTimeSeries);
+    } catch (error) {
+      console.error("Error generating drought time series:", error);
       res.status(500).json({
         success: false,
         error: error.message,

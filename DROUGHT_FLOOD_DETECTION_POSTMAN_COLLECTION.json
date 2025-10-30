@@ -1,0 +1,299 @@
+{
+  "info": {
+    "name": "Drought & Flood Detection APIs",
+    "description": "Complete collection for Drought and Flood Detection APIs with field boundary resolution support",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+    "_postman_id": "drought-flood-detection-v1",
+    "version": "1.0.0"
+  },
+  "auth": {
+    "type": "bearer",
+    "bearer": [
+      {
+        "key": "token",
+        "value": "{{auth_token}}",
+        "type": "string"
+      }
+    ]
+  },
+  "variable": [
+    {
+      "key": "base_url",
+      "value": "http://localhost:3000",
+      "type": "string"
+    },
+    {
+      "key": "auth_token",
+      "value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...",
+      "type": "string"
+    },
+    {
+      "key": "field_id",
+      "value": "FIELD-20251030-79C392",
+      "type": "string"
+    }
+  ],
+  "item": [
+    {
+      "name": "Flood Detection",
+      "item": [
+        {
+          "name": "Flood Detection (with fieldId)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"fieldId\": \"{{field_id}}\",\n  \"currentDate\": \"2025-10-15\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/field-analysis/flood-detection",
+              "host": ["{{base_url}}"],
+              "path": ["api", "field-analysis", "flood-detection"]
+            },
+            "description": "Detects current flood status using fieldId only (recommended)"
+          },
+          "response": [
+            {
+              "name": "Success Response",
+              "originalRequest": {
+                "method": "POST",
+                "header": [],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"fieldId\": \"FIELD-20251030-79C392\",\n  \"currentDate\": \"2025-10-15\"\n}"
+                },
+                "url": {
+                  "raw": "{{base_url}}/api/field-analysis/flood-detection",
+                  "host": ["{{base_url}}"],
+                  "path": ["api", "field-analysis", "flood-detection"]
+                }
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [],
+              "cookie": [],
+              "body": "{\n  \"success\": true,\n  \"field_id\": \"FIELD-20251030-79C392\",\n  \"current_flood\": {\n    \"flood_detected\": false,\n    \"severity\": \"none\",\n    \"confidence\": \"high\",\n    \"water_percentage\": 2.5\n  }\n}"
+            }
+          ]
+        },
+        {
+          "name": "Flood Detection (with fieldBoundary)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"fieldBoundary\": {\n    \"type\": \"Polygon\",\n    \"coordinates\": [\n      [\n        [90.3563, 23.7461],\n        [90.3663, 23.7461],\n        [90.3663, 23.7561],\n        [90.3563, 23.7561],\n        [90.3563, 23.7461]\n      ]\n    ]\n  },\n  \"currentDate\": \"2025-10-15\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/field-analysis/flood-detection",
+              "host": ["{{base_url}}"],
+              "path": ["api", "field-analysis", "flood-detection"]
+            },
+            "description": "Detects current flood status using fieldBoundary (creates new field)"
+          }
+        },
+        {
+          "name": "Flood Time Series (with fieldId)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"fieldId\": \"{{field_id}}\",\n  \"startDate\": \"2024-01-01\",\n  \"endDate\": \"2025-10-26\",\n  \"intervalDays\": 30\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/field-analysis/flood-time-series",
+              "host": ["{{base_url}}"],
+              "path": ["api", "field-analysis", "flood-time-series"]
+            },
+            "description": "Generates flood time series data using fieldId only"
+          },
+          "response": [
+            {
+              "name": "Success Response",
+              "originalRequest": {
+                "method": "POST",
+                "header": [],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"fieldId\": \"FIELD-20251030-79C392\",\n  \"startDate\": \"2024-01-01\",\n  \"endDate\": \"2025-10-26\"\n}"
+                },
+                "url": {
+                  "raw": "{{base_url}}/api/field-analysis/flood-time-series",
+                  "host": ["{{base_url}}"],
+                  "path": ["api", "field-analysis", "flood-time-series"]
+                }
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [],
+              "cookie": [],
+              "body": "{\n  \"success\": true,\n  \"field_id\": \"FIELD-20251030-79C392\",\n  \"time_series\": [\n    {\n      \"date\": \"2024-01-01\",\n      \"flood_detected\": false,\n      \"severity\": \"none\"\n    }\n  ]\n}"
+            }
+          ]
+        },
+        {
+          "name": "Flood Time Series (with fieldBoundary)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"fieldBoundary\": {\n    \"type\": \"Polygon\",\n    \"coordinates\": [\n      [\n        [90.3563, 23.7461],\n        [90.3663, 23.7461],\n        [90.3663, 23.7561],\n        [90.3563, 23.7561],\n        [90.3563, 23.7461]\n      ]\n    ]\n  },\n  \"startDate\": \"2024-01-01\",\n  \"endDate\": \"2025-10-26\",\n  \"intervalDays\": 30\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/field-analysis/flood-time-series",
+              "host": ["{{base_url}}"],
+              "path": ["api", "field-analysis", "flood-time-series"]
+            },
+            "description": "Generates flood time series data using fieldBoundary"
+          }
+        }
+      ],
+      "description": "Flood detection and time series APIs"
+    },
+    {
+      "name": "Drought Detection",
+      "item": [
+        {
+          "name": "Drought Detection (with fieldId)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"fieldId\": \"{{field_id}}\",\n  \"currentDate\": \"2025-10-15\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/field-analysis/drought-detection",
+              "host": ["{{base_url}}"],
+              "path": ["api", "field-analysis", "drought-detection"]
+            },
+            "description": "Detects current drought status using fieldId only (recommended)"
+          },
+          "response": [
+            {
+              "name": "Success Response",
+              "originalRequest": {
+                "method": "POST",
+                "header": [],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"fieldId\": \"FIELD-20251030-79C392\",\n  \"currentDate\": \"2025-10-15\"\n}"
+                },
+                "url": {
+                  "raw": "{{base_url}}/api/field-analysis/drought-detection",
+                  "host": ["{{base_url}}"],
+                  "path": ["api", "field-analysis", "drought-detection"]
+                }
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [],
+              "cookie": [],
+              "body": "{\n  \"success\": true,\n  \"field_id\": \"FIELD-20251030-79C392\",\n  \"drought_status\": {\n    \"drought_detected\": true,\n    \"severity\": \"moderate\"\n  },\n  \"combined_drought_index\": {\n    \"index\": 50,\n    \"confidence\": \"medium\"\n  }\n}"
+            }
+          ]
+        },
+        {
+          "name": "Drought Detection (with fieldBoundary)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"fieldBoundary\": {\n    \"type\": \"Polygon\",\n    \"coordinates\": [\n      [\n        [90.3563, 23.7461],\n        [90.3663, 23.7461],\n        [90.3663, 23.7561],\n        [90.3563, 23.7561],\n        [90.3563, 23.7461]\n      ]\n    ]\n  },\n  \"currentDate\": \"2025-10-15\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/field-analysis/drought-detection",
+              "host": ["{{base_url}}"],
+              "path": ["api", "field-analysis", "drought-detection"]
+            },
+            "description": "Detects current drought status using fieldBoundary (creates new field)"
+          }
+        },
+        {
+          "name": "Drought Time Series (with fieldId)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"fieldId\": \"{{field_id}}\",\n  \"startDate\": \"2024-01-01\",\n  \"endDate\": \"2025-10-26\",\n  \"intervalDays\": 30\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/field-analysis/drought-time-series",
+              "host": ["{{base_url}}"],
+              "path": ["api", "field-analysis", "drought-time-series"]
+            },
+            "description": "Generates drought time series data using fieldId only"
+          }
+        },
+        {
+          "name": "Drought Time Series (with fieldBoundary)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"fieldBoundary\": {\n    \"type\": \"Polygon\",\n    \"coordinates\": [\n      [\n        [90.3563, 23.7461],\n        [90.3663, 23.7461],\n        [90.3663, 23.7561],\n        [90.3563, 23.7561],\n        [90.3563, 23.7461]\n      ]\n    ]\n  },\n  \"startDate\": \"2024-01-01\",\n  \"endDate\": \"2025-10-26\",\n  \"intervalDays\": 30\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/field-analysis/drought-time-series",
+              "host": ["{{base_url}}"],
+              "path": ["api", "field-analysis", "drought-time-series"]
+            },
+            "description": "Generates drought time series data using fieldBoundary"
+          }
+        }
+      ],
+      "description": "Drought detection and time series APIs"
+    }
+  ]
+}
+

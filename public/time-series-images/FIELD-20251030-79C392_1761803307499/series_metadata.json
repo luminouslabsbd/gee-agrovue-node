@@ -1,0 +1,11 @@
+{
+  "series_id": "FIELD-20251030-79C392_1761803307499",
+  "field_id": "FIELD-20251030-79C392",
+  "start_date": "2023-10-30",
+  "end_date": "2025-10-30",
+  "interval_type": "monthly",
+  "total_data_points": 17,
+  "total_images": 17,
+  "storage_path": "/Users/luminous_imteaj/Documents/officeWork/Agrovue/gee-agrovue-node/public/time-series-images/FIELD-20251030-79C392_1761803307499",
+  "created_at": "2025-10-30T05:48:49.084Z"
+}

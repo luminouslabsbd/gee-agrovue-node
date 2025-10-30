@@ -58,13 +58,38 @@ let cropPredictionService;
 let cropChartService;
 let zoneImageGenerationService;
 
-async function initializeEarthEngine() {
+async function initializeEarthEngine(retryCount = 0, maxRetries = 3) {
   try {
     ee = require("@google/earthengine");
 
     // Load service account credentials
     const credentialsPath = path.join(__dirname, "credentials.json");
+
+    if (!fs.existsSync(credentialsPath)) {
+      console.error("❌ credentials.json not found at:", credentialsPath);
+      console.error(
+        "⚠️ Earth Engine will not be available. Please add credentials.json"
+      );
+      return;
+    }
+
     const credentials = JSON.parse(fs.readFileSync(credentialsPath, "utf8"));
+
+    // Validate credentials structure
+    if (!credentials.private_key || !credentials.client_email) {
+      console.error(
+        "❌ Invalid credentials.json structure. Missing private_key or client_email"
+      );
+      return;
+    }
+
+    console.log(
+      `🔄 Initializing Earth Engine (Attempt ${retryCount + 1}/${
+        maxRetries + 1
+      })...`
+    );
+    console.log(`📧 Service Account: ${credentials.client_email}`);
+    console.log(`🔑 Project ID: ${credentials.project_id}`);
 
     // Initialize Earth Engine with service account credentials
     ee.data.authenticateViaPrivateKey(
@@ -79,71 +104,103 @@ async function initializeEarthEngine() {
           () => {
             console.log("✅ Earth Engine initialized successfully");
             eeInitialized = true;
-            // Initialize field analysis service
-            fieldAnalysisService = new FieldAnalysisService(ee);
-            console.log("✅ Field Analysis Service initialized");
-            // Initialize NDVI time series service
-            ndviTimeSeriesService = new NDVITimeSeriesService(ee);
-            console.log("✅ NDVI Time Series Service initialized");
-            // Initialize NDVI time series map service
-            ndviTimeSeriesMapService = new NDVITimeSeriesMapService(ee);
-            console.log("✅ NDVI Time Series Map Service initialized");
-            // Initialize NDVI 2-year time series service
-            ndviTwoYearTimeSeriesService = new NDVITwoYearTimeSeriesService(ee);
-            console.log("✅ NDVI 2-Year Time Series Service initialized");
-            // Initialize field data update service
-            fieldDataUpdateService = new FieldDataUpdateService(
-              ee,
-              ndviTwoYearTimeSeriesService
-            );
-            console.log("✅ Field Data Update Service initialized");
-            // Initialize NDVI image export service
-            ndviImageExportService = new NDVIImageExportService(ee);
-            console.log("✅ NDVI Image Export Service initialized");
-            // Initialize time series image storage service
-            timeSeriesImageStorageService = new TimeSeriesImageStorageService(
-              ee
-            );
-            console.log("✅ Time Series Image Storage Service initialized");
-            // Initialize NDVI image generation service
-            ndviImageGenerationService = new NDVIImageGenerationService(ee);
-            console.log("✅ NDVI Image Generation Service initialized");
-            // Initialize NDVI legend service
-            ndviLegendService = new NDVILegendService();
-            console.log("✅ NDVI Legend Service initialized");
-            // Initialize NDVI chart service
-            ndviChartService = new NDVIChartService(ee);
-            console.log("✅ NDVI Chart Service initialized");
-            // Initialize flood detection service
-            floodDetectionService = new FloodDetectionService(ee);
-            console.log("✅ Flood Detection Service initialized");
-            // Initialize crop growth tracking service
-            cropGrowthTrackingService = new CropGrowthTrackingService(ee);
-            console.log("✅ Crop Growth Tracking Service initialized");
-            // Initialize crop analytics service
-            cropAnalyticsService = new CropAnalyticsService(ee);
-            console.log("✅ Crop Analytics Service initialized");
-            // Initialize crop prediction service
-            cropPredictionService = new CropPredictionService(ee);
-            console.log("✅ Crop Prediction Service initialized");
-            // Initialize crop chart service
-            cropChartService = new CropChartService(ee);
-            console.log("✅ Crop Chart Service initialized");
-            // Initialize zone image generation service
-            zoneImageGenerationService = new ZoneImageGenerationService(ee);
-            console.log("✅ Zone Image Generation Service initialized");
+            initializeAllServices();
           },
           (error) => {
             console.error("❌ Earth Engine initialization error:", error);
+            if (retryCount < maxRetries) {
+              console.log(`🔄 Retrying Earth Engine initialization...`);
+              setTimeout(
+                () => initializeEarthEngine(retryCount + 1, maxRetries),
+                2000
+              );
+            } else {
+              console.error(
+                "❌ Max retries reached. Earth Engine initialization failed."
+              );
+            }
           }
         );
       },
       (error) => {
         console.error("❌ Authentication error:", error);
+        if (retryCount < maxRetries) {
+          console.log(`🔄 Retrying authentication...`);
+          setTimeout(
+            () => initializeEarthEngine(retryCount + 1, maxRetries),
+            2000
+          );
+        } else {
+          console.error("❌ Max retries reached. Authentication failed.");
+        }
       }
     );
   } catch (error) {
-    console.error("Error initializing Earth Engine:", error);
+    console.error("❌ Error initializing Earth Engine:", error);
+    if (retryCount < maxRetries) {
+      console.log(`🔄 Retrying after error...`);
+      setTimeout(() => initializeEarthEngine(retryCount + 1, maxRetries), 2000);
+    }
+  }
+}
+
+// Initialize all services after EE is ready
+function initializeAllServices() {
+  try {
+    // Initialize field analysis service
+    fieldAnalysisService = new FieldAnalysisService(ee);
+    console.log("✅ Field Analysis Service initialized");
+    // Initialize NDVI time series service
+    ndviTimeSeriesService = new NDVITimeSeriesService(ee);
+    console.log("✅ NDVI Time Series Service initialized");
+    // Initialize NDVI time series map service
+    ndviTimeSeriesMapService = new NDVITimeSeriesMapService(ee);
+    console.log("✅ NDVI Time Series Map Service initialized");
+    // Initialize NDVI 2-year time series service
+    ndviTwoYearTimeSeriesService = new NDVITwoYearTimeSeriesService(ee);
+    console.log("✅ NDVI 2-Year Time Series Service initialized");
+    // Initialize field data update service
+    fieldDataUpdateService = new FieldDataUpdateService(
+      ee,
+      ndviTwoYearTimeSeriesService
+    );
+    console.log("✅ Field Data Update Service initialized");
+    // Initialize NDVI image export service
+    ndviImageExportService = new NDVIImageExportService(ee);
+    console.log("✅ NDVI Image Export Service initialized");
+    // Initialize time series image storage service
+    timeSeriesImageStorageService = new TimeSeriesImageStorageService(ee);
+    console.log("✅ Time Series Image Storage Service initialized");
+    // Initialize NDVI image generation service
+    ndviImageGenerationService = new NDVIImageGenerationService(ee);
+    console.log("✅ NDVI Image Generation Service initialized");
+    // Initialize NDVI legend service
+    ndviLegendService = new NDVILegendService();
+    console.log("✅ NDVI Legend Service initialized");
+    // Initialize NDVI chart service
+    ndviChartService = new NDVIChartService(ee);
+    console.log("✅ NDVI Chart Service initialized");
+    // Initialize flood detection service
+    floodDetectionService = new FloodDetectionService(ee);
+    console.log("✅ Flood Detection Service initialized");
+    // Initialize crop growth tracking service
+    cropGrowthTrackingService = new CropGrowthTrackingService(ee);
+    console.log("✅ Crop Growth Tracking Service initialized");
+    // Initialize crop analytics service
+    cropAnalyticsService = new CropAnalyticsService(ee);
+    console.log("✅ Crop Analytics Service initialized");
+    // Initialize crop prediction service
+    cropPredictionService = new CropPredictionService(ee);
+    console.log("✅ Crop Prediction Service initialized");
+    // Initialize crop chart service
+    cropChartService = new CropChartService(ee);
+    console.log("✅ Crop Chart Service initialized");
+    // Initialize zone image generation service
+    zoneImageGenerationService = new ZoneImageGenerationService(ee);
+    console.log("✅ Zone Image Generation Service initialized");
+    console.log("🎉 All services initialized successfully!");
+  } catch (error) {
+    console.error("❌ Error initializing services:", error);
   }
 }
 
@@ -376,15 +433,25 @@ app.post(
         });
       }
 
-      const { fieldBoundary, fieldId, startDate, endDate, intervalDays } =
-        req.body;
+      const { startDate, endDate, intervalDays } = req.body;
 
-      // Validate input
-      if (!fieldBoundary || !fieldId) {
+      // Resolve field boundary (from request or database)
+      let resolvedData;
+      try {
+        resolvedData = await resolveFieldBoundary(req.body, req.user.user_id);
+      } catch (error) {
         return res.status(400).json({
           success: false,
-          error: "Missing required fields: fieldBoundary and fieldId",
+          error: error.message,
         });
+      }
+
+      const { fieldBoundary, fieldId, fromDatabase } = resolvedData;
+
+      if (fromDatabase) {
+        console.log(
+          `📍 Using field boundary from database for time-series map ${fieldId}`
+        );
       }
 
       if (fieldBoundary.type !== "Polygon") {
@@ -676,14 +743,25 @@ app.post(
         });
       }
 
-      const { fieldBoundary, fieldId, intervalType } = req.body;
+      const { intervalType } = req.body;
 
-      // Validate input
-      if (!fieldBoundary || !fieldId) {
+      // Resolve field boundary (from request or database)
+      let resolvedData;
+      try {
+        resolvedData = await resolveFieldBoundary(req.body, req.user.user_id);
+      } catch (error) {
         return res.status(400).json({
           success: false,
-          error: "Missing required fields: fieldBoundary and fieldId",
+          error: error.message,
         });
+      }
+
+      const { fieldBoundary, fieldId, fromDatabase } = resolvedData;
+
+      if (fromDatabase) {
+        console.log(
+          `📍 Using field boundary from database for 2-year time series ${fieldId}`
+        );
       }
 
       if (fieldBoundary.type !== "Polygon") {
@@ -742,14 +820,33 @@ app.post("/api/field-analysis/field-image", verifyToken, async (req, res) => {
       });
     }
 
-    const { fieldBoundary, fieldId, date } = req.body;
+    const { date } = req.body;
 
-    // Validate input
-    if (!fieldBoundary || !fieldId || !date) {
+    // Validate date field
+    if (!date) {
       return res.status(400).json({
         success: false,
-        error: "Missing required fields: fieldBoundary, fieldId, and date",
+        error: "Missing required field: date",
       });
+    }
+
+    // Resolve field boundary (from request or database)
+    let resolvedData;
+    try {
+      resolvedData = await resolveFieldBoundary(req.body, req.user.user_id);
+    } catch (error) {
+      return res.status(400).json({
+        success: false,
+        error: error.message,
+      });
+    }
+
+    const { fieldBoundary, fieldId, fromDatabase } = resolvedData;
+
+    if (fromDatabase) {
+      console.log(
+        `📍 Using field boundary from database for field image ${fieldId}`
+      );
     }
 
     if (fieldBoundary.type !== "Polygon") {
@@ -947,13 +1044,32 @@ app.post(
         });
       }
 
-      const { fieldBoundary, fieldId, date } = req.body;
+      const { date } = req.body;
 
-      if (!fieldBoundary || !fieldId || !date) {
+      if (!date) {
         return res.status(400).json({
           success: false,
-          error: "Missing required parameters: fieldBoundary, fieldId, date",
+          error: "Missing required field: date",
         });
+      }
+
+      // Resolve field boundary (from request or database)
+      let resolvedData;
+      try {
+        resolvedData = await resolveFieldBoundary(req.body, req.user.user_id);
+      } catch (error) {
+        return res.status(400).json({
+          success: false,
+          error: error.message,
+        });
+      }
+
+      const { fieldBoundary, fieldId, fromDatabase } = resolvedData;
+
+      if (fromDatabase) {
+        console.log(
+          `📍 Using field boundary from database for NDVI export ${fieldId}`
+        );
       }
 
       const result = await ndviImageExportService.exportAndStoreNDVIImage(
@@ -1666,6 +1782,7 @@ app.post("/api/crop-analysis/performance", verifyToken, async (req, res) => {
  * POST /api/crop-analysis/estimate-yield
  *
  * Estimate crop yield based on NDVI
+ * Supports both fieldBoundary and fieldId patterns
  */
 app.post("/api/crop-analysis/estimate-yield", verifyToken, async (req, res) => {
   try {
@@ -1679,26 +1796,36 @@ app.post("/api/crop-analysis/estimate-yield", verifyToken, async (req, res) => {
     const { fieldBoundary, fieldId, cropType, startDate, endDate, fieldArea } =
       req.body;
 
-    if (
-      !fieldBoundary ||
-      !fieldId ||
-      !cropType ||
-      !startDate ||
-      !endDate ||
-      !fieldArea
-    ) {
+    // Validate required fields
+    if (!cropType || !startDate || !endDate || !fieldArea) {
       return res.status(400).json({
         success: false,
         error:
-          "Missing required fields: fieldBoundary, fieldId, cropType, startDate, endDate, fieldArea",
+          "Missing required fields: cropType, startDate, endDate, fieldArea. Either fieldBoundary or fieldId is also required.",
       });
     }
 
-    console.log(`🌾 Estimating yield for ${cropType} in field ${fieldId}`);
+    // Resolve field boundary (supports both fieldBoundary and fieldId patterns)
+    const { fieldBoundary: resolvedBoundary, fieldId: resolvedFieldId } =
+      await resolveFieldBoundary({ fieldBoundary, fieldId }, req.user.user_id, {
+        autoCreate: false,
+      });
+
+    if (!resolvedBoundary) {
+      return res.status(400).json({
+        success: false,
+        error:
+          "Field boundary not found. Provide either fieldBoundary or valid fieldId.",
+      });
+    }
+
+    console.log(
+      `🌾 Estimating yield for ${cropType} in field ${resolvedFieldId}`
+    );
 
     const yieldData = await cropAnalyticsService.estimateYield(
-      fieldBoundary,
-      fieldId,
+      resolvedBoundary,
+      resolvedFieldId,
       cropType,
       startDate,
       endDate,
@@ -2109,9 +2236,11 @@ app.get("/api/field-analysis/zone-images", (req, res) => {
 // Health check endpoint
 app.get("/api/health", (_, res) => {
   res.json({
+    success: true,
     status: "ok",
     message: "Server is running",
     earthEngineInitialized: eeInitialized,
+    timestamp: new Date().toISOString(),
   });
 });
 

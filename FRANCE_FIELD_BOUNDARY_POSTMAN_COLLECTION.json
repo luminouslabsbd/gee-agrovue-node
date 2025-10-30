@@ -1,0 +1,345 @@
+{
+  "info": {
+    "name": "France Field Boundary - Complete API Collection",
+    "description": "Complete API collection with France field boundary (Burgundy Region)",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+    "version": "1.0.0"
+  },
+  "item": [
+    {
+      "name": "🔐 Authentication",
+      "item": [
+        {
+          "name": "Login (Admin)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"admin@agrovue.com\",\n  \"password\": \"Admin@123456\"\n}"
+            },
+            "url": {
+              "raw": "http://localhost:3000/api/auth/login",
+              "protocol": "http",
+              "host": ["localhost"],
+              "port": "3000",
+              "path": ["api", "auth", "login"]
+            }
+          },
+          "response": [
+            {
+              "name": "Success Response",
+              "originalRequest": {
+                "method": "POST",
+                "header": [],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\"email\":\"admin@agrovue.com\",\"password\":\"Admin@123456\"}"
+                },
+                "url": {
+                  "raw": "http://localhost:3000/api/auth/login",
+                  "protocol": "http",
+                  "host": ["localhost"],
+                  "port": "3000",
+                  "path": ["api", "auth", "login"]
+                }
+              },
+              "status": "OK",
+              "code": 200,
+              "header": [],
+              "body": "{\n  \"success\": true,\n  \"data\": {\n    \"user_id\": \"user_9814056a-5297-41fc-8eb6-a03e30fd75cf\",\n    \"email\": \"admin@agrovue.com\",\n    \"role\": \"admin\",\n    \"token\": \"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...\"\n  }\n}"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "🌾 Field Management",
+      "item": [
+        {
+          "name": "Create Field (France Boundary)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{authToken}}"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"fieldBoundary\": {\n    \"type\": \"Polygon\",\n    \"coordinates\": [\n      [\n        [1.888082027435303, 46.59760650248566],\n        [1.8881249427795412, 46.597400086795304],\n        [1.8931889533996584, 46.597060973597],\n        [1.893467903137207, 46.59709046178544],\n        [1.894798278808594, 46.5988154928816],\n        [1.8962574005126955, 46.60012765924723],\n        [1.8965363502502444, 46.600805845136996],\n        [1.8947553634643557, 46.60115967788351],\n        [1.8942832946777346, 46.60077635897047],\n        [1.8939614295959475, 46.600923789642586],\n        [1.8931460380554201, 46.60132185045341],\n        [1.8914079666137698, 46.60076161588119],\n        [1.8895411491394045, 46.59965587275203],\n        [1.8886613845825198, 46.598564850747714],\n        [1.888082027435303, 46.59760650248566]\n      ]\n    ]\n  },\n  \"name\": \"France Field - Burgundy\",\n  \"crop_type\": \"wheat\",\n  \"farm_name\": \"Test Farm France\",\n  \"location\": \"Burgundy, France\"\n}"
+            },
+            "url": {
+              "raw": "http://localhost:3000/api/fields",
+              "protocol": "http",
+              "host": ["localhost"],
+              "port": "3000",
+              "path": ["api", "fields"]
+            }
+          },
+          "response": [
+            {
+              "name": "Success Response",
+              "status": "Created",
+              "code": 201,
+              "body": "{\n  \"success\": true,\n  \"data\": {\n    \"field_id\": \"FIELD-20251030-0C9308\",\n    \"user_id\": \"user_9814056a-5297-41fc-8eb6-a03e30fd75cf\",\n    \"name\": \"France Field - Burgundy\",\n    \"crop_type\": \"wheat\",\n    \"farm_name\": \"Test Farm France\",\n    \"location\": \"Burgundy, France\",\n    \"fieldBoundary\": { \"type\": \"Polygon\", \"coordinates\": [...] },\n    \"created_at\": \"2025-10-30T12:34:56.000Z\"\n  }\n}"
+            }
+          ]
+        },
+        {
+          "name": "Get All Fields",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{authToken}}"
+              }
+            ],
+            "url": {
+              "raw": "http://localhost:3000/api/fields?limit=10&offset=0",
+              "protocol": "http",
+              "host": ["localhost"],
+              "port": "3000",
+              "path": ["api", "fields"],
+              "query": [
+                {
+                  "key": "limit",
+                  "value": "10"
+                },
+                {
+                  "key": "offset",
+                  "value": "0"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Get Field by ID",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{authToken}}"
+              }
+            ],
+            "url": {
+              "raw": "http://localhost:3000/api/fields/{{field_id}}",
+              "protocol": "http",
+              "host": ["localhost"],
+              "port": "3000",
+              "path": ["api", "fields", "{{field_id}}"]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "📊 Field Analysis",
+      "item": [
+        {
+          "name": "Field Analysis (NDVI)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{authToken}}"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"fieldBoundary\": {\n    \"type\": \"Polygon\",\n    \"coordinates\": [\n      [\n        [1.888082027435303, 46.59760650248566],\n        [1.8881249427795412, 46.597400086795304],\n        [1.8931889533996584, 46.597060973597],\n        [1.893467903137207, 46.59709046178544],\n        [1.894798278808594, 46.5988154928816],\n        [1.8962574005126955, 46.60012765924723],\n        [1.8965363502502444, 46.600805845136996],\n        [1.8947553634643557, 46.60115967788351],\n        [1.8942832946777346, 46.60077635897047],\n        [1.8939614295959475, 46.600923789642586],\n        [1.8931460380554201, 46.60132185045341],\n        [1.8914079666137698, 46.60076161588119],\n        [1.8895411491394045, 46.59965587275203],\n        [1.8886613845825198, 46.598564850747714],\n        [1.888082027435303, 46.59760650248566]\n      ]\n    ]\n  },\n  \"startDate\": \"2024-01-01\",\n  \"endDate\": \"2024-10-26\"\n}"
+            },
+            "url": {
+              "raw": "http://localhost:3000/api/field-analysis",
+              "protocol": "http",
+              "host": ["localhost"],
+              "port": "3000",
+              "path": ["api", "field-analysis"]
+            }
+          },
+          "response": [
+            {
+              "name": "Success Response",
+              "status": "OK",
+              "code": 200,
+              "body": "{\n  \"success\": true,\n  \"data\": {\n    \"field_id\": \"FIELD-20251030-0C9308\",\n    \"date\": \"2025-10-30\",\n    \"ndvi\": {\n      \"mean\": 0.45,\n      \"std\": 0.15,\n      \"min\": 0.2,\n      \"max\": 0.8,\n      \"median\": 0.48,\n      \"p25\": 0.35,\n      \"p75\": 0.58\n    },\n    \"quality\": {\n      \"cloud_cover\": 2.11,\n      \"valid_pixels\": 95.5\n    },\n    \"location\": \"Burgundy, France\"\n  }\n}"
+            }
+          ]
+        },
+        {
+          "name": "Time Series Analysis",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{authToken}}"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"fieldBoundary\": {\n    \"type\": \"Polygon\",\n    \"coordinates\": [\n      [\n        [1.888082027435303, 46.59760650248566],\n        [1.8881249427795412, 46.597400086795304],\n        [1.8931889533996584, 46.597060973597],\n        [1.893467903137207, 46.59709046178544],\n        [1.894798278808594, 46.5988154928816],\n        [1.8962574005126955, 46.60012765924723],\n        [1.8965363502502444, 46.600805845136996],\n        [1.8947553634643557, 46.60115967788351],\n        [1.8942832946777346, 46.60077635897047],\n        [1.8939614295959475, 46.600923789642586],\n        [1.8931460380554201, 46.60132185045341],\n        [1.8914079666137698, 46.60076161588119],\n        [1.8895411491394045, 46.59965587275203],\n        [1.8886613845825198, 46.598564850747714],\n        [1.888082027435303, 46.59760650248566]\n      ]\n    ]\n  },\n  \"startDate\": \"2024-01-01\",\n  \"endDate\": \"2024-10-26\",\n  \"intervalDays\": 30\n}"
+            },
+            "url": {
+              "raw": "http://localhost:3000/api/field-analysis/time-series",
+              "protocol": "http",
+              "host": ["localhost"],
+              "port": "3000",
+              "path": ["api", "field-analysis", "time-series"]
+            }
+          }
+        },
+        {
+          "name": "Flood Detection",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{authToken}}"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"fieldBoundary\": {\n    \"type\": \"Polygon\",\n    \"coordinates\": [\n      [\n        [1.888082027435303, 46.59760650248566],\n        [1.8881249427795412, 46.597400086795304],\n        [1.8931889533996584, 46.597060973597],\n        [1.893467903137207, 46.59709046178544],\n        [1.894798278808594, 46.5988154928816],\n        [1.8962574005126955, 46.60012765924723],\n        [1.8965363502502444, 46.600805845136996],\n        [1.8947553634643557, 46.60115967788351],\n        [1.8942832946777346, 46.60077635897047],\n        [1.8939614295959475, 46.600923789642586],\n        [1.8931460380554201, 46.60132185045341],\n        [1.8914079666137698, 46.60076161588119],\n        [1.8895411491394045, 46.59965587275203],\n        [1.8886613845825198, 46.598564850747714],\n        [1.888082027435303, 46.59760650248566]\n      ]\n    ]\n  },\n  \"currentDate\": \"2024-10-15\"\n}"
+            },
+            "url": {
+              "raw": "http://localhost:3000/api/field-analysis/flood-detection",
+              "protocol": "http",
+              "host": ["localhost"],
+              "port": "3000",
+              "path": ["api", "field-analysis", "flood-detection"]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "🌾 Crop Analysis",
+      "item": [
+        {
+          "name": "Track Crop Growth",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{authToken}}"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"fieldBoundary\": {\n    \"type\": \"Polygon\",\n    \"coordinates\": [\n      [\n        [1.888082027435303, 46.59760650248566],\n        [1.8881249427795412, 46.597400086795304],\n        [1.8931889533996584, 46.597060973597],\n        [1.893467903137207, 46.59709046178544],\n        [1.894798278808594, 46.5988154928816],\n        [1.8962574005126955, 46.60012765924723],\n        [1.8965363502502444, 46.600805845136996],\n        [1.8947553634643557, 46.60115967788351],\n        [1.8942832946777346, 46.60077635897047],\n        [1.8939614295959475, 46.600923789642586],\n        [1.8931460380554201, 46.60132185045341],\n        [1.8914079666137698, 46.60076161588119],\n        [1.8895411491394045, 46.59965587275203],\n        [1.8886613845825198, 46.598564850747714],\n        [1.888082027435303, 46.59760650248566]\n      ]\n    ]\n  },\n  \"cropType\": \"wheat\",\n  \"plantingDate\": \"2024-09-01\",\n  \"currentDate\": \"2024-10-15\"\n}"
+            },
+            "url": {
+              "raw": "http://localhost:3000/api/crop-analysis/track-growth",
+              "protocol": "http",
+              "host": ["localhost"],
+              "port": "3000",
+              "path": ["api", "crop-analysis", "track-growth"]
+            }
+          }
+        },
+        {
+          "name": "Estimate Crop Yield",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{authToken}}"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"fieldBoundary\": {\n    \"type\": \"Polygon\",\n    \"coordinates\": [\n      [\n        [1.888082027435303, 46.59760650248566],\n        [1.8881249427795412, 46.597400086795304],\n        [1.8931889533996584, 46.597060973597],\n        [1.893467903137207, 46.59709046178544],\n        [1.894798278808594, 46.5988154928816],\n        [1.8962574005126955, 46.60012765924723],\n        [1.8965363502502444, 46.600805845136996],\n        [1.8947553634643557, 46.60115967788351],\n        [1.8942832946777346, 46.60077635897047],\n        [1.8939614295959475, 46.600923789642586],\n        [1.8931460380554201, 46.60132185045341],\n        [1.8914079666137698, 46.60076161588119],\n        [1.8895411491394045, 46.59965587275203],\n        [1.8886613845825198, 46.598564850747714],\n        [1.888082027435303, 46.59760650248566]\n      ]\n    ]\n  },\n  \"cropType\": \"wheat\",\n  \"startDate\": \"2024-01-01\",\n  \"endDate\": \"2024-10-26\",\n  \"fieldArea\": 50\n}"
+            },
+            "url": {
+              "raw": "http://localhost:3000/api/crop-analysis/estimate-yield",
+              "protocol": "http",
+              "host": ["localhost"],
+              "port": "3000",
+              "path": ["api", "crop-analysis", "estimate-yield"]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "🛠️ System",
+      "item": [
+        {
+          "name": "Health Check",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "http://localhost:3000/api/health",
+              "protocol": "http",
+              "host": ["localhost"],
+              "port": "3000",
+              "path": ["api", "health"]
+            }
+          },
+          "response": [
+            {
+              "name": "Success Response",
+              "status": "OK",
+              "code": 200,
+              "body": "{\n  \"success\": true,\n  \"status\": \"ok\",\n  \"message\": \"Server is running\",\n  \"earthEngineInitialized\": true,\n  \"timestamp\": \"2025-10-30T12:34:56.000Z\"\n}"
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "variable": [
+    {
+      "key": "baseUrl",
+      "value": "http://localhost:3000"
+    },
+    {
+      "key": "authToken",
+      "value": ""
+    },
+    {
+      "key": "field_id",
+      "value": ""
+    }
+  ]
+}
+

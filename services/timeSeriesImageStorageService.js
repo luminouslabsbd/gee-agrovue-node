@@ -11,15 +11,15 @@
  * - Track storage statistics
  */
 
-const fs = require('fs');
-const path = require('path');
-const https = require('https');
-const http = require('http');
+const fs = require("fs");
+const path = require("path");
+const https = require("https");
+const http = require("http");
 
 class TimeSeriesImageStorageService {
   constructor(ee = null) {
-    this.STORAGE_DIR = path.join(__dirname, '../public/time-series-images');
-    this.METADATA_FILE = path.join(this.STORAGE_DIR, 'metadata.json');
+    this.STORAGE_DIR = path.join(__dirname, "../public/time-series-images");
+    this.METADATA_FILE = path.join(this.STORAGE_DIR, "metadata.json");
     this.ee = ee;
     this.initializeStorage();
   }
@@ -30,11 +30,16 @@ class TimeSeriesImageStorageService {
   initializeStorage() {
     if (!fs.existsSync(this.STORAGE_DIR)) {
       fs.mkdirSync(this.STORAGE_DIR, { recursive: true });
-      console.log(`✅ Time series image storage directory created: ${this.STORAGE_DIR}`);
+      console.log(
+        `✅ Time series image storage directory created: ${this.STORAGE_DIR}`
+      );
     }
 
     if (!fs.existsSync(this.METADATA_FILE)) {
-      fs.writeFileSync(this.METADATA_FILE, JSON.stringify({ series: [] }, null, 2));
+      fs.writeFileSync(
+        this.METADATA_FILE,
+        JSON.stringify({ series: [] }, null, 2)
+      );
     }
   }
 
@@ -47,6 +52,12 @@ class TimeSeriesImageStorageService {
    */
   async saveTimeSeriesImages(timeSeriesData, fieldId, fieldBoundary = null) {
     try {
+      // Delete old series for this field BEFORE creating new one
+      console.log(
+        `🔍 Checking for existing time series for field ${fieldId}...`
+      );
+      await this.deleteOldSeriesForField(fieldId);
+
       const timestamp = Date.now();
       const seriesId = `${fieldId}_${timestamp}`;
       const seriesDir = path.join(this.STORAGE_DIR, seriesId);
@@ -71,7 +82,10 @@ class TimeSeriesImageStorageService {
             await this.downloadImage(item.thumb_url, pngPath);
             console.log(`✅ Downloaded NDVI image for ${item.date}`);
           } catch (error) {
-            console.error(`❌ Failed to download image for ${item.date}:`, error.message);
+            console.error(
+              `❌ Failed to download image for ${item.date}:`,
+              error.message
+            );
           }
         }
 
@@ -87,7 +101,7 @@ class TimeSeriesImageStorageService {
           confidence_level: item.confidence_level,
           image_url: `/time-series-images/${seriesId}/${pngFilename}`,
           image_available: item.image_available,
-          stored_at: new Date().toISOString()
+          stored_at: new Date().toISOString(),
         });
       }
 
@@ -101,12 +115,15 @@ class TimeSeriesImageStorageService {
         total_data_points: timeSeriesData.total_data_points,
         total_images: enhancedTimeSeries.length,
         storage_path: seriesDir,
-        created_at: new Date().toISOString()
+        created_at: new Date().toISOString(),
       };
 
       // Save series metadata
-      const seriesMetadataPath = path.join(seriesDir, 'series_metadata.json');
-      fs.writeFileSync(seriesMetadataPath, JSON.stringify(seriesMetadata, null, 2));
+      const seriesMetadataPath = path.join(seriesDir, "series_metadata.json");
+      fs.writeFileSync(
+        seriesMetadataPath,
+        JSON.stringify(seriesMetadata, null, 2)
+      );
 
       // Update global metadata index
       this.updateMetadataIndex(seriesMetadata);
@@ -127,12 +144,54 @@ class TimeSeriesImageStorageService {
           series_id: seriesId,
           storage_path: `/time-series-images/${seriesId}`,
           total_images_stored: enhancedTimeSeries.length,
-          created_at: new Date().toISOString()
-        }
+          created_at: new Date().toISOString(),
+        },
       };
     } catch (error) {
-      console.error('Error saving time series images:', error);
+      console.error("Error saving time series images:", error);
       throw new Error(`Failed to save time series images: ${error.message}`);
+    }
+  }
+
+  /**
+   * Delete old series for a specific field (keep only latest)
+   * @param {String} fieldId - Field identifier
+   */
+  async deleteOldSeriesForField(fieldId) {
+    try {
+      const metadata = JSON.parse(fs.readFileSync(this.METADATA_FILE, "utf8"));
+      const fieldSeries = metadata.series.filter((s) => s.field_id === fieldId);
+
+      if (fieldSeries.length > 0) {
+        console.log(
+          `🗑️  Found ${fieldSeries.length} old series for field ${fieldId}. Deleting...`
+        );
+
+        for (const series of fieldSeries) {
+          try {
+            const seriesPath = series.storage_path;
+            if (fs.existsSync(seriesPath)) {
+              fs.rmSync(seriesPath, { recursive: true, force: true });
+              console.log(`✅ Deleted old series: ${series.series_id}`);
+            }
+          } catch (e) {
+            console.warn(
+              `⚠️  Could not delete old series: ${series.series_id}`,
+              e.message
+            );
+          }
+        }
+
+        // Remove from metadata
+        metadata.series = metadata.series.filter((s) => s.field_id !== fieldId);
+        fs.writeFileSync(this.METADATA_FILE, JSON.stringify(metadata, null, 2));
+        console.log(`✅ Cleaned up metadata for field ${fieldId}`);
+      }
+    } catch (error) {
+      console.warn(
+        `⚠️  Failed to delete old series for field ${fieldId}:`,
+        error.message
+      );
     }
   }
 
@@ -142,7 +201,7 @@ class TimeSeriesImageStorageService {
    */
   updateMetadataIndex(seriesMetadata) {
     try {
-      const metadata = JSON.parse(fs.readFileSync(this.METADATA_FILE, 'utf8'));
+      const metadata = JSON.parse(fs.readFileSync(this.METADATA_FILE, "utf8"));
 
       // Add new series
       metadata.series.push(seriesMetadata);
@@ -150,7 +209,7 @@ class TimeSeriesImageStorageService {
       // Keep only last 50 series
       if (metadata.series.length > 50) {
         const toDelete = metadata.series.slice(0, metadata.series.length - 50);
-        toDelete.forEach(series => {
+        toDelete.forEach((series) => {
           try {
             const seriesPath = series.storage_path;
             if (fs.existsSync(seriesPath)) {
@@ -165,7 +224,7 @@ class TimeSeriesImageStorageService {
 
       fs.writeFileSync(this.METADATA_FILE, JSON.stringify(metadata, null, 2));
     } catch (error) {
-      console.error('Failed to update metadata index:', error);
+      console.error("Failed to update metadata index:", error);
     }
   }
 
@@ -176,11 +235,15 @@ class TimeSeriesImageStorageService {
    */
   getSeriesMetadata(seriesId) {
     try {
-      const seriesPath = path.join(this.STORAGE_DIR, seriesId, 'series_metadata.json');
+      const seriesPath = path.join(
+        this.STORAGE_DIR,
+        seriesId,
+        "series_metadata.json"
+      );
       if (!fs.existsSync(seriesPath)) {
         throw new Error(`Series not found: ${seriesId}`);
       }
-      return JSON.parse(fs.readFileSync(seriesPath, 'utf8'));
+      return JSON.parse(fs.readFileSync(seriesPath, "utf8"));
     } catch (error) {
       throw new Error(`Failed to get series metadata: ${error.message}`);
     }
@@ -194,29 +257,33 @@ class TimeSeriesImageStorageService {
    */
   downloadImage(url, filepath) {
     return new Promise((resolve, reject) => {
-      const protocol = url.startsWith('https') ? https : http;
+      const protocol = url.startsWith("https") ? https : http;
 
-      protocol.get(url, (response) => {
-        if (response.statusCode !== 200) {
-          reject(new Error(`Failed to download image: ${response.statusCode}`));
-          return;
-        }
+      protocol
+        .get(url, (response) => {
+          if (response.statusCode !== 200) {
+            reject(
+              new Error(`Failed to download image: ${response.statusCode}`)
+            );
+            return;
+          }
 
-        const fileStream = fs.createWriteStream(filepath);
-        response.pipe(fileStream);
+          const fileStream = fs.createWriteStream(filepath);
+          response.pipe(fileStream);
 
-        fileStream.on('finish', () => {
-          fileStream.close();
-          resolve();
-        });
+          fileStream.on("finish", () => {
+            fileStream.close();
+            resolve();
+          });
 
-        fileStream.on('error', (err) => {
-          fs.unlink(filepath, () => {}); // Delete the file if error
+          fileStream.on("error", (err) => {
+            fs.unlink(filepath, () => {}); // Delete the file if error
+            reject(err);
+          });
+        })
+        .on("error", (err) => {
           reject(err);
         });
-      }).on('error', (err) => {
-        reject(err);
-      });
     });
   }
 
@@ -230,20 +297,20 @@ class TimeSeriesImageStorageService {
     try {
       // Create visualization data
       const visualizationData = {
-        type: 'ndvi_visualization',
+        type: "ndvi_visualization",
         ndvi_value: ndviValue,
         suitability_status: suitabilityStatus,
         color: this.getNDVIColor(ndviValue),
         created_at: new Date().toISOString(),
-        note: 'NDVI visualization data. For actual PNG images, integrate with canvas or sharp library.'
+        note: "NDVI visualization data. For actual PNG images, integrate with canvas or sharp library.",
       };
 
       // Save visualization data as JSON
-      const vizJsonPath = pngPath.replace('.png', '_viz.json');
+      const vizJsonPath = pngPath.replace(".png", "_viz.json");
       fs.writeFileSync(vizJsonPath, JSON.stringify(visualizationData, null, 2));
 
       // Create a simple text file as image placeholder
-      const txtPath = pngPath.replace('.png', '.txt');
+      const txtPath = pngPath.replace(".png", ".txt");
       const placeholderContent = `NDVI Visualization
 Value: ${ndviValue.toFixed(4)}
 Status: ${suitabilityStatus}
@@ -251,9 +318,13 @@ Color: ${this.getNDVIColor(ndviValue)}
 Generated: ${new Date().toISOString()}`;
       fs.writeFileSync(txtPath, placeholderContent);
 
-      console.log(`📊 Created visualization for NDVI: ${ndviValue.toFixed(4)} (${suitabilityStatus})`);
+      console.log(
+        `📊 Created visualization for NDVI: ${ndviValue.toFixed(
+          4
+        )} (${suitabilityStatus})`
+      );
     } catch (error) {
-      console.error('Error creating NDVI visualization:', error);
+      console.error("Error creating NDVI visualization:", error);
     }
   }
 
@@ -263,12 +334,12 @@ Generated: ${new Date().toISOString()}`;
    * @returns {String} Hex color code
    */
   getNDVIColor(ndviValue) {
-    if (ndviValue < 0) return '#d73027'; // Red - Poor
-    if (ndviValue < 0.2) return '#fc8d59'; // Orange - Sparse
-    if (ndviValue < 0.4) return '#fee090'; // Yellow - Bare
-    if (ndviValue < 0.6) return '#e0f3f8'; // Light Blue - Moderate
-    if (ndviValue < 0.8) return '#91bfdb'; // Blue - Good
-    return '#4575b4'; // Dark Blue - Excellent
+    if (ndviValue < 0) return "#d73027"; // Red - Poor
+    if (ndviValue < 0.2) return "#fc8d59"; // Orange - Sparse
+    if (ndviValue < 0.4) return "#fee090"; // Yellow - Bare
+    if (ndviValue < 0.6) return "#e0f3f8"; // Light Blue - Moderate
+    if (ndviValue < 0.8) return "#91bfdb"; // Blue - Good
+    return "#4575b4"; // Dark Blue - Excellent
   }
 
   /**
@@ -278,16 +349,16 @@ Generated: ${new Date().toISOString()}`;
    */
   listStoredSeries(fieldId = null) {
     try {
-      const metadata = JSON.parse(fs.readFileSync(this.METADATA_FILE, 'utf8'));
+      const metadata = JSON.parse(fs.readFileSync(this.METADATA_FILE, "utf8"));
       let series = metadata.series || [];
 
       if (fieldId) {
-        series = series.filter(s => s.field_id === fieldId);
+        series = series.filter((s) => s.field_id === fieldId);
       }
 
       return series;
     } catch (error) {
-      console.error('Failed to list stored series:', error);
+      console.error("Failed to list stored series:", error);
       return [];
     }
   }
@@ -298,17 +369,17 @@ Generated: ${new Date().toISOString()}`;
    */
   getStorageStats() {
     try {
-      const metadata = JSON.parse(fs.readFileSync(this.METADATA_FILE, 'utf8'));
+      const metadata = JSON.parse(fs.readFileSync(this.METADATA_FILE, "utf8"));
       const series = metadata.series || [];
 
       let totalImages = 0;
       let totalSize = 0;
 
-      series.forEach(s => {
+      series.forEach((s) => {
         if (fs.existsSync(s.storage_path)) {
           const files = fs.readdirSync(s.storage_path);
           totalImages += files.length;
-          files.forEach(file => {
+          files.forEach((file) => {
             const filePath = path.join(s.storage_path, file);
             const stats = fs.statSync(filePath);
             totalSize += stats.size;
@@ -320,10 +391,10 @@ Generated: ${new Date().toISOString()}`;
         total_series: series.length,
         total_images: totalImages,
         total_size_mb: (totalSize / (1024 * 1024)).toFixed(2),
-        storage_path: this.STORAGE_DIR
+        storage_path: this.STORAGE_DIR,
       };
     } catch (error) {
-      console.error('Failed to get storage stats:', error);
+      console.error("Failed to get storage stats:", error);
       return { error: error.message };
     }
   }
@@ -343,13 +414,13 @@ Generated: ${new Date().toISOString()}`;
       fs.rmSync(seriesPath, { recursive: true, force: true });
 
       // Update metadata index
-      const metadata = JSON.parse(fs.readFileSync(this.METADATA_FILE, 'utf8'));
-      metadata.series = metadata.series.filter(s => s.series_id !== seriesId);
+      const metadata = JSON.parse(fs.readFileSync(this.METADATA_FILE, "utf8"));
+      metadata.series = metadata.series.filter((s) => s.series_id !== seriesId);
       fs.writeFileSync(this.METADATA_FILE, JSON.stringify(metadata, null, 2));
 
       return {
         success: true,
-        message: `Series deleted: ${seriesId}`
+        message: `Series deleted: ${seriesId}`,
       };
     } catch (error) {
       throw new Error(`Failed to delete series: ${error.message}`);
@@ -358,4 +429,3 @@ Generated: ${new Date().toISOString()}`;
 }
 
 module.exports = TimeSeriesImageStorageService;
-

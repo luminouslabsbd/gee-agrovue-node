@@ -1692,14 +1692,32 @@ app.post("/api/crop-analysis/classify-crop", verifyToken, async (req, res) => {
       });
     }
 
-    const { fieldBoundary, fieldId, startDate, endDate } = req.body;
+    const { startDate, endDate } = req.body;
 
-    if (!fieldBoundary || !fieldId || !startDate || !endDate) {
+    if (!startDate || !endDate) {
       return res.status(400).json({
         success: false,
-        error:
-          "Missing required fields: fieldBoundary, fieldId, startDate, endDate",
+        error: "Missing required fields: startDate, endDate",
       });
+    }
+
+    // Resolve field boundary (from request or database)
+    let resolvedData;
+    try {
+      resolvedData = await resolveFieldBoundary(req.body, req.user.user_id);
+    } catch (error) {
+      return res.status(400).json({
+        success: false,
+        error: error.message,
+      });
+    }
+
+    const { fieldBoundary, fieldId, fromDatabase } = resolvedData;
+
+    if (fromDatabase) {
+      console.log(
+        `📍 Using field boundary from database for crop classification ${fieldId}`
+      );
     }
 
     console.log(`🔍 Classifying crop type for field ${fieldId}`);
@@ -1736,22 +1754,33 @@ app.post("/api/crop-analysis/performance", verifyToken, async (req, res) => {
       });
     }
 
-    const { fieldBoundary, fieldId, cropType, startDate, endDate, fieldArea } =
-      req.body;
+    const { cropType, startDate, endDate, fieldArea } = req.body;
 
-    if (
-      !fieldBoundary ||
-      !fieldId ||
-      !cropType ||
-      !startDate ||
-      !endDate ||
-      !fieldArea
-    ) {
+    if (!cropType || !startDate || !endDate || !fieldArea) {
       return res.status(400).json({
         success: false,
         error:
-          "Missing required fields: fieldBoundary, fieldId, cropType, startDate, endDate, fieldArea",
+          "Missing required fields: cropType, startDate, endDate, fieldArea",
       });
+    }
+
+    // Resolve field boundary (from request or database)
+    let resolvedData;
+    try {
+      resolvedData = await resolveFieldBoundary(req.body, req.user.user_id);
+    } catch (error) {
+      return res.status(400).json({
+        success: false,
+        error: error.message,
+      });
+    }
+
+    const { fieldBoundary, fieldId, fromDatabase } = resolvedData;
+
+    if (fromDatabase) {
+      console.log(
+        `📍 Using field boundary from database for crop performance ${fieldId}`
+      );
     }
 
     console.log(
@@ -1920,29 +1949,34 @@ app.post("/api/crop-analysis/predict-yield", verifyToken, async (req, res) => {
       });
     }
 
-    const {
-      fieldBoundary,
-      fieldId,
-      cropType,
-      plantingDate,
-      currentDate,
-      fieldArea,
-      historicalYield,
-    } = req.body;
+    const { cropType, plantingDate, currentDate, fieldArea, historicalYield } =
+      req.body;
 
-    if (
-      !fieldBoundary ||
-      !fieldId ||
-      !cropType ||
-      !plantingDate ||
-      !currentDate ||
-      !fieldArea
-    ) {
+    if (!cropType || !plantingDate || !currentDate || !fieldArea) {
       return res.status(400).json({
         success: false,
         error:
-          "Missing required fields: fieldBoundary, fieldId, cropType, plantingDate, currentDate, fieldArea",
+          "Missing required fields: cropType, plantingDate, currentDate, fieldArea",
       });
+    }
+
+    // Resolve field boundary (from request or database)
+    let resolvedData;
+    try {
+      resolvedData = await resolveFieldBoundary(req.body, req.user.user_id);
+    } catch (error) {
+      return res.status(400).json({
+        success: false,
+        error: error.message,
+      });
+    }
+
+    const { fieldBoundary, fieldId, fromDatabase } = resolvedData;
+
+    if (fromDatabase) {
+      console.log(
+        `📍 Using field boundary from database for yield prediction ${fieldId}`
+      );
     }
 
     console.log(`🔮 Predicting yield for ${cropType} in field ${fieldId}`);
@@ -1985,27 +2019,32 @@ app.post(
         });
       }
 
-      const {
-        fieldBoundary,
-        fieldId,
-        cropType,
-        plantingDate,
-        currentDate,
-        forecastDays,
-      } = req.body;
+      const { cropType, plantingDate, currentDate, forecastDays } = req.body;
 
-      if (
-        !fieldBoundary ||
-        !fieldId ||
-        !cropType ||
-        !plantingDate ||
-        !currentDate
-      ) {
+      if (!cropType || !plantingDate || !currentDate) {
         return res.status(400).json({
           success: false,
-          error:
-            "Missing required fields: fieldBoundary, fieldId, cropType, plantingDate, currentDate",
+          error: "Missing required fields: cropType, plantingDate, currentDate",
         });
+      }
+
+      // Resolve field boundary (from request or database)
+      let resolvedData;
+      try {
+        resolvedData = await resolveFieldBoundary(req.body, req.user.user_id);
+      } catch (error) {
+        return res.status(400).json({
+          success: false,
+          error: error.message,
+        });
+      }
+
+      const { fieldBoundary, fieldId, fromDatabase } = resolvedData;
+
+      if (fromDatabase) {
+        console.log(
+          `📍 Using field boundary from database for growth forecast ${fieldId}`
+        );
       }
 
       console.log(`📈 Forecasting growth for ${cropType} in field ${fieldId}`);
@@ -2045,28 +2084,33 @@ app.post("/api/crop-analysis/crop-chart", verifyToken, async (req, res) => {
       });
     }
 
-    const {
-      fieldBoundary,
-      fieldId,
-      cropType,
-      plantingDate,
-      currentDate,
-      fieldArea,
-    } = req.body;
+    const { cropType, plantingDate, currentDate, fieldArea } = req.body;
 
-    if (
-      !fieldBoundary ||
-      !fieldId ||
-      !cropType ||
-      !plantingDate ||
-      !currentDate ||
-      !fieldArea
-    ) {
+    if (!cropType || !plantingDate || !currentDate || !fieldArea) {
       return res.status(400).json({
         success: false,
         error:
-          "Missing required fields: fieldBoundary, fieldId, cropType, plantingDate, currentDate, fieldArea",
+          "Missing required fields: cropType, plantingDate, currentDate, fieldArea",
       });
+    }
+
+    // Resolve field boundary (from request or database)
+    let resolvedData;
+    try {
+      resolvedData = await resolveFieldBoundary(req.body, req.user.user_id);
+    } catch (error) {
+      return res.status(400).json({
+        success: false,
+        error: error.message,
+      });
+    }
+
+    const { fieldBoundary, fieldId, fromDatabase } = resolvedData;
+
+    if (fromDatabase) {
+      console.log(
+        `📍 Using field boundary from database for crop chart ${fieldId}`
+      );
     }
 
     console.log(

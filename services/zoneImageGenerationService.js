@@ -99,20 +99,56 @@ class ZoneImageGenerationService {
       console.log(`🎨 Generating zone image for field ${fieldId}...`);
 
       const geometry = this.ee.Geometry.Polygon(fieldBoundary.coordinates[0]);
-      const nextDate = this._addDays(date, 1);
 
-      // Get Sentinel-2 imagery
-      const imageCollection = this.ee
-        .ImageCollection(this.SENTINEL2_DATASET)
-        .filterBounds(geometry)
-        .filterDate(date, nextDate)
-        .filter(
-          this.ee.Filter.lt("CLOUDY_PIXEL_PERCENTAGE", this.CLOUD_FILTER)
+      // Try to get imagery with progressive date range expansion
+      let imageCollection = null;
+      let actualDateRange = null;
+      let searchAttempts = [
+        { days: 0, label: "exact date" }, // Try exact date first
+        { days: 3, label: "±3 days" }, // Then ±3 days
+        { days: 7, label: "±7 days" }, // Then ±7 days
+        { days: 15, label: "±15 days" }, // Then ±15 days
+        { days: 30, label: "±30 days" }, // Finally ±30 days
+      ];
+
+      for (const attempt of searchAttempts) {
+        const startDate = this._addDays(date, -attempt.days);
+        const endDate = this._addDays(date, attempt.days + 1);
+
+        console.log(
+          `🔍 Searching for satellite images (${attempt.label}): ${startDate} to ${endDate}`
         );
 
-      const imageCount = imageCollection.size().getInfo();
-      if (imageCount === 0) {
-        throw new Error(`No satellite images available for date: ${date}`);
+        const collection = this.ee
+          .ImageCollection(this.SENTINEL2_DATASET)
+          .filterBounds(geometry)
+          .filterDate(startDate, endDate)
+          .filter(
+            this.ee.Filter.lt("CLOUDY_PIXEL_PERCENTAGE", this.CLOUD_FILTER)
+          )
+          .sort("CLOUDY_PIXEL_PERCENTAGE"); // Sort by cloud cover (best first)
+
+        const imageCount = collection.size().getInfo();
+        console.log(
+          `📊 Found ${imageCount} images with <${this.CLOUD_FILTER}% cloud cover`
+        );
+
+        if (imageCount > 0) {
+          imageCollection = collection;
+          actualDateRange = {
+            start: startDate,
+            end: endDate,
+            range: attempt.label,
+          };
+          console.log(`✅ Using images from ${attempt.label} range`);
+          break;
+        }
+      }
+
+      if (!imageCollection) {
+        throw new Error(
+          `No satellite images available for date: ${date} (searched up to ±30 days with <${this.CLOUD_FILTER}% cloud cover)`
+        );
       }
 
       // Calculate NDVI
@@ -227,6 +263,7 @@ class ZoneImageGenerationService {
         success: true,
         field_id: fieldId,
         analysis_date: date,
+        actual_date_range: actualDateRange, // Include actual date range used
         crop_type: cropType,
         image_id: fieldId,
 
@@ -260,8 +297,9 @@ class ZoneImageGenerationService {
         metadata: {
           grid_size_meters: gridSize,
           total_zones: zoneAnalysis.zones.length,
-          image_count: imageCount,
+          image_count: imageCollection.size().getInfo(),
           data_source: "Sentinel-2 Level 2A",
+          cloud_filter_percentage: this.CLOUD_FILTER,
           generated_at: new Date().toISOString(),
         },
       };

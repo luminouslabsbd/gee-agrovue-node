@@ -52,21 +52,19 @@ class TimeSeriesImageStorageService {
    */
   async saveTimeSeriesImages(timeSeriesData, fieldId, fieldBoundary = null) {
     try {
-      // Delete old series for this field BEFORE creating new one
-      console.log(
-        `🔍 Checking for existing time series for field ${fieldId}...`
-      );
-      await this.deleteOldSeriesForField(fieldId);
+      // Use fieldId as directory name (no timestamp)
+      const seriesDir = path.join(this.STORAGE_DIR, fieldId);
 
-      const timestamp = Date.now();
-      const seriesId = `${fieldId}_${timestamp}`;
-      const seriesDir = path.join(this.STORAGE_DIR, seriesId);
-
-      // Create series directory
-      if (!fs.existsSync(seriesDir)) {
-        fs.mkdirSync(seriesDir, { recursive: true });
-        console.log(`✅ Created series directory: ${seriesDir}`);
+      // Delete old data if directory exists
+      if (fs.existsSync(seriesDir)) {
+        console.log(`🗑️  Removing old data for field ${fieldId}...`);
+        fs.rmSync(seriesDir, { recursive: true, force: true });
+        console.log(`✅ Old data deleted for field ${fieldId}`);
       }
+
+      // Create series directory with fieldId as name
+      fs.mkdirSync(seriesDir, { recursive: true });
+      console.log(`✅ Created series directory: ${seriesDir}`);
 
       // Process time series data and save images
       const enhancedTimeSeries = [];
@@ -89,7 +87,7 @@ class TimeSeriesImageStorageService {
           }
         }
 
-        // Return enhanced item with image URL
+        // Return enhanced item with image URL (using fieldId as folder name)
         enhancedTimeSeries.push({
           date: item.date,
           mean_ndvi: item.mean_ndvi,
@@ -99,7 +97,7 @@ class TimeSeriesImageStorageService {
           suitability_status: item.suitability_status,
           suitability_percentage: item.suitability_percentage,
           confidence_level: item.confidence_level,
-          image_url: `/time-series-images/${seriesId}/${pngFilename}`,
+          image_url: `/time-series-images/${fieldId}/${pngFilename}`,
           image_available: item.image_available,
           stored_at: new Date().toISOString(),
         });
@@ -107,7 +105,6 @@ class TimeSeriesImageStorageService {
 
       // Create series metadata
       const seriesMetadata = {
-        series_id: seriesId,
         field_id: fieldId,
         start_date: timeSeriesData.start_date,
         end_date: timeSeriesData.end_date,
@@ -116,6 +113,7 @@ class TimeSeriesImageStorageService {
         total_images: enhancedTimeSeries.length,
         storage_path: seriesDir,
         created_at: new Date().toISOString(),
+        updated_at: new Date().toISOString(),
       };
 
       // Save series metadata
@@ -139,12 +137,12 @@ class TimeSeriesImageStorageService {
         trends: timeSeriesData.trends,
         statistics: timeSeriesData.statistics,
         metadata: timeSeriesData.metadata,
-        series_id: seriesId,
         storage_info: {
-          series_id: seriesId,
-          storage_path: `/time-series-images/${seriesId}`,
+          field_id: fieldId,
+          storage_path: `/time-series-images/${fieldId}`,
           total_images_stored: enhancedTimeSeries.length,
           created_at: new Date().toISOString(),
+          updated_at: new Date().toISOString(),
         },
       };
     } catch (error) {
@@ -160,32 +158,31 @@ class TimeSeriesImageStorageService {
   async deleteOldSeriesForField(fieldId) {
     try {
       const metadata = JSON.parse(fs.readFileSync(this.METADATA_FILE, "utf8"));
-      const fieldSeries = metadata.series.filter((s) => s.field_id === fieldId);
+      const fieldSeriesIndex = metadata.series.findIndex(
+        (s) => s.field_id === fieldId
+      );
 
-      if (fieldSeries.length > 0) {
-        console.log(
-          `🗑️  Found ${fieldSeries.length} old series for field ${fieldId}. Deleting...`
-        );
+      if (fieldSeriesIndex !== -1) {
+        const oldSeries = metadata.series[fieldSeriesIndex];
+        console.log(`🗑️  Found old series for field ${fieldId}. Updating...`);
 
-        for (const series of fieldSeries) {
-          try {
-            const seriesPath = series.storage_path;
-            if (fs.existsSync(seriesPath)) {
-              fs.rmSync(seriesPath, { recursive: true, force: true });
-              console.log(`✅ Deleted old series: ${series.series_id}`);
-            }
-          } catch (e) {
-            console.warn(
-              `⚠️  Could not delete old series: ${series.series_id}`,
-              e.message
-            );
+        try {
+          const seriesPath = oldSeries.storage_path;
+          if (fs.existsSync(seriesPath)) {
+            fs.rmSync(seriesPath, { recursive: true, force: true });
+            console.log(`✅ Deleted old data for field ${fieldId}`);
           }
+        } catch (e) {
+          console.warn(
+            `⚠️  Could not delete old data for field ${fieldId}`,
+            e.message
+          );
         }
 
         // Remove from metadata
-        metadata.series = metadata.series.filter((s) => s.field_id !== fieldId);
+        metadata.series.splice(fieldSeriesIndex, 1);
         fs.writeFileSync(this.METADATA_FILE, JSON.stringify(metadata, null, 2));
-        console.log(`✅ Cleaned up metadata for field ${fieldId}`);
+        console.log(`✅ Updated metadata for field ${fieldId}`);
       }
     } catch (error) {
       console.warn(
@@ -203,23 +200,19 @@ class TimeSeriesImageStorageService {
     try {
       const metadata = JSON.parse(fs.readFileSync(this.METADATA_FILE, "utf8"));
 
-      // Add new series
-      metadata.series.push(seriesMetadata);
+      // Check if field already exists in metadata
+      const existingIndex = metadata.series.findIndex(
+        (s) => s.field_id === seriesMetadata.field_id
+      );
 
-      // Keep only last 50 series
-      if (metadata.series.length > 50) {
-        const toDelete = metadata.series.slice(0, metadata.series.length - 50);
-        toDelete.forEach((series) => {
-          try {
-            const seriesPath = series.storage_path;
-            if (fs.existsSync(seriesPath)) {
-              fs.rmSync(seriesPath, { recursive: true, force: true });
-            }
-          } catch (e) {
-            console.warn(`Could not delete old series: ${series.series_id}`);
-          }
-        });
-        metadata.series = metadata.series.slice(-50);
+      if (existingIndex !== -1) {
+        // Update existing field metadata
+        metadata.series[existingIndex] = seriesMetadata;
+        console.log(`✅ Updated metadata for field ${seriesMetadata.field_id}`);
+      } else {
+        // Add new field metadata
+        metadata.series.push(seriesMetadata);
+        console.log(`✅ Added metadata for field ${seriesMetadata.field_id}`);
       }
 
       fs.writeFileSync(this.METADATA_FILE, JSON.stringify(metadata, null, 2));
@@ -229,19 +222,19 @@ class TimeSeriesImageStorageService {
   }
 
   /**
-   * Get stored series metadata
-   * @param {String} seriesId - Series identifier
+   * Get stored series metadata by fieldId
+   * @param {String} fieldId - Field identifier
    * @returns {Object} Series metadata
    */
-  getSeriesMetadata(seriesId) {
+  getSeriesMetadata(fieldId) {
     try {
       const seriesPath = path.join(
         this.STORAGE_DIR,
-        seriesId,
+        fieldId,
         "series_metadata.json"
       );
       if (!fs.existsSync(seriesPath)) {
-        throw new Error(`Series not found: ${seriesId}`);
+        throw new Error(`Series not found for field: ${fieldId}`);
       }
       return JSON.parse(fs.readFileSync(seriesPath, "utf8"));
     } catch (error) {
@@ -400,27 +393,27 @@ Generated: ${new Date().toISOString()}`;
   }
 
   /**
-   * Delete stored series
-   * @param {String} seriesId - Series identifier
+   * Delete stored series by fieldId
+   * @param {String} fieldId - Field identifier
    * @returns {Object} Deletion result
    */
-  deleteStoredSeries(seriesId) {
+  deleteStoredSeries(fieldId) {
     try {
-      const seriesPath = path.join(this.STORAGE_DIR, seriesId);
+      const seriesPath = path.join(this.STORAGE_DIR, fieldId);
       if (!fs.existsSync(seriesPath)) {
-        throw new Error(`Series not found: ${seriesId}`);
+        throw new Error(`Series not found for field: ${fieldId}`);
       }
 
       fs.rmSync(seriesPath, { recursive: true, force: true });
 
       // Update metadata index
       const metadata = JSON.parse(fs.readFileSync(this.METADATA_FILE, "utf8"));
-      metadata.series = metadata.series.filter((s) => s.series_id !== seriesId);
+      metadata.series = metadata.series.filter((s) => s.field_id !== fieldId);
       fs.writeFileSync(this.METADATA_FILE, JSON.stringify(metadata, null, 2));
 
       return {
         success: true,
-        message: `Series deleted: ${seriesId}`,
+        message: `Series deleted for field: ${fieldId}`,
       };
     } catch (error) {
       throw new Error(`Failed to delete series: ${error.message}`);

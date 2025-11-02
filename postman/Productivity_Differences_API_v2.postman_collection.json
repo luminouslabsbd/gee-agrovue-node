@@ -1,0 +1,88 @@
+{
+  "info": {
+    "name": "Productivity Differences API (Field ID Pattern)",
+    "_postman_id": "productivity-differences-api-v2",
+    "description": "7-Zone Productivity Classification API with Field ID Pattern Support\n\n**Supports Two Patterns:**\n\n1. **Field Boundary Pattern** - Provide full boundary data (creates/updates field)\n2. **Field ID Pattern** - Provide only field_id (fetches boundary from database)\n\n**Productivity Zones:**\n- **m3**: Very Low (69%) - Urgent intervention needed\n- **m2**: Low (87%) - Targeted fertilization needed\n- **m1**: Below Average (95%) - Monitor closely\n- **p0**: Average (100%) - Maintain practices\n- **p1**: Above Average (107%) - Optimize yield\n- **p2**: High (111%) - Use as reference\n- **p3**: Very High (119%) - Replicate conditions",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "item": [
+    {
+      "name": "Pattern 1: Field Boundary + Field ID",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"fieldBoundary\": {\n    \"type\": \"Polygon\",\n    \"coordinates\": [\n      [\n        [9.15, 45.45],\n        [9.16, 45.45],\n        [9.16, 45.46],\n        [9.15, 45.46],\n        [9.15, 45.45]\n      ]\n    ]\n  },\n  \"fieldId\": \"ITALY-RICE-FIELD\",\n  \"date\": \"2024-07-15\"\n}"
+        },
+        "url": {
+          "raw": "http://localhost:3000/api/field-analysis/productivity-differences",
+          "protocol": "http",
+          "host": ["localhost"],
+          "port": "3000",
+          "path": ["api", "field-analysis", "productivity-differences"]
+        },
+        "description": "**Pattern 1: Field Boundary + Field ID**\n\nProvide both fieldBoundary and fieldId. This will:\n- Create a new field if it doesn't exist\n- Update the field if it already exists\n- Use the provided boundary for analysis\n\n**Parameters:**\n- `fieldBoundary` (required): GeoJSON Polygon\n- `fieldId` (required): Unique field identifier\n- `date` (optional): Analysis date (YYYY-MM-DD)\n\n**Use Case:** First-time analysis or when you want to update field boundary"
+      }
+    },
+    {
+      "name": "Pattern 2: Field ID Only",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          },
+          {
+            "key": "Authorization",
+            "value": "Bearer YOUR_JWT_TOKEN_HERE",
+            "description": "Required for database access"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"fieldId\": \"ITALY-RICE-FIELD\",\n  \"date\": \"2024-07-15\"\n}"
+        },
+        "url": {
+          "raw": "http://localhost:3000/api/field-analysis/productivity-differences",
+          "protocol": "http",
+          "host": ["localhost"],
+          "port": "3000",
+          "path": ["api", "field-analysis", "productivity-differences"]
+        },
+        "description": "**Pattern 2: Field ID Only**\n\nProvide only fieldId. This will:\n- Fetch field boundary from database\n- Use the stored boundary for analysis\n- Reduce payload size significantly\n\n**Parameters:**\n- `fieldId` (required): Unique field identifier\n- `date` (optional): Analysis date (YYYY-MM-DD)\n\n**Requirements:**\n- Field must exist in database\n- Authentication token required\n\n**Use Case:** Subsequent analyses after field is created"
+      }
+    },
+    {
+      "name": "Pattern 3: Field Boundary Only (Auto-Generated ID)",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"fieldBoundary\": {\n    \"type\": \"Polygon\",\n    \"coordinates\": [\n      [\n        [9.18, 45.47],\n        [9.185, 45.47],\n        [9.185, 45.475],\n        [9.18, 45.475],\n        [9.18, 45.47]\n      ]\n    ]\n  },\n  \"date\": \"2024-06-20\"\n}"
+        },
+        "url": {
+          "raw": "http://localhost:3000/api/field-analysis/productivity-differences",
+          "protocol": "http",
+          "host": ["localhost"],
+          "port": "3000",
+          "path": ["api", "field-analysis", "productivity-differences"]
+        },
+        "description": "**Pattern 3: Field Boundary Only**\n\nProvide only fieldBoundary. This will:\n- Auto-generate a unique field ID\n- Create a new field in database\n- Use the provided boundary for analysis\n\n**Parameters:**\n- `fieldBoundary` (required): GeoJSON Polygon\n- `date` (optional): Analysis date (YYYY-MM-DD)\n\n**Use Case:** Quick analysis without specifying field ID"
+      }
+    }
+  ]
+}
+

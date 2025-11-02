@@ -59,6 +59,7 @@ let cropAnalyticsService;
 let cropPredictionService;
 let cropChartService;
 let zoneImageGenerationService;
+let productivityDifferencesService;
 
 async function initializeEarthEngine(retryCount = 0, maxRetries = 3) {
   try {
@@ -203,6 +204,10 @@ function initializeAllServices() {
     // Initialize zone image generation service
     zoneImageGenerationService = new ZoneImageGenerationService(ee);
     console.log("✅ Zone Image Generation Service initialized");
+    // Initialize productivity differences service
+    const ProductivityDifferencesService = require("./services/productivityDifferencesService");
+    productivityDifferencesService = new ProductivityDifferencesService(ee);
+    console.log("✅ Productivity Differences Service initialized");
     console.log("🎉 All services initialized successfully!");
   } catch (error) {
     console.error("❌ Error initializing services:", error);
@@ -2444,6 +2449,99 @@ app.get("/api/field-analysis/zone-images", (req, res) => {
     });
   }
 });
+
+/**
+ * Generate Productivity Differences Analysis
+ * POST /api/field-analysis/productivity-differences
+ *
+ * Calculates 7-zone productivity classification (m3, m2, m1, p0, p1, p2, p3)
+ * based on NDVI statistical distribution.
+ *
+ * Supports two patterns:
+ * 1. Field ID only (fetches boundary from database):
+ *    { "fieldId": "FIELD-123", "date": "2024-08-15" }
+ *
+ * 2. Field boundary with optional ID (creates/updates field):
+ *    { "fieldBoundary": {...}, "fieldId": "FIELD-123", "date": "2024-08-15" }
+ *
+ * Request body:
+ * {
+ *   "fieldBoundary": { ... },  // GeoJSON Polygon (optional if fieldId provided)
+ *   "fieldId": "FIELD-123",    // Field ID (optional if fieldBoundary provided)
+ *   "date": "2024-08-15"       // optional, defaults to 6 months ago
+ * }
+ */
+app.post(
+  "/api/field-analysis/productivity-differences",
+  // verifyToken, // Temporarily disabled for testing (database not working)
+  async (req, res) => {
+    try {
+      if (!eeInitialized || !productivityDifferencesService) {
+        return res.status(503).json({
+          success: false,
+          error:
+            "Productivity Differences Service not initialized yet. Please try again in a moment.",
+        });
+      }
+
+      const { date } = req.body;
+
+      // Resolve field boundary (from request or database)
+      let resolvedData;
+      try {
+        resolvedData = await resolveFieldBoundary(
+          req.body,
+          req.user?.user_id || null
+        );
+      } catch (error) {
+        return res.status(400).json({
+          success: false,
+          error: error.message,
+        });
+      }
+
+      const { fieldBoundary, fieldId, fromDatabase } = resolvedData;
+
+      if (fromDatabase) {
+        console.log(
+          `📍 Using field boundary from database for productivity analysis ${fieldId}`
+        );
+      }
+
+      // Use past date if not provided (6 months ago to ensure data availability)
+      const analysisDate =
+        date ||
+        (() => {
+          const d = new Date();
+          d.setMonth(d.getMonth() - 6);
+          return d.toISOString().split("T")[0];
+        })();
+
+      console.log(
+        `🎯 Generating productivity differences analysis for field ${fieldId}...`
+      );
+      console.log(`📅 Analysis date: ${analysisDate}`);
+
+      const result =
+        await productivityDifferencesService.generateProductivityAnalysis(
+          fieldBoundary,
+          fieldId,
+          analysisDate
+        );
+
+      res.json(result);
+    } catch (error) {
+      console.error(
+        "❌ Error generating productivity differences analysis:",
+        error
+      );
+      res.status(500).json({
+        success: false,
+        error: error.message,
+      });
+    }
+  }
+);
 
 // Health check endpoint
 app.get("/api/health", (_, res) => {

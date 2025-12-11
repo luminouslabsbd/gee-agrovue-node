@@ -1,0 +1,424 @@
+{
+  "info": {
+    "name": "Auto-Generated Field ID - Complete API Collection",
+    "description": "Complete Postman collection for testing auto-generated field_id feature in Google Earth Engine Agrovue API.\n\n## Features:\n- Auto-generated field_id in format: FIELD-YYYYMMDD-XXXXXX\n- Field CRUD operations\n- Integration with all analysis APIs\n- Field boundary storage and retrieval\n\n## Authentication:\nAll endpoints require Bearer token authentication.\n\n## Admin Credentials:\n- Email: admin@agrovue.com\n- Password: Admin@123456",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+    "_postman_id": "auto-field-id-collection",
+    "version": "1.0.0"
+  },
+  "auth": {
+    "type": "bearer",
+    "bearer": [
+      {
+        "key": "token",
+        "value": "{{auth_token}}",
+        "type": "string"
+      }
+    ]
+  },
+  "variable": [
+    {
+      "key": "base_url",
+      "value": "http://localhost:3000",
+      "type": "string"
+    },
+    {
+      "key": "auth_token",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "field_id",
+      "value": "",
+      "type": "string"
+    }
+  ],
+  "item": [
+    {
+      "name": "1. Authentication",
+      "item": [
+        {
+          "name": "Login (Admin)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "if (pm.response.code === 200) {",
+                  "    var jsonData = pm.response.json();",
+                  "    pm.collectionVariables.set('auth_token', jsonData.data.token);",
+                  "    console.log('Token saved:', jsonData.data.token);",
+                  "}"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"admin@agrovue.com\",\n  \"password\": \"Admin@123456\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/auth/login",
+              "host": ["{{base_url}}"],
+              "path": ["api", "auth", "login"]
+            },
+            "description": "Login with admin credentials to get authentication token"
+          },
+          "response": [
+            {
+              "name": "Success Response",
+              "originalRequest": {
+                "method": "POST",
+                "header": [],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"email\": \"admin@agrovue.com\",\n  \"password\": \"Admin@123456\"\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                },
+                "url": {
+                  "raw": "{{base_url}}/api/auth/login",
+                  "host": ["{{base_url}}"],
+                  "path": ["api", "auth", "login"]
+                }
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [],
+              "cookie": [],
+              "body": "{\n  \"success\": true,\n  \"message\": \"Login successful\",\n  \"data\": {\n    \"token\": \"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...\",\n    \"user\": {\n      \"user_id\": \"user_9814056a-5297-41fc-8eb6-a03e30fd75cf\",\n      \"email\": \"admin@agrovue.com\",\n      \"name\": \"System Administrator\",\n      \"role\": \"admin\",\n      \"status\": \"active\"\n    }\n  }\n}"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "2. Field Management (Auto-Generated ID)",
+      "item": [
+        {
+          "name": "Create Field (Auto-Generated ID)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "if (pm.response.code === 201) {",
+                  "    var jsonData = pm.response.json();",
+                  "    pm.collectionVariables.set('field_id', jsonData.data.field_id);",
+                  "    console.log('Field ID saved:', jsonData.data.field_id);",
+                  "}"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{auth_token}}"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"fieldBoundary\": {\n    \"type\": \"Polygon\",\n    \"coordinates\": [\n      [\n        [90.3563, 23.7104],\n        [90.3563, 23.7004],\n        [90.3663, 23.7004],\n        [90.3663, 23.7104],\n        [90.3563, 23.7104]\n      ]\n    ]\n  },\n  \"name\": \"Green Valley Farm - Field 1\",\n  \"crop_type\": \"rice\",\n  \"farm_name\": \"Green Valley Farm\",\n  \"location\": \"Dhaka, Bangladesh\",\n  \"notes\": \"Main rice field with irrigation system\",\n  \"tags\": [\"organic\", \"irrigated\", \"high-yield\"]\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/fields",
+              "host": ["{{base_url}}"],
+              "path": ["api", "fields"]
+            },
+            "description": "Create a new field with auto-generated field_id. The system automatically generates a unique ID in format: FIELD-YYYYMMDD-XXXXXX"
+          },
+          "response": [
+            {
+              "name": "Success Response",
+              "originalRequest": {
+                "method": "POST",
+                "header": [],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"fieldBoundary\": {\n    \"type\": \"Polygon\",\n    \"coordinates\": [\n      [\n        [90.3563, 23.7104],\n        [90.3563, 23.7004],\n        [90.3663, 23.7004],\n        [90.3663, 23.7104],\n        [90.3563, 23.7104]\n      ]\n    ]\n  },\n  \"name\": \"Green Valley Farm - Field 1\",\n  \"crop_type\": \"rice\",\n  \"farm_name\": \"Green Valley Farm\",\n  \"location\": \"Dhaka, Bangladesh\",\n  \"notes\": \"Main rice field with irrigation system\"\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                },
+                "url": {
+                  "raw": "{{base_url}}/api/fields",
+                  "host": ["{{base_url}}"],
+                  "path": ["api", "fields"]
+                }
+              },
+              "status": "Created",
+              "code": 201,
+              "_postman_previewlanguage": "json",
+              "header": [],
+              "cookie": [],
+              "body": "{\n  \"success\": true,\n  \"message\": \"Field created successfully\",\n  \"data\": {\n    \"field_id\": \"FIELD-20251029-F774B3\",\n    \"name\": \"Green Valley Farm - Field 1\",\n    \"area_hectares\": 113.4699,\n    \"area_acres\": 280.3897,\n    \"crop_type\": \"rice\",\n    \"status\": \"active\",\n    \"created_at\": \"2025-10-29T11:06:16.773Z\"\n  }\n}"
+            }
+          ]
+        },
+        {
+          "name": "Get All Fields",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{auth_token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/fields?limit=10&offset=0",
+              "host": ["{{base_url}}"],
+              "path": ["api", "fields"],
+              "query": [
+                {
+                  "key": "limit",
+                  "value": "10"
+                },
+                {
+                  "key": "offset",
+                  "value": "0"
+                },
+                {
+                  "key": "status",
+                  "value": "active",
+                  "disabled": true
+                },
+                {
+                  "key": "crop_type",
+                  "value": "rice",
+                  "disabled": true
+                }
+              ]
+            },
+            "description": "Get all fields for the authenticated user with optional filters"
+          },
+          "response": [
+            {
+              "name": "Success Response",
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [],
+              "cookie": [],
+              "body": "{\n  \"success\": true,\n  \"data\": [\n    {\n      \"field_id\": \"FIELD-20251029-F774B3\",\n      \"name\": \"Green Valley Farm - Field 1\",\n      \"crop_type\": \"rice\",\n      \"area_hectares\": 113.4699,\n      \"area_acres\": 280.3897,\n      \"status\": \"active\",\n      \"created_at\": \"2025-10-29T11:06:16.773Z\"\n    },\n    {\n      \"field_id\": \"FIELD-20251029-169A4E\",\n      \"name\": \"Test Farm Field 2\",\n      \"crop_type\": \"wheat\",\n      \"area_hectares\": 85.2100,\n      \"area_acres\": 210.5897,\n      \"status\": \"active\",\n      \"created_at\": \"2025-10-29T11:06:32.000Z\"\n    }\n  ],\n  \"pagination\": {\n    \"total\": 2,\n    \"limit\": 10,\n    \"offset\": 0\n  }\n}"
+            }
+          ]
+        },
+        {
+          "name": "Get Field by ID",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{auth_token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/fields/{{field_id}}",
+              "host": ["{{base_url}}"],
+              "path": ["api", "fields", "{{field_id}}"]
+            },
+            "description": "Get a single field by its auto-generated field_id"
+          },
+          "response": [
+            {
+              "name": "Success Response",
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [],
+              "cookie": [],
+              "body": "{\n  \"success\": true,\n  \"data\": {\n    \"id\": 5,\n    \"field_id\": \"FIELD-20251029-169A4E\",\n    \"user_id\": \"user_9814056a-5297-41fc-8eb6-a03e30fd75cf\",\n    \"name\": \"Test Farm Field 1\",\n    \"crop_type\": \"rice\",\n    \"planting_date\": null,\n    \"harvest_date\": null,\n    \"farm_name\": \"Green Valley Farm\",\n    \"location\": \"Dhaka, Bangladesh\",\n    \"notes\": \"Test field for auto-generated ID\",\n    \"tags\": null,\n    \"area_sqm\": \"1134698.65\",\n    \"area_hectares\": \"113.4699\",\n    \"perimeter_m\": null,\n    \"status\": \"active\",\n    \"created_at\": \"2025-10-29T11:06:32.000Z\",\n    \"updated_at\": \"2025-10-29T11:06:32.000Z\",\n    \"boundary\": {\n      \"type\": \"Polygon\",\n      \"coordinates\": [\n        [\n          [90.3563, 23.7104],\n          [90.3563, 23.7004],\n          [90.3663, 23.7004],\n          [90.3663, 23.7104],\n          [90.3563, 23.7104]\n        ]\n      ]\n    },\n    \"area_acres\": 280.38979639499996\n  }\n}"
+            }
+          ]
+        },
+        {
+          "name": "Update Field",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{auth_token}}"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Updated Field Name\",\n  \"crop_type\": \"corn\",\n  \"notes\": \"Updated via API\",\n  \"status\": \"active\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/fields/{{field_id}}",
+              "host": ["{{base_url}}"],
+              "path": ["api", "fields", "{{field_id}}"]
+            },
+            "description": "Update field metadata (name, crop_type, notes, etc.)"
+          },
+          "response": [
+            {
+              "name": "Success Response",
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [],
+              "cookie": [],
+              "body": "{\n  \"success\": true,\n  \"message\": \"Field updated successfully\",\n  \"data\": {\n    \"field_id\": \"FIELD-20251029-169A4E\",\n    \"name\": \"Updated Field Name\",\n    \"crop_type\": \"corn\",\n    \"notes\": \"Updated via API\",\n    \"status\": \"active\",\n    \"updated_at\": \"2025-10-29T11:06:32.587Z\"\n  }\n}"
+            }
+          ]
+        },
+        {
+          "name": "Delete Field",
+          "request": {
+            "method": "DELETE",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{auth_token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/fields/{{field_id}}",
+              "host": ["{{base_url}}"],
+              "path": ["api", "fields", "{{field_id}}"]
+            },
+            "description": "Delete a field by its field_id"
+          },
+          "response": [
+            {
+              "name": "Success Response",
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [],
+              "cookie": [],
+              "body": "{\n  \"success\": true,\n  \"message\": \"Field deleted successfully\"\n}"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "3. Field Analysis (Using Auto-Generated ID)",
+      "item": [
+        {
+          "name": "Field Analysis (Create Field + Analyze)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "if (pm.response.code === 200) {",
+                  "    var jsonData = pm.response.json();",
+                  "    if (jsonData.field_id) {",
+                  "        pm.collectionVariables.set('field_id', jsonData.field_id);",
+                  "        console.log('Field ID saved:', jsonData.field_id);",
+                  "    }",
+                  "}"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{auth_token}}"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"fieldBoundary\": {\n    \"type\": \"Polygon\",\n    \"coordinates\": [\n      [\n        [90.3563, 23.7104],\n        [90.3563, 23.7004],\n        [90.3663, 23.7004],\n        [90.3663, 23.7104],\n        [90.3563, 23.7104]\n      ]\n    ]\n  },\n  \"name\": \"Field Created via Analysis\",\n  \"crop_type\": \"rice\",\n  \"startDate\": \"2024-10-01\",\n  \"endDate\": \"2024-10-26\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/field-analysis",
+              "host": ["{{base_url}}"],
+              "path": ["api", "field-analysis"]
+            },
+            "description": "Create a new field with auto-generated ID and perform NDVI analysis in one request"
+          },
+          "response": [
+            {
+              "name": "Success Response",
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [],
+              "cookie": [],
+              "body": "{\n  \"success\": true,\n  \"data\": {\n    \"ndvi\": {\n      \"mean\": 0.21,\n      \"std\": 0.15,\n      \"min\": -0.05,\n      \"max\": 0.65\n    },\n    \"interpretation\": {\n      \"status\": \"Moderate Vegetation\",\n      \"description\": \"Field shows moderate vegetation health\",\n      \"color\": \"#90EE90\"\n    }\n  },\n  \"field_id\": \"FIELD-20251029-5D7E84\",\n  \"is_new_field\": true,\n  \"message\": \"Field created with ID: FIELD-20251029-5D7E84. Analysis completed successfully.\",\n  \"saved_to_db\": true\n}"
+            }
+          ]
+        },
+        {
+          "name": "Field Analysis (Using Existing Field ID)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{auth_token}}"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"fieldId\": \"{{field_id}}\",\n  \"startDate\": \"2024-10-01\",\n  \"endDate\": \"2024-10-26\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/field-analysis",
+              "host": ["{{base_url}}"],
+              "path": ["api", "field-analysis"]
+            },
+            "description": "Perform NDVI analysis using only the field_id (boundary fetched from database)"
+          },
+          "response": [
+            {
+              "name": "Success Response",
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [],
+              "cookie": [],
+              "body": "{\n  \"success\": true,\n  \"data\": {\n    \"ndvi\": {\n      \"mean\": 0.21,\n      \"std\": 0.15,\n      \"min\": -0.05,\n      \"max\": 0.65\n    },\n    \"interpretation\": {\n      \"status\": \"Moderate Vegetation\",\n      \"description\": \"Field shows moderate vegetation health\",\n      \"color\": \"#90EE90\"\n    }\n  },\n  \"field_id\": \"FIELD-20251029-169A4E\",\n  \"is_new_field\": false,\n  \"message\": \"Field analysis completed successfully\",\n  \"saved_to_db\": true\n}"
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

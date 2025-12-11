@@ -1,0 +1,240 @@
+{
+  "image_id": "ITALY-RICE-FIELD-01_20241026_1761502332147",
+  "field_id": "ITALY-RICE-FIELD-01",
+  "analysis_date": "2024-10-26",
+  "ndvi_statistics": {
+    "mean": 0.5356,
+    "std": 0.0684,
+    "min": 0.3055,
+    "max": 0.6661
+  },
+  "zone_analysis": {
+    "zones": [
+      {
+        "zone_id": 1,
+        "mean_ndvi": 0.4369,
+        "std_ndvi": 0.078,
+        "area_hectares": 0.434,
+        "classification": "Moderate",
+        "classification_code": "moderate",
+        "color": "#FFD700",
+        "priority": 3
+      },
+      {
+        "zone_id": 2,
+        "mean_ndvi": 0.5722,
+        "std_ndvi": 0.0531,
+        "area_hectares": 0.6187,
+        "classification": "Good",
+        "classification_code": "good",
+        "color": "#32CD32",
+        "priority": 2
+      },
+      {
+        "zone_id": 3,
+        "mean_ndvi": 0.5016,
+        "std_ndvi": 0.0608,
+        "area_hectares": 0.3474,
+        "classification": "Good",
+        "classification_code": "good",
+        "color": "#32CD32",
+        "priority": 2
+      },
+      {
+        "zone_id": 4,
+        "mean_ndvi": 0.5219,
+        "std_ndvi": 0.0631,
+        "area_hectares": 0.7011,
+        "classification": "Good",
+        "classification_code": "good",
+        "color": "#32CD32",
+        "priority": 2
+      },
+      {
+        "zone_id": 5,
+        "mean_ndvi": 0.5846,
+        "std_ndvi": 0.0597,
+        "area_hectares": 0.7339,
+        "classification": "Good",
+        "classification_code": "good",
+        "color": "#32CD32",
+        "priority": 2
+      },
+      {
+        "zone_id": 6,
+        "mean_ndvi": 0.5306,
+        "std_ndvi": 0.0325,
+        "area_hectares": 0.4383,
+        "classification": "Good",
+        "classification_code": "good",
+        "color": "#32CD32",
+        "priority": 2
+      },
+      {
+        "zone_id": 7,
+        "mean_ndvi": 0.5495,
+        "std_ndvi": 0.0209,
+        "area_hectares": 0.5908,
+        "classification": "Good",
+        "classification_code": "good",
+        "color": "#32CD32",
+        "priority": 2
+      },
+      {
+        "zone_id": 8,
+        "mean_ndvi": 0.5366,
+        "std_ndvi": 0.0479,
+        "area_hectares": 0.6334,
+        "classification": "Good",
+        "classification_code": "good",
+        "color": "#32CD32",
+        "priority": 2
+      },
+      {
+        "zone_id": 9,
+        "mean_ndvi": 0.5279,
+        "std_ndvi": 0.0518,
+        "area_hectares": 0.1037,
+        "classification": "Good",
+        "classification_code": "good",
+        "color": "#32CD32",
+        "priority": 2
+      },
+      {
+        "zone_id": 10,
+        "mean_ndvi": 0.5385,
+        "std_ndvi": 0.0603,
+        "area_hectares": 0.4112,
+        "classification": "Good",
+        "classification_code": "good",
+        "color": "#32CD32",
+        "priority": 2
+      },
+      {
+        "zone_id": 11,
+        "mean_ndvi": 0.515,
+        "std_ndvi": 0.0689,
+        "area_hectares": 0.0706,
+        "classification": "Good",
+        "classification_code": "good",
+        "color": "#32CD32",
+        "priority": 2
+      }
+    ],
+    "summary": {
+      "by_classification": {
+        "moderate": {
+          "count": 1,
+          "total_area": 0.434,
+          "label": "Moderate",
+          "color": "#FFD700",
+          "percentage": 8.54
+        },
+        "good": {
+          "count": 10,
+          "total_area": 4.649099999999999,
+          "label": "Good",
+          "color": "#32CD32",
+          "percentage": 91.46
+        }
+      },
+      "total_area": 5.083099999999999,
+      "average_ndvi": 0.5355895142727864,
+      "priority_zones": []
+    }
+  },
+  "yield_data": {
+    "crop_type": "rice",
+    "zone_yields": [
+      {
+        "zone_id": 1,
+        "estimated_yield_tons_per_hectare": 7,
+        "total_yield_tons": 3.04,
+        "yield_quality": "Good",
+        "classification": "Moderate"
+      },
+      {
+        "zone_id": 2,
+        "estimated_yield_tons_per_hectare": 8.08,
+        "total_yield_tons": 5,
+        "yield_quality": "Excellent",
+        "classification": "Good"
+      },
+      {
+        "zone_id": 3,
+        "estimated_yield_tons_per_hectare": 7.51,
+        "total_yield_tons": 2.61,
+        "yield_quality": "Good",
+        "classification": "Good"
+      },
+      {
+        "zone_id": 4,
+        "estimated_yield_tons_per_hectare": 7.68,
+        "total_yield_tons": 5.38,
+        "yield_quality": "Good",
+        "classification": "Good"
+      },
+      {
+        "zone_id": 5,
+        "estimated_yield_tons_per_hectare": 8.18,
+        "total_yield_tons": 6,
+        "yield_quality": "Excellent",
+        "classification": "Good"
+      },
+      {
+        "zone_id": 6,
+        "estimated_yield_tons_per_hectare": 7.74,
+        "total_yield_tons": 3.39,
+        "yield_quality": "Good",
+        "classification": "Good"
+      },
+      {
+        "zone_id": 7,
+        "estimated_yield_tons_per_hectare": 7.9,
+        "total_yield_tons": 4.66,
+        "yield_quality": "Good",
+        "classification": "Good"
+      },
+      {
+        "zone_id": 8,
+        "estimated_yield_tons_per_hectare": 7.79,
+        "total_yield_tons": 4.94,
+        "yield_quality": "Good",
+        "classification": "Good"
+      },
+      {
+        "zone_id": 9,
+        "estimated_yield_tons_per_hectare": 7.72,
+        "total_yield_tons": 0.8,
+        "yield_quality": "Good",
+        "classification": "Good"
+      },
+      {
+        "zone_id": 10,
+        "estimated_yield_tons_per_hectare": 7.81,
+        "total_yield_tons": 3.21,
+        "yield_quality": "Good",
+        "classification": "Good"
+      },
+      {
+        "zone_id": 11,
+        "estimated_yield_tons_per_hectare": 7.62,
+        "total_yield_tons": 0.54,
+        "yield_quality": "Good",
+        "classification": "Good"
+      }
+    ],
+    "field_summary": {
+      "total_estimated_yield_tons": 39.57,
+      "average_yield_tons_per_hectare": 7.78,
+      "total_area_hectares": 5.08,
+      "potential_max_yield_tons": 50.83,
+      "yield_efficiency_percentage": 77.85
+    }
+  },
+  "images": {
+    "ndvi_image": "/zone-images/ITALY-RICE-FIELD-01_20241026_1761502332147/ndvi_map.png",
+    "zone_image": "/zone-images/ITALY-RICE-FIELD-01_20241026_1761502332147/zone_map.png"
+  },
+  "created_at": "2025-10-26T18:12:19.999Z"
+}

@@ -1,0 +1,2374 @@
+{
+  "field_id": "FIELD-20251030-79C392",
+  "analysis_date": "2025-10-20",
+  "ndvi_statistics": {
+    "mean": 0.5911,
+    "std": 0.0642,
+    "min": 0.1521,
+    "max": 0.7069
+  },
+  "zone_analysis": {
+    "zones": [
+      {
+        "zone_id": 1,
+        "mean_ndvi": 0.3687,
+        "std_ndvi": 0.0909,
+        "area_hectares": 0.0437,
+        "classification": "Moderate",
+        "classification_code": "moderate",
+        "color": "#FFD700",
+        "priority": 3
+      },
+      {
+        "zone_id": 2,
+        "mean_ndvi": 0.5724,
+        "std_ndvi": 0.0312,
+        "area_hectares": 0.1386,
+        "classification": "Good",
+        "classification_code": "good",
+        "color": "#32CD32",
+        "priority": 2
+      },
+      {
+        "zone_id": 3,
+        "mean_ndvi": 0.5743,
+        "std_ndvi": 0.0288,
+        "area_hectares": 0.0391,
+        "classification": "Good",
+        "classification_code": "good",
+        "color": "#32CD32",
+        "priority": 2
+      },
+      {
+        "zone_id": 11,
+        "mean_ndvi": 0.5116,
+        "std_ndvi": 0.0828,
+        "area_hectares": 0.0581,
+        "classification": "Good",
+        "classification_code": "good",
+        "color": "#32CD32",
+        "priority": 2
+      },
+      {
+        "zone_id": 12,
+        "mean_ndvi": 0.6132,
+        "std_ndvi": 0.0267,
+        "area_hectares": 0.1714,
+        "classification": "Good",
+        "classification_code": "good",
+        "color": "#32CD32",
+        "priority": 2
+      },
+      {
+        "zone_id": 13,
+        "mean_ndvi": 0.5611,
+        "std_ndvi": 0.0241,
+        "area_hectares": 0.1705,
+        "classification": "Good",
+        "classification_code": "good",
+        "color": "#32CD32",
+        "priority": 2
+      },
+      {
+        "zone_id": 14,
+        "mean_ndvi": 0.5797,
+        "std_ndvi": 0.0201,
+        "area_hectares": 0.0986,
+        "classification": "Good",
+        "classification_code": "good",
+        "color": "#32CD32",
+        "priority": 2
+      },
+      {
+        "zone_id": 15,
+        "mean_ndvi": 0.6106,
+        "std_ndvi": 0.007,
+        "area_hectares": 0.0036,
+        "classification": "Good",
+        "classification_code": "good",
+        "color": "#32CD32",
+        "priority": 2
+      },
+      {
+        "zone_id": 21,
+        "mean_ndvi": 0.4867,
+        "std_ndvi": 0.0889,
+        "area_hectares": 0.0696,
+        "classification": "Moderate",
+        "classification_code": "moderate",
+        "color": "#FFD700",
+        "priority": 3
+      },
+      {
+        "zone_id": 22,
+        "mean_ndvi": 0.6056,
+        "std_ndvi": 0.0252,
+        "area_hectares": 0.1714,
+        "classification": "Good",
+        "classification_code": "good",
+        "color": "#32CD32",
+        "priority": 2
+      },
+      {
+        "zone_id": 23,
+        "mean_ndvi": 0.5663,
+        "std_ndvi": 0.0145,
+        "area_hectares": 0.1714,
+        "classification": "Good",
+        "classification_code": "good",
+        "color": "#32CD32",
+        "priority": 2
+      },
+      {
+        "zone_id": 24,
+        "mean_ndvi": 0.55,
+        "std_ndvi": 0.0204,
+        "area_hectares": 0.1714,
+        "classification": "Good",
+        "classification_code": "good",
+        "color": "#32CD32",
+        "priority": 2
+      },
+      {
+        "zone_id": 25,
+        "mean_ndvi": 0.5909,
+        "std_ndvi": 0.0204,
+        "area_hectares": 0.1303,
+        "classification": "Good",
+        "classification_code": "good",
+        "color": "#32CD32",
+        "priority": 2
+      },
+      {
+        "zone_id": 26,
+        "mean_ndvi": 0.6003,
+        "std_ndvi": 0.0285,
+        "area_hectares": 0.0152,
+        "classification": "Good",
+        "classification_code": "good",
+        "color": "#32CD32",
+        "priority": 2
+      },
+      {
+        "zone_id": 31,
+        "mean_ndvi": 0.5581,
+        "std_ndvi": 0.0791,
+        "area_hectares": 0.0811,
+        "classification": "Good",
+        "classification_code": "good",
+        "color": "#32CD32",
+        "priority": 2
+      },
+      {
+        "zone_id": 32,
+        "mean_ndvi": 0.6114,
+        "std_ndvi": 0.021,
+        "area_hectares": 0.1714,
+        "classification": "Good",
+        "classification_code": "good",
+        "color": "#32CD32",
+        "priority": 2
+      },
+      {
+        "zone_id": 33,
+        "mean_ndvi": 0.5749,
+        "std_ndvi": 0.0113,
+        "area_hectares": 0.1714,
+        "classification": "Good",
+        "classification_code": "good",
+        "color": "#32CD32",
+        "priority": 2
+      },
+      {
+        "zone_id": 34,
+        "mean_ndvi": 0.5775,
+        "std_ndvi": 0.0164,
+        "area_hectares": 0.1714,
+        "classification": "Good",
+        "classification_code": "good",
+        "color": "#32CD32",
+        "priority": 2
+      },
+      {
+        "zone_id": 35,
+        "mean_ndvi": 0.6037,
+        "std_ndvi": 0.0212,
+        "area_hectares": 0.1714,
+        "classification": "Good",
+        "classification_code": "good",
+        "color": "#32CD32",
+        "priority": 2
+      },
+      {
+        "zone_id": 36,
+        "mean_ndvi": 0.5944,
+        "std_ndvi": 0.0306,
+        "area_hectares": 0.1482,
+        "classification": "Good",
+        "classification_code": "good",
+        "color": "#32CD32",
+        "priority": 2
+      },
+      {
+        "zone_id": 37,
+        "mean_ndvi": 0.5738,
+        "std_ndvi": 0.0116,
+        "area_hectares": 0.0072,
+        "classification": "Good",
+        "classification_code": "good",
+        "color": "#32CD32",
+        "priority": 2
+      },
+      {
+        "zone_id": 41,
+        "mean_ndvi": 0.637,
+        "std_ndvi": 0.0142,
+        "area_hectares": 0.0925,
+        "classification": "Good",
+        "classification_code": "good",
+        "color": "#32CD32",
+        "priority": 2
+      },
+      {
+        "zone_id": 42,
+        "mean_ndvi": 0.6247,
+        "std_ndvi": 0.0249,
+        "area_hectares": 0.1714,
+        "classification": "Good",
+        "classification_code": "good",
+        "color": "#32CD32",
+        "priority": 2
+      },
+      {
+        "zone_id": 43,
+        "mean_ndvi": 0.5855,
+        "std_ndvi": 0.0194,
+        "area_hectares": 0.1714,
+        "classification": "Good",
+        "classification_code": "good",
+        "color": "#32CD32",
+        "priority": 2
+      },
+      {
+        "zone_id": 44,
+        "mean_ndvi": 0.5919,
+        "std_ndvi": 0.0122,
+        "area_hectares": 0.1714,
+        "classification": "Good",
+        "classification_code": "good",
+        "color": "#32CD32",
+        "priority": 2
+      },
+      {
+        "zone_id": 45,
+        "mean_ndvi": 0.6306,
+        "std_ndvi": 0.0127,
+        "area_hectares": 0.1714,
+        "classification": "Good",
+        "classification_code": "good",
+        "color": "#32CD32",
+        "priority": 2
+      },
+      {
+        "zone_id": 46,
+        "mean_ndvi": 0.6139,
+        "std_ndvi": 0.014,
+        "area_hectares": 0.1714,
+        "classification": "Good",
+        "classification_code": "good",
+        "color": "#32CD32",
+        "priority": 2
+      },
+      {
+        "zone_id": 47,
+        "mean_ndvi": 0.6095,
+        "std_ndvi": 0.034,
+        "area_hectares": 0.0889,
+        "classification": "Good",
+        "classification_code": "good",
+        "color": "#32CD32",
+        "priority": 2
+      },
+      {
+        "zone_id": 51,
+        "mean_ndvi": 0.6273,
+        "std_ndvi": 0.055,
+        "area_hectares": 0.104,
+        "classification": "Good",
+        "classification_code": "good",
+        "color": "#32CD32",
+        "priority": 2
+      },
+      {
+        "zone_id": 52,
+        "mean_ndvi": 0.6332,
+        "std_ndvi": 0.0133,
+        "area_hectares": 0.1714,
+        "classification": "Good",
+        "classification_code": "good",
+        "color": "#32CD32",
+        "priority": 2
+      },
+      {
+        "zone_id": 53,
+        "mean_ndvi": 0.614,
+        "std_ndvi": 0.0096,
+        "area_hectares": 0.1714,
+        "classification": "Good",
+        "classification_code": "good",
+        "color": "#32CD32",
+        "priority": 2
+      },
+      {
+        "zone_id": 54,
+        "mean_ndvi": 0.6025,
+        "std_ndvi": 0.0099,
+        "area_hectares": 0.1714,
+        "classification": "Good",
+        "classification_code": "good",
+        "color": "#32CD32",
+        "priority": 2
+      },
+      {
+        "zone_id": 55,
+        "mean_ndvi": 0.6328,
+        "std_ndvi": 0.0139,
+        "area_hectares": 0.1714,
+        "classification": "Good",
+        "classification_code": "good",
+        "color": "#32CD32",
+        "priority": 2
+      },
+      {
+        "zone_id": 56,
+        "mean_ndvi": 0.608,
+        "std_ndvi": 0.0097,
+        "area_hectares": 0.1714,
+        "classification": "Good",
+        "classification_code": "good",
+        "color": "#32CD32",
+        "priority": 2
+      },
+      {
+        "zone_id": 57,
+        "mean_ndvi": 0.6108,
+        "std_ndvi": 0.0192,
+        "area_hectares": 0.1664,
+        "classification": "Good",
+        "classification_code": "good",
+        "color": "#32CD32",
+        "priority": 2
+      },
+      {
+        "zone_id": 58,
+        "mean_ndvi": 0.6046,
+        "std_ndvi": 0.0234,
+        "area_hectares": 0.024,
+        "classification": "Good",
+        "classification_code": "good",
+        "color": "#32CD32",
+        "priority": 2
+      },
+      {
+        "zone_id": 61,
+        "mean_ndvi": 0.6155,
+        "std_ndvi": 0.0759,
+        "area_hectares": 0.1155,
+        "classification": "Good",
+        "classification_code": "good",
+        "color": "#32CD32",
+        "priority": 2
+      },
+      {
+        "zone_id": 62,
+        "mean_ndvi": 0.6396,
+        "std_ndvi": 0.0095,
+        "area_hectares": 0.1714,
+        "classification": "Good",
+        "classification_code": "good",
+        "color": "#32CD32",
+        "priority": 2
+      },
+      {
+        "zone_id": 63,
+        "mean_ndvi": 0.6233,
+        "std_ndvi": 0.0087,
+        "area_hectares": 0.1714,
+        "classification": "Good",
+        "classification_code": "good",
+        "color": "#32CD32",
+        "priority": 2
+      },
+      {
+        "zone_id": 64,
+        "mean_ndvi": 0.5935,
+        "std_ndvi": 0.0174,
+        "area_hectares": 0.1714,
+        "classification": "Good",
+        "classification_code": "good",
+        "color": "#32CD32",
+        "priority": 2
+      },
+      {
+        "zone_id": 65,
+        "mean_ndvi": 0.6262,
+        "std_ndvi": 0.0133,
+        "area_hectares": 0.1714,
+        "classification": "Good",
+        "classification_code": "good",
+        "color": "#32CD32",
+        "priority": 2
+      },
+      {
+        "zone_id": 66,
+        "mean_ndvi": 0.6034,
+        "std_ndvi": 0.0098,
+        "area_hectares": 0.1714,
+        "classification": "Good",
+        "classification_code": "good",
+        "color": "#32CD32",
+        "priority": 2
+      },
+      {
+        "zone_id": 67,
+        "mean_ndvi": 0.6085,
+        "std_ndvi": 0.0153,
+        "area_hectares": 0.1714,
+        "classification": "Good",
+        "classification_code": "good",
+        "color": "#32CD32",
+        "priority": 2
+      },
+      {
+        "zone_id": 68,
+        "mean_ndvi": 0.596,
+        "std_ndvi": 0.0219,
+        "area_hectares": 0.1205,
+        "classification": "Good",
+        "classification_code": "good",
+        "color": "#32CD32",
+        "priority": 2
+      },
+      {
+        "zone_id": 71,
+        "mean_ndvi": 0.6224,
+        "std_ndvi": 0.043,
+        "area_hectares": 0.127,
+        "classification": "Good",
+        "classification_code": "good",
+        "color": "#32CD32",
+        "priority": 2
+      },
+      {
+        "zone_id": 72,
+        "mean_ndvi": 0.645,
+        "std_ndvi": 0.0139,
+        "area_hectares": 0.1714,
+        "classification": "Good",
+        "classification_code": "good",
+        "color": "#32CD32",
+        "priority": 2
+      },
+      {
+        "zone_id": 73,
+        "mean_ndvi": 0.6342,
+        "std_ndvi": 0.016,
+        "area_hectares": 0.1714,
+        "classification": "Good",
+        "classification_code": "good",
+        "color": "#32CD32",
+        "priority": 2
+      },
+      {
+        "zone_id": 74,
+        "mean_ndvi": 0.6083,
+        "std_ndvi": 0.0126,
+        "area_hectares": 0.1714,
+        "classification": "Good",
+        "classification_code": "good",
+        "color": "#32CD32",
+        "priority": 2
+      },
+      {
+        "zone_id": 75,
+        "mean_ndvi": 0.6295,
+        "std_ndvi": 0.0162,
+        "area_hectares": 0.1714,
+        "classification": "Good",
+        "classification_code": "good",
+        "color": "#32CD32",
+        "priority": 2
+      },
+      {
+        "zone_id": 76,
+        "mean_ndvi": 0.6084,
+        "std_ndvi": 0.0113,
+        "area_hectares": 0.1714,
+        "classification": "Good",
+        "classification_code": "good",
+        "color": "#32CD32",
+        "priority": 2
+      },
+      {
+        "zone_id": 77,
+        "mean_ndvi": 0.6163,
+        "std_ndvi": 0.0071,
+        "area_hectares": 0.1714,
+        "classification": "Good",
+        "classification_code": "good",
+        "color": "#32CD32",
+        "priority": 2
+      },
+      {
+        "zone_id": 78,
+        "mean_ndvi": 0.6184,
+        "std_ndvi": 0.0196,
+        "area_hectares": 0.1714,
+        "classification": "Good",
+        "classification_code": "good",
+        "color": "#32CD32",
+        "priority": 2
+      },
+      {
+        "zone_id": 79,
+        "mean_ndvi": 0.6051,
+        "std_ndvi": 0.0412,
+        "area_hectares": 0.0424,
+        "classification": "Good",
+        "classification_code": "good",
+        "color": "#32CD32",
+        "priority": 2
+      },
+      {
+        "zone_id": 81,
+        "mean_ndvi": 0.6219,
+        "std_ndvi": 0.0673,
+        "area_hectares": 0.1384,
+        "classification": "Good",
+        "classification_code": "good",
+        "color": "#32CD32",
+        "priority": 2
+      },
+      {
+        "zone_id": 82,
+        "mean_ndvi": 0.6682,
+        "std_ndvi": 0.0111,
+        "area_hectares": 0.1714,
+        "classification": "Good",
+        "classification_code": "good",
+        "color": "#32CD32",
+        "priority": 2
+      },
+      {
+        "zone_id": 83,
+        "mean_ndvi": 0.6473,
+        "std_ndvi": 0.027,
+        "area_hectares": 0.1714,
+        "classification": "Good",
+        "classification_code": "good",
+        "color": "#32CD32",
+        "priority": 2
+      },
+      {
+        "zone_id": 84,
+        "mean_ndvi": 0.6084,
+        "std_ndvi": 0.0163,
+        "area_hectares": 0.1714,
+        "classification": "Good",
+        "classification_code": "good",
+        "color": "#32CD32",
+        "priority": 2
+      },
+      {
+        "zone_id": 85,
+        "mean_ndvi": 0.6312,
+        "std_ndvi": 0.0164,
+        "area_hectares": 0.1714,
+        "classification": "Good",
+        "classification_code": "good",
+        "color": "#32CD32",
+        "priority": 2
+      },
+      {
+        "zone_id": 86,
+        "mean_ndvi": 0.6126,
+        "std_ndvi": 0.0126,
+        "area_hectares": 0.1714,
+        "classification": "Good",
+        "classification_code": "good",
+        "color": "#32CD32",
+        "priority": 2
+      },
+      {
+        "zone_id": 87,
+        "mean_ndvi": 0.6195,
+        "std_ndvi": 0.0225,
+        "area_hectares": 0.1714,
+        "classification": "Good",
+        "classification_code": "good",
+        "color": "#32CD32",
+        "priority": 2
+      },
+      {
+        "zone_id": 88,
+        "mean_ndvi": 0.6226,
+        "std_ndvi": 0.0265,
+        "area_hectares": 0.1714,
+        "classification": "Good",
+        "classification_code": "good",
+        "color": "#32CD32",
+        "priority": 2
+      },
+      {
+        "zone_id": 89,
+        "mean_ndvi": 0.6078,
+        "std_ndvi": 0.0254,
+        "area_hectares": 0.1015,
+        "classification": "Good",
+        "classification_code": "good",
+        "color": "#32CD32",
+        "priority": 2
+      },
+      {
+        "zone_id": 91,
+        "mean_ndvi": 0.6214,
+        "std_ndvi": 0.0807,
+        "area_hectares": 0.1499,
+        "classification": "Good",
+        "classification_code": "good",
+        "color": "#32CD32",
+        "priority": 2
+      },
+      {
+        "zone_id": 92,
+        "mean_ndvi": 0.6498,
+        "std_ndvi": 0.0262,
+        "area_hectares": 0.1714,
+        "classification": "Good",
+        "classification_code": "good",
+        "color": "#32CD32",
+        "priority": 2
+      },
+      {
+        "zone_id": 93,
+        "mean_ndvi": 0.6695,
+        "std_ndvi": 0.0224,
+        "area_hectares": 0.1714,
+        "classification": "Good",
+        "classification_code": "good",
+        "color": "#32CD32",
+        "priority": 2
+      },
+      {
+        "zone_id": 94,
+        "mean_ndvi": 0.6193,
+        "std_ndvi": 0.0216,
+        "area_hectares": 0.1714,
+        "classification": "Good",
+        "classification_code": "good",
+        "color": "#32CD32",
+        "priority": 2
+      },
+      {
+        "zone_id": 95,
+        "mean_ndvi": 0.6216,
+        "std_ndvi": 0.0148,
+        "area_hectares": 0.1714,
+        "classification": "Good",
+        "classification_code": "good",
+        "color": "#32CD32",
+        "priority": 2
+      },
+      {
+        "zone_id": 96,
+        "mean_ndvi": 0.6103,
+        "std_ndvi": 0.0172,
+        "area_hectares": 0.1714,
+        "classification": "Good",
+        "classification_code": "good",
+        "color": "#32CD32",
+        "priority": 2
+      },
+      {
+        "zone_id": 97,
+        "mean_ndvi": 0.6038,
+        "std_ndvi": 0.0233,
+        "area_hectares": 0.1714,
+        "classification": "Good",
+        "classification_code": "good",
+        "color": "#32CD32",
+        "priority": 2
+      },
+      {
+        "zone_id": 98,
+        "mean_ndvi": 0.6086,
+        "std_ndvi": 0.0184,
+        "area_hectares": 0.1714,
+        "classification": "Good",
+        "classification_code": "good",
+        "color": "#32CD32",
+        "priority": 2
+      },
+      {
+        "zone_id": 99,
+        "mean_ndvi": 0.6003,
+        "std_ndvi": 0.0241,
+        "area_hectares": 0.1552,
+        "classification": "Good",
+        "classification_code": "good",
+        "color": "#32CD32",
+        "priority": 2
+      },
+      {
+        "zone_id": 100,
+        "mean_ndvi": 0.5647,
+        "std_ndvi": 0.0109,
+        "area_hectares": 0.0015,
+        "classification": "Good",
+        "classification_code": "good",
+        "color": "#32CD32",
+        "priority": 2
+      },
+      {
+        "zone_id": 101,
+        "mean_ndvi": 0.5599,
+        "std_ndvi": 0.0476,
+        "area_hectares": 0.1614,
+        "classification": "Good",
+        "classification_code": "good",
+        "color": "#32CD32",
+        "priority": 2
+      },
+      {
+        "zone_id": 102,
+        "mean_ndvi": 0.5849,
+        "std_ndvi": 0.0298,
+        "area_hectares": 0.1714,
+        "classification": "Good",
+        "classification_code": "good",
+        "color": "#32CD32",
+        "priority": 2
+      },
+      {
+        "zone_id": 103,
+        "mean_ndvi": 0.6193,
+        "std_ndvi": 0.0254,
+        "area_hectares": 0.1714,
+        "classification": "Good",
+        "classification_code": "good",
+        "color": "#32CD32",
+        "priority": 2
+      },
+      {
+        "zone_id": 104,
+        "mean_ndvi": 0.6329,
+        "std_ndvi": 0.0194,
+        "area_hectares": 0.1714,
+        "classification": "Good",
+        "classification_code": "good",
+        "color": "#32CD32",
+        "priority": 2
+      },
+      {
+        "zone_id": 105,
+        "mean_ndvi": 0.6208,
+        "std_ndvi": 0.0139,
+        "area_hectares": 0.1714,
+        "classification": "Good",
+        "classification_code": "good",
+        "color": "#32CD32",
+        "priority": 2
+      },
+      {
+        "zone_id": 106,
+        "mean_ndvi": 0.615,
+        "std_ndvi": 0.0206,
+        "area_hectares": 0.1714,
+        "classification": "Good",
+        "classification_code": "good",
+        "color": "#32CD32",
+        "priority": 2
+      },
+      {
+        "zone_id": 107,
+        "mean_ndvi": 0.5961,
+        "std_ndvi": 0.0093,
+        "area_hectares": 0.1714,
+        "classification": "Good",
+        "classification_code": "good",
+        "color": "#32CD32",
+        "priority": 2
+      },
+      {
+        "zone_id": 108,
+        "mean_ndvi": 0.5953,
+        "std_ndvi": 0.0155,
+        "area_hectares": 0.1714,
+        "classification": "Good",
+        "classification_code": "good",
+        "color": "#32CD32",
+        "priority": 2
+      },
+      {
+        "zone_id": 109,
+        "mean_ndvi": 0.5824,
+        "std_ndvi": 0.0253,
+        "area_hectares": 0.1714,
+        "classification": "Good",
+        "classification_code": "good",
+        "color": "#32CD32",
+        "priority": 2
+      },
+      {
+        "zone_id": 110,
+        "mean_ndvi": 0.5499,
+        "std_ndvi": 0.0459,
+        "area_hectares": 0.0406,
+        "classification": "Good",
+        "classification_code": "good",
+        "color": "#32CD32",
+        "priority": 2
+      },
+      {
+        "zone_id": 111,
+        "mean_ndvi": 0.5321,
+        "std_ndvi": 0.0292,
+        "area_hectares": 0.167,
+        "classification": "Good",
+        "classification_code": "good",
+        "color": "#32CD32",
+        "priority": 2
+      },
+      {
+        "zone_id": 112,
+        "mean_ndvi": 0.5517,
+        "std_ndvi": 0.0283,
+        "area_hectares": 0.1714,
+        "classification": "Good",
+        "classification_code": "good",
+        "color": "#32CD32",
+        "priority": 2
+      },
+      {
+        "zone_id": 113,
+        "mean_ndvi": 0.5722,
+        "std_ndvi": 0.019,
+        "area_hectares": 0.1714,
+        "classification": "Good",
+        "classification_code": "good",
+        "color": "#32CD32",
+        "priority": 2
+      },
+      {
+        "zone_id": 114,
+        "mean_ndvi": 0.5915,
+        "std_ndvi": 0.0369,
+        "area_hectares": 0.1714,
+        "classification": "Good",
+        "classification_code": "good",
+        "color": "#32CD32",
+        "priority": 2
+      },
+      {
+        "zone_id": 115,
+        "mean_ndvi": 0.6227,
+        "std_ndvi": 0.0273,
+        "area_hectares": 0.1714,
+        "classification": "Good",
+        "classification_code": "good",
+        "color": "#32CD32",
+        "priority": 2
+      },
+      {
+        "zone_id": 116,
+        "mean_ndvi": 0.6122,
+        "std_ndvi": 0.0232,
+        "area_hectares": 0.1714,
+        "classification": "Good",
+        "classification_code": "good",
+        "color": "#32CD32",
+        "priority": 2
+      },
+      {
+        "zone_id": 117,
+        "mean_ndvi": 0.5871,
+        "std_ndvi": 0.0159,
+        "area_hectares": 0.1714,
+        "classification": "Good",
+        "classification_code": "good",
+        "color": "#32CD32",
+        "priority": 2
+      },
+      {
+        "zone_id": 118,
+        "mean_ndvi": 0.5876,
+        "std_ndvi": 0.0284,
+        "area_hectares": 0.1714,
+        "classification": "Good",
+        "classification_code": "good",
+        "color": "#32CD32",
+        "priority": 2
+      },
+      {
+        "zone_id": 119,
+        "mean_ndvi": 0.6018,
+        "std_ndvi": 0.0477,
+        "area_hectares": 0.1714,
+        "classification": "Good",
+        "classification_code": "good",
+        "color": "#32CD32",
+        "priority": 2
+      },
+      {
+        "zone_id": 120,
+        "mean_ndvi": 0.4791,
+        "std_ndvi": 0.0383,
+        "area_hectares": 0.0593,
+        "classification": "Moderate",
+        "classification_code": "moderate",
+        "color": "#FFD700",
+        "priority": 3
+      },
+      {
+        "zone_id": 121,
+        "mean_ndvi": 0.5325,
+        "std_ndvi": 0.0533,
+        "area_hectares": 0.0563,
+        "classification": "Good",
+        "classification_code": "good",
+        "color": "#32CD32",
+        "priority": 2
+      },
+      {
+        "zone_id": 122,
+        "mean_ndvi": 0.5434,
+        "std_ndvi": 0.0272,
+        "area_hectares": 0.1622,
+        "classification": "Good",
+        "classification_code": "good",
+        "color": "#32CD32",
+        "priority": 2
+      },
+      {
+        "zone_id": 123,
+        "mean_ndvi": 0.5603,
+        "std_ndvi": 0.0163,
+        "area_hectares": 0.1714,
+        "classification": "Good",
+        "classification_code": "good",
+        "color": "#32CD32",
+        "priority": 2
+      },
+      {
+        "zone_id": 124,
+        "mean_ndvi": 0.5732,
+        "std_ndvi": 0.0241,
+        "area_hectares": 0.1714,
+        "classification": "Good",
+        "classification_code": "good",
+        "color": "#32CD32",
+        "priority": 2
+      },
+      {
+        "zone_id": 125,
+        "mean_ndvi": 0.6103,
+        "std_ndvi": 0.0403,
+        "area_hectares": 0.1714,
+        "classification": "Good",
+        "classification_code": "good",
+        "color": "#32CD32",
+        "priority": 2
+      },
+      {
+        "zone_id": 126,
+        "mean_ndvi": 0.5994,
+        "std_ndvi": 0.053,
+        "area_hectares": 0.1714,
+        "classification": "Good",
+        "classification_code": "good",
+        "color": "#32CD32",
+        "priority": 2
+      },
+      {
+        "zone_id": 127,
+        "mean_ndvi": 0.5848,
+        "std_ndvi": 0.0404,
+        "area_hectares": 0.1714,
+        "classification": "Good",
+        "classification_code": "good",
+        "color": "#32CD32",
+        "priority": 2
+      },
+      {
+        "zone_id": 128,
+        "mean_ndvi": 0.5723,
+        "std_ndvi": 0.0132,
+        "area_hectares": 0.1714,
+        "classification": "Good",
+        "classification_code": "good",
+        "color": "#32CD32",
+        "priority": 2
+      },
+      {
+        "zone_id": 129,
+        "mean_ndvi": 0.5493,
+        "std_ndvi": 0.0286,
+        "area_hectares": 0.1491,
+        "classification": "Good",
+        "classification_code": "good",
+        "color": "#32CD32",
+        "priority": 2
+      },
+      {
+        "zone_id": 130,
+        "mean_ndvi": 0.5259,
+        "std_ndvi": 0.0096,
+        "area_hectares": 0.0031,
+        "classification": "Good",
+        "classification_code": "good",
+        "color": "#32CD32",
+        "priority": 2
+      },
+      {
+        "zone_id": 132,
+        "mean_ndvi": 0.5247,
+        "std_ndvi": 0.0251,
+        "area_hectares": 0.0259,
+        "classification": "Good",
+        "classification_code": "good",
+        "color": "#32CD32",
+        "priority": 2
+      },
+      {
+        "zone_id": 133,
+        "mean_ndvi": 0.5384,
+        "std_ndvi": 0.0203,
+        "area_hectares": 0.1417,
+        "classification": "Good",
+        "classification_code": "good",
+        "color": "#32CD32",
+        "priority": 2
+      },
+      {
+        "zone_id": 134,
+        "mean_ndvi": 0.5565,
+        "std_ndvi": 0.0355,
+        "area_hectares": 0.1714,
+        "classification": "Good",
+        "classification_code": "good",
+        "color": "#32CD32",
+        "priority": 2
+      },
+      {
+        "zone_id": 135,
+        "mean_ndvi": 0.6232,
+        "std_ndvi": 0.0417,
+        "area_hectares": 0.1714,
+        "classification": "Good",
+        "classification_code": "good",
+        "color": "#32CD32",
+        "priority": 2
+      },
+      {
+        "zone_id": 136,
+        "mean_ndvi": 0.6385,
+        "std_ndvi": 0.0703,
+        "area_hectares": 0.1714,
+        "classification": "Good",
+        "classification_code": "good",
+        "color": "#32CD32",
+        "priority": 2
+      },
+      {
+        "zone_id": 137,
+        "mean_ndvi": 0.5301,
+        "std_ndvi": 0.0402,
+        "area_hectares": 0.1714,
+        "classification": "Good",
+        "classification_code": "good",
+        "color": "#32CD32",
+        "priority": 2
+      },
+      {
+        "zone_id": 138,
+        "mean_ndvi": 0.5672,
+        "std_ndvi": 0.0454,
+        "area_hectares": 0.1714,
+        "classification": "Good",
+        "classification_code": "good",
+        "color": "#32CD32",
+        "priority": 2
+      },
+      {
+        "zone_id": 139,
+        "mean_ndvi": 0.538,
+        "std_ndvi": 0.0328,
+        "area_hectares": 0.0748,
+        "classification": "Good",
+        "classification_code": "good",
+        "color": "#32CD32",
+        "priority": 2
+      },
+      {
+        "zone_id": 143,
+        "mean_ndvi": 0.5273,
+        "std_ndvi": 0.0125,
+        "area_hectares": 0.0072,
+        "classification": "Good",
+        "classification_code": "good",
+        "color": "#32CD32",
+        "priority": 2
+      },
+      {
+        "zone_id": 144,
+        "mean_ndvi": 0.5585,
+        "std_ndvi": 0.0342,
+        "area_hectares": 0.1096,
+        "classification": "Good",
+        "classification_code": "good",
+        "color": "#32CD32",
+        "priority": 2
+      },
+      {
+        "zone_id": 145,
+        "mean_ndvi": 0.5522,
+        "std_ndvi": 0.1066,
+        "area_hectares": 0.1714,
+        "classification": "Good",
+        "classification_code": "good",
+        "color": "#32CD32",
+        "priority": 2
+      },
+      {
+        "zone_id": 146,
+        "mean_ndvi": 0.5006,
+        "std_ndvi": 0.1187,
+        "area_hectares": 0.1714,
+        "classification": "Good",
+        "classification_code": "good",
+        "color": "#32CD32",
+        "priority": 2
+      },
+      {
+        "zone_id": 147,
+        "mean_ndvi": 0.6017,
+        "std_ndvi": 0.0738,
+        "area_hectares": 0.1714,
+        "classification": "Good",
+        "classification_code": "good",
+        "color": "#32CD32",
+        "priority": 2
+      },
+      {
+        "zone_id": 148,
+        "mean_ndvi": 0.5255,
+        "std_ndvi": 0.0719,
+        "area_hectares": 0.1714,
+        "classification": "Good",
+        "classification_code": "good",
+        "color": "#32CD32",
+        "priority": 2
+      },
+      {
+        "zone_id": 149,
+        "mean_ndvi": 0.5818,
+        "std_ndvi": 0.0291,
+        "area_hectares": 0.137,
+        "classification": "Good",
+        "classification_code": "good",
+        "color": "#32CD32",
+        "priority": 2
+      },
+      {
+        "zone_id": 150,
+        "mean_ndvi": 0.5395,
+        "std_ndvi": 0.0009,
+        "area_hectares": 0.0044,
+        "classification": "Good",
+        "classification_code": "good",
+        "color": "#32CD32",
+        "priority": 2
+      },
+      {
+        "zone_id": 155,
+        "mean_ndvi": 0.4764,
+        "std_ndvi": 0.0734,
+        "area_hectares": 0.1029,
+        "classification": "Moderate",
+        "classification_code": "moderate",
+        "color": "#FFD700",
+        "priority": 3
+      },
+      {
+        "zone_id": 156,
+        "mean_ndvi": 0.4565,
+        "std_ndvi": 0.0999,
+        "area_hectares": 0.1714,
+        "classification": "Moderate",
+        "classification_code": "moderate",
+        "color": "#FFD700",
+        "priority": 3
+      },
+      {
+        "zone_id": 157,
+        "mean_ndvi": 0.6158,
+        "std_ndvi": 0.0327,
+        "area_hectares": 0.1714,
+        "classification": "Good",
+        "classification_code": "good",
+        "color": "#32CD32",
+        "priority": 2
+      },
+      {
+        "zone_id": 158,
+        "mean_ndvi": 0.5949,
+        "std_ndvi": 0.0285,
+        "area_hectares": 0.1714,
+        "classification": "Good",
+        "classification_code": "good",
+        "color": "#32CD32",
+        "priority": 2
+      },
+      {
+        "zone_id": 159,
+        "mean_ndvi": 0.5565,
+        "std_ndvi": 0.1074,
+        "area_hectares": 0.1669,
+        "classification": "Good",
+        "classification_code": "good",
+        "color": "#32CD32",
+        "priority": 2
+      },
+      {
+        "zone_id": 160,
+        "mean_ndvi": 0.5502,
+        "std_ndvi": 0.0223,
+        "area_hectares": 0.0041,
+        "classification": "Good",
+        "classification_code": "good",
+        "color": "#32CD32",
+        "priority": 2
+      },
+      {
+        "zone_id": 165,
+        "mean_ndvi": 0.3322,
+        "std_ndvi": 0.0279,
+        "area_hectares": 0.0022,
+        "classification": "Moderate",
+        "classification_code": "moderate",
+        "color": "#FFD700",
+        "priority": 3
+      },
+      {
+        "zone_id": 166,
+        "mean_ndvi": 0.471,
+        "std_ndvi": 0.077,
+        "area_hectares": 0.1182,
+        "classification": "Moderate",
+        "classification_code": "moderate",
+        "color": "#FFD700",
+        "priority": 3
+      },
+      {
+        "zone_id": 167,
+        "mean_ndvi": 0.5913,
+        "std_ndvi": 0.0526,
+        "area_hectares": 0.1714,
+        "classification": "Good",
+        "classification_code": "good",
+        "color": "#32CD32",
+        "priority": 2
+      },
+      {
+        "zone_id": 168,
+        "mean_ndvi": 0.606,
+        "std_ndvi": 0.0766,
+        "area_hectares": 0.1714,
+        "classification": "Good",
+        "classification_code": "good",
+        "color": "#32CD32",
+        "priority": 2
+      },
+      {
+        "zone_id": 169,
+        "mean_ndvi": 0.2812,
+        "std_ndvi": 0.1282,
+        "area_hectares": 0.1369,
+        "classification": "Poor",
+        "classification_code": "poor",
+        "color": "#FF8C00",
+        "priority": 4
+      },
+      {
+        "zone_id": 176,
+        "mean_ndvi": 0.5212,
+        "std_ndvi": 0.0285,
+        "area_hectares": 0.0061,
+        "classification": "Good",
+        "classification_code": "good",
+        "color": "#32CD32",
+        "priority": 2
+      },
+      {
+        "zone_id": 177,
+        "mean_ndvi": 0.6049,
+        "std_ndvi": 0.0356,
+        "area_hectares": 0.1316,
+        "classification": "Good",
+        "classification_code": "good",
+        "color": "#32CD32",
+        "priority": 2
+      },
+      {
+        "zone_id": 178,
+        "mean_ndvi": 0.6162,
+        "std_ndvi": 0.0486,
+        "area_hectares": 0.1714,
+        "classification": "Good",
+        "classification_code": "good",
+        "color": "#32CD32",
+        "priority": 2
+      },
+      {
+        "zone_id": 179,
+        "mean_ndvi": 0.4681,
+        "std_ndvi": 0.1482,
+        "area_hectares": 0.1029,
+        "classification": "Moderate",
+        "classification_code": "moderate",
+        "color": "#FFD700",
+        "priority": 3
+      },
+      {
+        "zone_id": 187,
+        "mean_ndvi": 0.6275,
+        "std_ndvi": 0.01,
+        "area_hectares": 0.0101,
+        "classification": "Good",
+        "classification_code": "good",
+        "color": "#32CD32",
+        "priority": 2
+      },
+      {
+        "zone_id": 188,
+        "mean_ndvi": 0.6192,
+        "std_ndvi": 0.0494,
+        "area_hectares": 0.082,
+        "classification": "Good",
+        "classification_code": "good",
+        "color": "#32CD32",
+        "priority": 2
+      },
+      {
+        "zone_id": 189,
+        "mean_ndvi": 0.4811,
+        "std_ndvi": 0.051,
+        "area_hectares": 0.0551,
+        "classification": "Moderate",
+        "classification_code": "moderate",
+        "color": "#FFD700",
+        "priority": 3
+      }
+    ],
+    "summary": {
+      "by_classification": {
+        "moderate": {
+          "count": 9,
+          "total_area": 0.7253000000000001,
+          "label": "Moderate",
+          "color": "#FFD700",
+          "percentage": 3.88
+        },
+        "good": {
+          "count": 126,
+          "total_area": 17.842700000000004,
+          "label": "Good",
+          "color": "#32CD32",
+          "percentage": 95.39
+        },
+        "poor": {
+          "count": 1,
+          "total_area": 0.1369,
+          "label": "Poor",
+          "color": "#FF8C00",
+          "percentage": 0.73
+        }
+      },
+      "total_area": 18.704900000000006,
+      "average_ndvi": 0.5910735555923845,
+      "priority_zones": [
+        169
+      ]
+    }
+  },
+  "yield_data": {
+    "crop_type": "rice",
+    "zone_yields": [
+      {
+        "zone_id": 1,
+        "estimated_yield_tons_per_hectare": 6.45,
+        "total_yield_tons": 0.28,
+        "yield_quality": "Good",
+        "classification": "Moderate"
+      },
+      {
+        "zone_id": 2,
+        "estimated_yield_tons_per_hectare": 8.08,
+        "total_yield_tons": 1.12,
+        "yield_quality": "Excellent",
+        "classification": "Good"
+      },
+      {
+        "zone_id": 3,
+        "estimated_yield_tons_per_hectare": 8.09,
+        "total_yield_tons": 0.32,
+        "yield_quality": "Excellent",
+        "classification": "Good"
+      },
+      {
+        "zone_id": 11,
+        "estimated_yield_tons_per_hectare": 7.59,
+        "total_yield_tons": 0.44,
+        "yield_quality": "Good",
+        "classification": "Good"
+      },
+      {
+        "zone_id": 12,
+        "estimated_yield_tons_per_hectare": 8.41,
+        "total_yield_tons": 1.44,
+        "yield_quality": "Excellent",
+        "classification": "Good"
+      },
+      {
+        "zone_id": 13,
+        "estimated_yield_tons_per_hectare": 7.99,
+        "total_yield_tons": 1.36,
+        "yield_quality": "Good",
+        "classification": "Good"
+      },
+      {
+        "zone_id": 14,
+        "estimated_yield_tons_per_hectare": 8.14,
+        "total_yield_tons": 0.8,
+        "yield_quality": "Excellent",
+        "classification": "Good"
+      },
+      {
+        "zone_id": 15,
+        "estimated_yield_tons_per_hectare": 8.38,
+        "total_yield_tons": 0.03,
+        "yield_quality": "Excellent",
+        "classification": "Good"
+      },
+      {
+        "zone_id": 21,
+        "estimated_yield_tons_per_hectare": 7.39,
+        "total_yield_tons": 0.51,
+        "yield_quality": "Good",
+        "classification": "Moderate"
+      },
+      {
+        "zone_id": 22,
+        "estimated_yield_tons_per_hectare": 8.34,
+        "total_yield_tons": 1.43,
+        "yield_quality": "Excellent",
+        "classification": "Good"
+      },
+      {
+        "zone_id": 23,
+        "estimated_yield_tons_per_hectare": 8.03,
+        "total_yield_tons": 1.38,
+        "yield_quality": "Excellent",
+        "classification": "Good"
+      },
+      {
+        "zone_id": 24,
+        "estimated_yield_tons_per_hectare": 7.9,
+        "total_yield_tons": 1.35,
+        "yield_quality": "Good",
+        "classification": "Good"
+      },
+      {
+        "zone_id": 25,
+        "estimated_yield_tons_per_hectare": 8.23,
+        "total_yield_tons": 1.07,
+        "yield_quality": "Excellent",
+        "classification": "Good"
+      },
+      {
+        "zone_id": 26,
+        "estimated_yield_tons_per_hectare": 8.3,
+        "total_yield_tons": 0.13,
+        "yield_quality": "Excellent",
+        "classification": "Good"
+      },
+      {
+        "zone_id": 31,
+        "estimated_yield_tons_per_hectare": 7.96,
+        "total_yield_tons": 0.65,
+        "yield_quality": "Good",
+        "classification": "Good"
+      },
+      {
+        "zone_id": 32,
+        "estimated_yield_tons_per_hectare": 8.39,
+        "total_yield_tons": 1.44,
+        "yield_quality": "Excellent",
+        "classification": "Good"
+      },
+      {
+        "zone_id": 33,
+        "estimated_yield_tons_per_hectare": 8.1,
+        "total_yield_tons": 1.39,
+        "yield_quality": "Excellent",
+        "classification": "Good"
+      },
+      {
+        "zone_id": 34,
+        "estimated_yield_tons_per_hectare": 8.12,
+        "total_yield_tons": 1.39,
+        "yield_quality": "Excellent",
+        "classification": "Good"
+      },
+      {
+        "zone_id": 35,
+        "estimated_yield_tons_per_hectare": 8.33,
+        "total_yield_tons": 1.43,
+        "yield_quality": "Excellent",
+        "classification": "Good"
+      },
+      {
+        "zone_id": 36,
+        "estimated_yield_tons_per_hectare": 8.26,
+        "total_yield_tons": 1.22,
+        "yield_quality": "Excellent",
+        "classification": "Good"
+      },
+      {
+        "zone_id": 37,
+        "estimated_yield_tons_per_hectare": 8.09,
+        "total_yield_tons": 0.06,
+        "yield_quality": "Excellent",
+        "classification": "Good"
+      },
+      {
+        "zone_id": 41,
+        "estimated_yield_tons_per_hectare": 8.6,
+        "total_yield_tons": 0.8,
+        "yield_quality": "Excellent",
+        "classification": "Good"
+      },
+      {
+        "zone_id": 42,
+        "estimated_yield_tons_per_hectare": 8.5,
+        "total_yield_tons": 1.46,
+        "yield_quality": "Excellent",
+        "classification": "Good"
+      },
+      {
+        "zone_id": 43,
+        "estimated_yield_tons_per_hectare": 8.18,
+        "total_yield_tons": 1.4,
+        "yield_quality": "Excellent",
+        "classification": "Good"
+      },
+      {
+        "zone_id": 44,
+        "estimated_yield_tons_per_hectare": 8.24,
+        "total_yield_tons": 1.41,
+        "yield_quality": "Excellent",
+        "classification": "Good"
+      },
+      {
+        "zone_id": 45,
+        "estimated_yield_tons_per_hectare": 8.54,
+        "total_yield_tons": 1.46,
+        "yield_quality": "Excellent",
+        "classification": "Good"
+      },
+      {
+        "zone_id": 46,
+        "estimated_yield_tons_per_hectare": 8.41,
+        "total_yield_tons": 1.44,
+        "yield_quality": "Excellent",
+        "classification": "Good"
+      },
+      {
+        "zone_id": 47,
+        "estimated_yield_tons_per_hectare": 8.38,
+        "total_yield_tons": 0.74,
+        "yield_quality": "Excellent",
+        "classification": "Good"
+      },
+      {
+        "zone_id": 51,
+        "estimated_yield_tons_per_hectare": 8.52,
+        "total_yield_tons": 0.89,
+        "yield_quality": "Excellent",
+        "classification": "Good"
+      },
+      {
+        "zone_id": 52,
+        "estimated_yield_tons_per_hectare": 8.57,
+        "total_yield_tons": 1.47,
+        "yield_quality": "Excellent",
+        "classification": "Good"
+      },
+      {
+        "zone_id": 53,
+        "estimated_yield_tons_per_hectare": 8.41,
+        "total_yield_tons": 1.44,
+        "yield_quality": "Excellent",
+        "classification": "Good"
+      },
+      {
+        "zone_id": 54,
+        "estimated_yield_tons_per_hectare": 8.32,
+        "total_yield_tons": 1.43,
+        "yield_quality": "Excellent",
+        "classification": "Good"
+      },
+      {
+        "zone_id": 55,
+        "estimated_yield_tons_per_hectare": 8.56,
+        "total_yield_tons": 1.47,
+        "yield_quality": "Excellent",
+        "classification": "Good"
+      },
+      {
+        "zone_id": 56,
+        "estimated_yield_tons_per_hectare": 8.36,
+        "total_yield_tons": 1.43,
+        "yield_quality": "Excellent",
+        "classification": "Good"
+      },
+      {
+        "zone_id": 57,
+        "estimated_yield_tons_per_hectare": 8.39,
+        "total_yield_tons": 1.4,
+        "yield_quality": "Excellent",
+        "classification": "Good"
+      },
+      {
+        "zone_id": 58,
+        "estimated_yield_tons_per_hectare": 8.34,
+        "total_yield_tons": 0.2,
+        "yield_quality": "Excellent",
+        "classification": "Good"
+      },
+      {
+        "zone_id": 61,
+        "estimated_yield_tons_per_hectare": 8.42,
+        "total_yield_tons": 0.97,
+        "yield_quality": "Excellent",
+        "classification": "Good"
+      },
+      {
+        "zone_id": 62,
+        "estimated_yield_tons_per_hectare": 8.62,
+        "total_yield_tons": 1.48,
+        "yield_quality": "Excellent",
+        "classification": "Good"
+      },
+      {
+        "zone_id": 63,
+        "estimated_yield_tons_per_hectare": 8.49,
+        "total_yield_tons": 1.45,
+        "yield_quality": "Excellent",
+        "classification": "Good"
+      },
+      {
+        "zone_id": 64,
+        "estimated_yield_tons_per_hectare": 8.25,
+        "total_yield_tons": 1.41,
+        "yield_quality": "Excellent",
+        "classification": "Good"
+      },
+      {
+        "zone_id": 65,
+        "estimated_yield_tons_per_hectare": 8.51,
+        "total_yield_tons": 1.46,
+        "yield_quality": "Excellent",
+        "classification": "Good"
+      },
+      {
+        "zone_id": 66,
+        "estimated_yield_tons_per_hectare": 8.33,
+        "total_yield_tons": 1.43,
+        "yield_quality": "Excellent",
+        "classification": "Good"
+      },
+      {
+        "zone_id": 67,
+        "estimated_yield_tons_per_hectare": 8.37,
+        "total_yield_tons": 1.43,
+        "yield_quality": "Excellent",
+        "classification": "Good"
+      },
+      {
+        "zone_id": 68,
+        "estimated_yield_tons_per_hectare": 8.27,
+        "total_yield_tons": 1,
+        "yield_quality": "Excellent",
+        "classification": "Good"
+      },
+      {
+        "zone_id": 71,
+        "estimated_yield_tons_per_hectare": 8.48,
+        "total_yield_tons": 1.08,
+        "yield_quality": "Excellent",
+        "classification": "Good"
+      },
+      {
+        "zone_id": 72,
+        "estimated_yield_tons_per_hectare": 8.66,
+        "total_yield_tons": 1.48,
+        "yield_quality": "Excellent",
+        "classification": "Good"
+      },
+      {
+        "zone_id": 73,
+        "estimated_yield_tons_per_hectare": 8.57,
+        "total_yield_tons": 1.47,
+        "yield_quality": "Excellent",
+        "classification": "Good"
+      },
+      {
+        "zone_id": 74,
+        "estimated_yield_tons_per_hectare": 8.37,
+        "total_yield_tons": 1.43,
+        "yield_quality": "Excellent",
+        "classification": "Good"
+      },
+      {
+        "zone_id": 75,
+        "estimated_yield_tons_per_hectare": 8.54,
+        "total_yield_tons": 1.46,
+        "yield_quality": "Excellent",
+        "classification": "Good"
+      },
+      {
+        "zone_id": 76,
+        "estimated_yield_tons_per_hectare": 8.37,
+        "total_yield_tons": 1.43,
+        "yield_quality": "Excellent",
+        "classification": "Good"
+      },
+      {
+        "zone_id": 77,
+        "estimated_yield_tons_per_hectare": 8.43,
+        "total_yield_tons": 1.44,
+        "yield_quality": "Excellent",
+        "classification": "Good"
+      },
+      {
+        "zone_id": 78,
+        "estimated_yield_tons_per_hectare": 8.45,
+        "total_yield_tons": 1.45,
+        "yield_quality": "Excellent",
+        "classification": "Good"
+      },
+      {
+        "zone_id": 79,
+        "estimated_yield_tons_per_hectare": 8.34,
+        "total_yield_tons": 0.35,
+        "yield_quality": "Excellent",
+        "classification": "Good"
+      },
+      {
+        "zone_id": 81,
+        "estimated_yield_tons_per_hectare": 8.48,
+        "total_yield_tons": 1.17,
+        "yield_quality": "Excellent",
+        "classification": "Good"
+      },
+      {
+        "zone_id": 82,
+        "estimated_yield_tons_per_hectare": 8.85,
+        "total_yield_tons": 1.52,
+        "yield_quality": "Excellent",
+        "classification": "Good"
+      },
+      {
+        "zone_id": 83,
+        "estimated_yield_tons_per_hectare": 8.68,
+        "total_yield_tons": 1.49,
+        "yield_quality": "Excellent",
+        "classification": "Good"
+      },
+      {
+        "zone_id": 84,
+        "estimated_yield_tons_per_hectare": 8.37,
+        "total_yield_tons": 1.43,
+        "yield_quality": "Excellent",
+        "classification": "Good"
+      },
+      {
+        "zone_id": 85,
+        "estimated_yield_tons_per_hectare": 8.55,
+        "total_yield_tons": 1.47,
+        "yield_quality": "Excellent",
+        "classification": "Good"
+      },
+      {
+        "zone_id": 86,
+        "estimated_yield_tons_per_hectare": 8.4,
+        "total_yield_tons": 1.44,
+        "yield_quality": "Excellent",
+        "classification": "Good"
+      },
+      {
+        "zone_id": 87,
+        "estimated_yield_tons_per_hectare": 8.46,
+        "total_yield_tons": 1.45,
+        "yield_quality": "Excellent",
+        "classification": "Good"
+      },
+      {
+        "zone_id": 88,
+        "estimated_yield_tons_per_hectare": 8.48,
+        "total_yield_tons": 1.45,
+        "yield_quality": "Excellent",
+        "classification": "Good"
+      },
+      {
+        "zone_id": 89,
+        "estimated_yield_tons_per_hectare": 8.36,
+        "total_yield_tons": 0.85,
+        "yield_quality": "Excellent",
+        "classification": "Good"
+      },
+      {
+        "zone_id": 91,
+        "estimated_yield_tons_per_hectare": 8.47,
+        "total_yield_tons": 1.27,
+        "yield_quality": "Excellent",
+        "classification": "Good"
+      },
+      {
+        "zone_id": 92,
+        "estimated_yield_tons_per_hectare": 8.7,
+        "total_yield_tons": 1.49,
+        "yield_quality": "Excellent",
+        "classification": "Good"
+      },
+      {
+        "zone_id": 93,
+        "estimated_yield_tons_per_hectare": 8.86,
+        "total_yield_tons": 1.52,
+        "yield_quality": "Excellent",
+        "classification": "Good"
+      },
+      {
+        "zone_id": 94,
+        "estimated_yield_tons_per_hectare": 8.45,
+        "total_yield_tons": 1.45,
+        "yield_quality": "Excellent",
+        "classification": "Good"
+      },
+      {
+        "zone_id": 95,
+        "estimated_yield_tons_per_hectare": 8.47,
+        "total_yield_tons": 1.45,
+        "yield_quality": "Excellent",
+        "classification": "Good"
+      },
+      {
+        "zone_id": 96,
+        "estimated_yield_tons_per_hectare": 8.38,
+        "total_yield_tons": 1.44,
+        "yield_quality": "Excellent",
+        "classification": "Good"
+      },
+      {
+        "zone_id": 97,
+        "estimated_yield_tons_per_hectare": 8.33,
+        "total_yield_tons": 1.43,
+        "yield_quality": "Excellent",
+        "classification": "Good"
+      },
+      {
+        "zone_id": 98,
+        "estimated_yield_tons_per_hectare": 8.37,
+        "total_yield_tons": 1.43,
+        "yield_quality": "Excellent",
+        "classification": "Good"
+      },
+      {
+        "zone_id": 99,
+        "estimated_yield_tons_per_hectare": 8.3,
+        "total_yield_tons": 1.29,
+        "yield_quality": "Excellent",
+        "classification": "Good"
+      },
+      {
+        "zone_id": 100,
+        "estimated_yield_tons_per_hectare": 8.02,
+        "total_yield_tons": 0.01,
+        "yield_quality": "Excellent",
+        "classification": "Good"
+      },
+      {
+        "zone_id": 101,
+        "estimated_yield_tons_per_hectare": 7.98,
+        "total_yield_tons": 1.29,
+        "yield_quality": "Good",
+        "classification": "Good"
+      },
+      {
+        "zone_id": 102,
+        "estimated_yield_tons_per_hectare": 8.18,
+        "total_yield_tons": 1.4,
+        "yield_quality": "Excellent",
+        "classification": "Good"
+      },
+      {
+        "zone_id": 103,
+        "estimated_yield_tons_per_hectare": 8.45,
+        "total_yield_tons": 1.45,
+        "yield_quality": "Excellent",
+        "classification": "Good"
+      },
+      {
+        "zone_id": 104,
+        "estimated_yield_tons_per_hectare": 8.56,
+        "total_yield_tons": 1.47,
+        "yield_quality": "Excellent",
+        "classification": "Good"
+      },
+      {
+        "zone_id": 105,
+        "estimated_yield_tons_per_hectare": 8.47,
+        "total_yield_tons": 1.45,
+        "yield_quality": "Excellent",
+        "classification": "Good"
+      },
+      {
+        "zone_id": 106,
+        "estimated_yield_tons_per_hectare": 8.42,
+        "total_yield_tons": 1.44,
+        "yield_quality": "Excellent",
+        "classification": "Good"
+      },
+      {
+        "zone_id": 107,
+        "estimated_yield_tons_per_hectare": 8.27,
+        "total_yield_tons": 1.42,
+        "yield_quality": "Excellent",
+        "classification": "Good"
+      },
+      {
+        "zone_id": 108,
+        "estimated_yield_tons_per_hectare": 8.26,
+        "total_yield_tons": 1.42,
+        "yield_quality": "Excellent",
+        "classification": "Good"
+      },
+      {
+        "zone_id": 109,
+        "estimated_yield_tons_per_hectare": 8.16,
+        "total_yield_tons": 1.4,
+        "yield_quality": "Excellent",
+        "classification": "Good"
+      },
+      {
+        "zone_id": 110,
+        "estimated_yield_tons_per_hectare": 7.9,
+        "total_yield_tons": 0.32,
+        "yield_quality": "Good",
+        "classification": "Good"
+      },
+      {
+        "zone_id": 111,
+        "estimated_yield_tons_per_hectare": 7.76,
+        "total_yield_tons": 1.3,
+        "yield_quality": "Good",
+        "classification": "Good"
+      },
+      {
+        "zone_id": 112,
+        "estimated_yield_tons_per_hectare": 7.91,
+        "total_yield_tons": 1.36,
+        "yield_quality": "Good",
+        "classification": "Good"
+      },
+      {
+        "zone_id": 113,
+        "estimated_yield_tons_per_hectare": 8.08,
+        "total_yield_tons": 1.38,
+        "yield_quality": "Excellent",
+        "classification": "Good"
+      },
+      {
+        "zone_id": 114,
+        "estimated_yield_tons_per_hectare": 8.23,
+        "total_yield_tons": 1.41,
+        "yield_quality": "Excellent",
+        "classification": "Good"
+      },
+      {
+        "zone_id": 115,
+        "estimated_yield_tons_per_hectare": 8.48,
+        "total_yield_tons": 1.45,
+        "yield_quality": "Excellent",
+        "classification": "Good"
+      },
+      {
+        "zone_id": 116,
+        "estimated_yield_tons_per_hectare": 8.4,
+        "total_yield_tons": 1.44,
+        "yield_quality": "Excellent",
+        "classification": "Good"
+      },
+      {
+        "zone_id": 117,
+        "estimated_yield_tons_per_hectare": 8.2,
+        "total_yield_tons": 1.4,
+        "yield_quality": "Excellent",
+        "classification": "Good"
+      },
+      {
+        "zone_id": 118,
+        "estimated_yield_tons_per_hectare": 8.2,
+        "total_yield_tons": 1.41,
+        "yield_quality": "Excellent",
+        "classification": "Good"
+      },
+      {
+        "zone_id": 119,
+        "estimated_yield_tons_per_hectare": 8.31,
+        "total_yield_tons": 1.43,
+        "yield_quality": "Excellent",
+        "classification": "Good"
+      },
+      {
+        "zone_id": 120,
+        "estimated_yield_tons_per_hectare": 7.33,
+        "total_yield_tons": 0.43,
+        "yield_quality": "Good",
+        "classification": "Moderate"
+      },
+      {
+        "zone_id": 121,
+        "estimated_yield_tons_per_hectare": 7.76,
+        "total_yield_tons": 0.44,
+        "yield_quality": "Good",
+        "classification": "Good"
+      },
+      {
+        "zone_id": 122,
+        "estimated_yield_tons_per_hectare": 7.85,
+        "total_yield_tons": 1.27,
+        "yield_quality": "Good",
+        "classification": "Good"
+      },
+      {
+        "zone_id": 123,
+        "estimated_yield_tons_per_hectare": 7.98,
+        "total_yield_tons": 1.37,
+        "yield_quality": "Good",
+        "classification": "Good"
+      },
+      {
+        "zone_id": 124,
+        "estimated_yield_tons_per_hectare": 8.09,
+        "total_yield_tons": 1.39,
+        "yield_quality": "Excellent",
+        "classification": "Good"
+      },
+      {
+        "zone_id": 125,
+        "estimated_yield_tons_per_hectare": 8.38,
+        "total_yield_tons": 1.44,
+        "yield_quality": "Excellent",
+        "classification": "Good"
+      },
+      {
+        "zone_id": 126,
+        "estimated_yield_tons_per_hectare": 8.3,
+        "total_yield_tons": 1.42,
+        "yield_quality": "Excellent",
+        "classification": "Good"
+      },
+      {
+        "zone_id": 127,
+        "estimated_yield_tons_per_hectare": 8.18,
+        "total_yield_tons": 1.4,
+        "yield_quality": "Excellent",
+        "classification": "Good"
+      },
+      {
+        "zone_id": 128,
+        "estimated_yield_tons_per_hectare": 8.08,
+        "total_yield_tons": 1.38,
+        "yield_quality": "Excellent",
+        "classification": "Good"
+      },
+      {
+        "zone_id": 129,
+        "estimated_yield_tons_per_hectare": 7.89,
+        "total_yield_tons": 1.18,
+        "yield_quality": "Good",
+        "classification": "Good"
+      },
+      {
+        "zone_id": 130,
+        "estimated_yield_tons_per_hectare": 7.71,
+        "total_yield_tons": 0.02,
+        "yield_quality": "Good",
+        "classification": "Good"
+      },
+      {
+        "zone_id": 132,
+        "estimated_yield_tons_per_hectare": 7.7,
+        "total_yield_tons": 0.2,
+        "yield_quality": "Good",
+        "classification": "Good"
+      },
+      {
+        "zone_id": 133,
+        "estimated_yield_tons_per_hectare": 7.81,
+        "total_yield_tons": 1.11,
+        "yield_quality": "Good",
+        "classification": "Good"
+      },
+      {
+        "zone_id": 134,
+        "estimated_yield_tons_per_hectare": 7.95,
+        "total_yield_tons": 1.36,
+        "yield_quality": "Good",
+        "classification": "Good"
+      },
+      {
+        "zone_id": 135,
+        "estimated_yield_tons_per_hectare": 8.49,
+        "total_yield_tons": 1.45,
+        "yield_quality": "Excellent",
+        "classification": "Good"
+      },
+      {
+        "zone_id": 136,
+        "estimated_yield_tons_per_hectare": 8.61,
+        "total_yield_tons": 1.48,
+        "yield_quality": "Excellent",
+        "classification": "Good"
+      },
+      {
+        "zone_id": 137,
+        "estimated_yield_tons_per_hectare": 7.74,
+        "total_yield_tons": 1.33,
+        "yield_quality": "Good",
+        "classification": "Good"
+      },
+      {
+        "zone_id": 138,
+        "estimated_yield_tons_per_hectare": 8.04,
+        "total_yield_tons": 1.38,
+        "yield_quality": "Excellent",
+        "classification": "Good"
+      },
+      {
+        "zone_id": 139,
+        "estimated_yield_tons_per_hectare": 7.8,
+        "total_yield_tons": 0.58,
+        "yield_quality": "Good",
+        "classification": "Good"
+      },
+      {
+        "zone_id": 143,
+        "estimated_yield_tons_per_hectare": 7.72,
+        "total_yield_tons": 0.06,
+        "yield_quality": "Good",
+        "classification": "Good"
+      },
+      {
+        "zone_id": 144,
+        "estimated_yield_tons_per_hectare": 7.97,
+        "total_yield_tons": 0.87,
+        "yield_quality": "Good",
+        "classification": "Good"
+      },
+      {
+        "zone_id": 145,
+        "estimated_yield_tons_per_hectare": 7.92,
+        "total_yield_tons": 1.36,
+        "yield_quality": "Good",
+        "classification": "Good"
+      },
+      {
+        "zone_id": 146,
+        "estimated_yield_tons_per_hectare": 7.5,
+        "total_yield_tons": 1.29,
+        "yield_quality": "Good",
+        "classification": "Good"
+      },
+      {
+        "zone_id": 147,
+        "estimated_yield_tons_per_hectare": 8.31,
+        "total_yield_tons": 1.42,
+        "yield_quality": "Excellent",
+        "classification": "Good"
+      },
+      {
+        "zone_id": 148,
+        "estimated_yield_tons_per_hectare": 7.7,
+        "total_yield_tons": 1.32,
+        "yield_quality": "Good",
+        "classification": "Good"
+      },
+      {
+        "zone_id": 149,
+        "estimated_yield_tons_per_hectare": 8.15,
+        "total_yield_tons": 1.12,
+        "yield_quality": "Excellent",
+        "classification": "Good"
+      },
+      {
+        "zone_id": 150,
+        "estimated_yield_tons_per_hectare": 7.82,
+        "total_yield_tons": 0.03,
+        "yield_quality": "Good",
+        "classification": "Good"
+      },
+      {
+        "zone_id": 155,
+        "estimated_yield_tons_per_hectare": 7.31,
+        "total_yield_tons": 0.75,
+        "yield_quality": "Good",
+        "classification": "Moderate"
+      },
+      {
+        "zone_id": 156,
+        "estimated_yield_tons_per_hectare": 7.15,
+        "total_yield_tons": 1.23,
+        "yield_quality": "Good",
+        "classification": "Moderate"
+      },
+      {
+        "zone_id": 157,
+        "estimated_yield_tons_per_hectare": 8.43,
+        "total_yield_tons": 1.44,
+        "yield_quality": "Excellent",
+        "classification": "Good"
+      },
+      {
+        "zone_id": 158,
+        "estimated_yield_tons_per_hectare": 8.26,
+        "total_yield_tons": 1.42,
+        "yield_quality": "Excellent",
+        "classification": "Good"
+      },
+      {
+        "zone_id": 159,
+        "estimated_yield_tons_per_hectare": 7.95,
+        "total_yield_tons": 1.33,
+        "yield_quality": "Good",
+        "classification": "Good"
+      },
+      {
+        "zone_id": 160,
+        "estimated_yield_tons_per_hectare": 7.9,
+        "total_yield_tons": 0.03,
+        "yield_quality": "Good",
+        "classification": "Good"
+      },
+      {
+        "zone_id": 165,
+        "estimated_yield_tons_per_hectare": 6.16,
+        "total_yield_tons": 0.01,
+        "yield_quality": "Good",
+        "classification": "Moderate"
+      },
+      {
+        "zone_id": 166,
+        "estimated_yield_tons_per_hectare": 7.27,
+        "total_yield_tons": 0.86,
+        "yield_quality": "Good",
+        "classification": "Moderate"
+      },
+      {
+        "zone_id": 167,
+        "estimated_yield_tons_per_hectare": 8.23,
+        "total_yield_tons": 1.41,
+        "yield_quality": "Excellent",
+        "classification": "Good"
+      },
+      {
+        "zone_id": 168,
+        "estimated_yield_tons_per_hectare": 8.35,
+        "total_yield_tons": 1.43,
+        "yield_quality": "Excellent",
+        "classification": "Good"
+      },
+      {
+        "zone_id": 169,
+        "estimated_yield_tons_per_hectare": 5.75,
+        "total_yield_tons": 0.79,
+        "yield_quality": "Moderate",
+        "classification": "Poor"
+      },
+      {
+        "zone_id": 176,
+        "estimated_yield_tons_per_hectare": 7.67,
+        "total_yield_tons": 0.05,
+        "yield_quality": "Good",
+        "classification": "Good"
+      },
+      {
+        "zone_id": 177,
+        "estimated_yield_tons_per_hectare": 8.34,
+        "total_yield_tons": 1.1,
+        "yield_quality": "Excellent",
+        "classification": "Good"
+      },
+      {
+        "zone_id": 178,
+        "estimated_yield_tons_per_hectare": 8.43,
+        "total_yield_tons": 1.44,
+        "yield_quality": "Excellent",
+        "classification": "Good"
+      },
+      {
+        "zone_id": 179,
+        "estimated_yield_tons_per_hectare": 7.24,
+        "total_yield_tons": 0.75,
+        "yield_quality": "Good",
+        "classification": "Moderate"
+      },
+      {
+        "zone_id": 187,
+        "estimated_yield_tons_per_hectare": 8.52,
+        "total_yield_tons": 0.09,
+        "yield_quality": "Excellent",
+        "classification": "Good"
+      },
+      {
+        "zone_id": 188,
+        "estimated_yield_tons_per_hectare": 8.45,
+        "total_yield_tons": 0.69,
+        "yield_quality": "Excellent",
+        "classification": "Good"
+      },
+      {
+        "zone_id": 189,
+        "estimated_yield_tons_per_hectare": 7.35,
+        "total_yield_tons": 0.4,
+        "yield_quality": "Good",
+        "classification": "Moderate"
+      }
+    ],
+    "field_summary": {
+      "total_estimated_yield_tons": 153.91,
+      "average_yield_tons_per_hectare": 8.23,
+      "total_area_hectares": 18.7,
+      "potential_max_yield_tons": 187.05,
+      "yield_efficiency_percentage": 82.28
+    }
+  },
+  "images": {
+    "ndvi_image": "/zone-images/FIELD-20251030-79C392/ndvi_map.png",
+    "zone_image": "/zone-images/FIELD-20251030-79C392/zone_map.png"
+  },
+  "created_at": "2025-10-30T10:17:08.763Z",
+  "updated_at": "2025-10-30T10:17:08.763Z"
+}

@@ -1,0 +1,164 @@
+{
+  "info": {
+    "name": "Zone Image Generation API",
+    "description": "API collection for generating NDVI zone images with crop yield predictions and productivity status",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "item": [
+    {
+      "name": "Zone Image Generation",
+      "item": [
+        {
+          "name": "Generate Zone Image (Italy Rice Field - 100m grid)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"fieldBoundary\": {\n    \"type\": \"Polygon\",\n    \"coordinates\": [[\n      [12.633435130119326, 42.6498850799555],\n      [12.633585333824158, 42.64952208649428],\n      [12.633628249168396, 42.64908806979262],\n      [12.633499503135681, 42.64897759233047],\n      [12.63356387615204, 42.64877241938018],\n      [12.63375699520111, 42.648488332639424],\n      [12.633907198905947, 42.64795961219534],\n      [12.634164690971376, 42.64786491552187],\n      [12.634711861610413, 42.64787280691682],\n      [12.635602355003359, 42.64807009146552],\n      [12.63606369495392, 42.64803063460584],\n      [12.636653780937197, 42.64803063460584],\n      [12.63683617115021, 42.64825159269771],\n      [12.636954188346865, 42.64829894075813],\n      [12.636353373527529, 42.64893024478662],\n      [12.63555943965912, 42.64979038621333],\n      [12.635216116905214, 42.65020072472159],\n      [12.634583115577698, 42.65020072472159],\n      [12.63383209705353, 42.65014548700316],\n      [12.633435130119326, 42.6498850799555]\n    ]]\n  },\n  \"fieldId\": \"ITALY-RICE-FIELD-01\",\n  \"date\": \"2024-10-26\",\n  \"gridSize\": 100,\n  \"cropType\": \"rice\"\n}"
+            },
+            "url": {
+              "raw": "http://localhost:3000/api/field-analysis/zone-image",
+              "protocol": "http",
+              "host": ["localhost"],
+              "port": "3000",
+              "path": ["api", "field-analysis", "zone-image"]
+            },
+            "description": "Generate zone image with 100m grid for faster processing. Returns NDVI map, zone map, yield predictions, and productivity status."
+          },
+          "response": []
+        },
+        {
+          "name": "Generate Zone Image (Italy Rice Field - 50m grid)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"fieldBoundary\": {\n    \"type\": \"Polygon\",\n    \"coordinates\": [[\n      [12.633435130119326, 42.6498850799555],\n      [12.633585333824158, 42.64952208649428],\n      [12.633628249168396, 42.64908806979262],\n      [12.633499503135681, 42.64897759233047],\n      [12.63356387615204, 42.64877241938018],\n      [12.63375699520111, 42.648488332639424],\n      [12.633907198905947, 42.64795961219534],\n      [12.634164690971376, 42.64786491552187],\n      [12.634711861610413, 42.64787280691682],\n      [12.635602355003359, 42.64807009146552],\n      [12.63606369495392, 42.64803063460584],\n      [12.636653780937197, 42.64803063460584],\n      [12.63683617115021, 42.64825159269771],\n      [12.636954188346865, 42.64829894075813],\n      [12.636353373527529, 42.64893024478662],\n      [12.63555943965912, 42.64979038621333],\n      [12.635216116905214, 42.65020072472159],\n      [12.634583115577698, 42.65020072472159],\n      [12.63383209705353, 42.65014548700316],\n      [12.633435130119326, 42.6498850799555]\n    ]]\n  },\n  \"fieldId\": \"ITALY-RICE-FIELD-01\",\n  \"date\": \"2024-10-26\",\n  \"gridSize\": 50,\n  \"cropType\": \"rice\"\n}"
+            },
+            "url": {
+              "raw": "http://localhost:3000/api/field-analysis/zone-image",
+              "protocol": "http",
+              "host": ["localhost"],
+              "port": "3000",
+              "path": ["api", "field-analysis", "zone-image"]
+            },
+            "description": "Generate zone image with 50m grid for detailed analysis. More zones but longer processing time."
+          },
+          "response": []
+        },
+        {
+          "name": "Generate Zone Image (Wheat Field)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"fieldBoundary\": {\n    \"type\": \"Polygon\",\n    \"coordinates\": [[\n      [12.633435130119326, 42.6498850799555],\n      [12.633585333824158, 42.64952208649428],\n      [12.633628249168396, 42.64908806979262],\n      [12.633499503135681, 42.64897759233047],\n      [12.63356387615204, 42.64877241938018],\n      [12.63375699520111, 42.648488332639424],\n      [12.633907198905947, 42.64795961219534],\n      [12.634164690971376, 42.64786491552187],\n      [12.634711861610413, 42.64787280691682],\n      [12.635602355003359, 42.64807009146552],\n      [12.63606369495392, 42.64803063460584],\n      [12.636653780937197, 42.64803063460584],\n      [12.63683617115021, 42.64825159269771],\n      [12.636954188346865, 42.64829894075813],\n      [12.636353373527529, 42.64893024478662],\n      [12.63555943965912, 42.64979038621333],\n      [12.635216116905214, 42.65020072472159],\n      [12.634583115577698, 42.65020072472159],\n      [12.63383209705353, 42.65014548700316],\n      [12.633435130119326, 42.6498850799555]\n    ]]\n  },\n  \"fieldId\": \"WHEAT-FIELD-01\",\n  \"date\": \"2024-10-26\",\n  \"gridSize\": 100,\n  \"cropType\": \"wheat\"\n}"
+            },
+            "url": {
+              "raw": "http://localhost:3000/api/field-analysis/zone-image",
+              "protocol": "http",
+              "host": ["localhost"],
+              "port": "3000",
+              "path": ["api", "field-analysis", "zone-image"]
+            },
+            "description": "Generate zone image for wheat field with different yield calculation parameters."
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "Zone Image Metadata",
+      "item": [
+        {
+          "name": "Get Zone Image Metadata",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "http://localhost:3000/api/field-analysis/zone-image/ITALY-RICE-FIELD-01_20241026_1234567890",
+              "protocol": "http",
+              "host": ["localhost"],
+              "port": "3000",
+              "path": ["api", "field-analysis", "zone-image", "ITALY-RICE-FIELD-01_20241026_1234567890"]
+            },
+            "description": "Retrieve stored metadata for a specific zone image. Replace the imageId with actual ID from generation response."
+          },
+          "response": []
+        },
+        {
+          "name": "List All Zone Images",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "http://localhost:3000/api/field-analysis/zone-images",
+              "protocol": "http",
+              "host": ["localhost"],
+              "port": "3000",
+              "path": ["api", "field-analysis", "zone-images"]
+            },
+            "description": "List all generated zone images with their IDs and creation dates."
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "Health Checks",
+      "item": [
+        {
+          "name": "Health Check",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "http://localhost:3000/api/health",
+              "protocol": "http",
+              "host": ["localhost"],
+              "port": "3000",
+              "path": ["api", "health"]
+            },
+            "description": "Check if server is running and Earth Engine is initialized."
+          },
+          "response": []
+        },
+        {
+          "name": "Earth Engine Status",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "http://localhost:3000/api/ee-status",
+              "protocol": "http",
+              "host": ["localhost"],
+              "port": "3000",
+              "path": ["api", "ee-status"]
+            },
+            "description": "Check Earth Engine initialization status and project ID."
+          },
+          "response": []
+        }
+      ]
+    }
+  ]
+}
+

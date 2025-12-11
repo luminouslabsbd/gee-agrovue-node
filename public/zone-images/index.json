@@ -1,0 +1,41 @@
+{
+  "images": [
+    {
+      "image_id": "ITALY-RICE-FIELD-01_20241026_1761502254611",
+      "field_id": "ITALY-RICE-FIELD-01",
+      "date": "2024-10-26",
+      "created_at": "2025-10-26T18:11:02.429Z"
+    },
+    {
+      "image_id": "ITALY-RICE-FIELD-01_20241026_1761502332147",
+      "field_id": "ITALY-RICE-FIELD-01",
+      "date": "2024-10-26",
+      "created_at": "2025-10-26T18:12:20.000Z"
+    },
+    {
+      "image_id": "TEST-ZONE-RGB_20241026_1761502531055",
+      "field_id": "TEST-ZONE-RGB",
+      "date": "2024-10-26",
+      "created_at": "2025-10-26T18:15:40.310Z"
+    },
+    {
+      "image_id": "TEST-ZONE-RGB-V2_20241026_1761502931297",
+      "field_id": "TEST-ZONE-RGB-V2",
+      "date": "2024-10-26",
+      "created_at": "2025-10-26T18:22:21.656Z"
+    },
+    {
+      "image_id": "FINAL-TEST-ZONE_20241026_1761503032342",
+      "field_id": "FINAL-TEST-ZONE",
+      "date": "2024-10-26",
+      "created_at": "2025-10-26T18:24:00.589Z"
+    },
+    {
+      "image_id": "FIELD-20251030-79C392",
+      "field_id": "FIELD-20251030-79C392",
+      "date": "2025-10-20",
+      "created_at": "2025-10-30T10:08:35.535Z",
+      "updated_at": "2025-10-30T10:17:08.765Z"
+    }
+  ]
+}

@@ -1,0 +1,70 @@
+{
+  "info": {
+    "name": "Productivity Differences API",
+    "_postman_id": "productivity-differences-api-001",
+    "description": "7-Zone Productivity Classification API for Agricultural Fields\n\nThis API analyzes field productivity using NDVI data from Sentinel-2 satellite imagery and classifies the field into 7 productivity zones based on statistical distribution.\n\n**Productivity Zones:**\n- **m3**: Very Low Productivity (< -1.5 std dev) - 69% of average\n- **m2**: Low Productivity (-1.5 to -0.5 std dev) - 87% of average\n- **m1**: Below Average (-0.5 to -0.25 std dev) - 95% of average\n- **p0**: Average Productivity (-0.25 to +0.25 std dev) - 100% baseline\n- **p1**: Above Average (+0.25 to +0.5 std dev) - 107% of average\n- **p2**: High Productivity (+0.5 to +1.5 std dev) - 111% of average\n- **p3**: Very High Productivity (> +1.5 std dev) - 119% of average\n\n**Features:**\n- Image-based classification (fast, scalable)\n- Field boundary clipping\n- Zone distribution statistics\n- Management recommendations\n- Downloadable visualization images\n- Supports field_id-based boundary retrieval pattern",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "item": [
+    {
+      "name": "Generate Productivity Differences Analysis",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json",
+            "type": "text"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"fieldBoundary\": {\n    \"type\": \"Polygon\",\n    \"coordinates\": [\n      [\n        [9.15, 45.45],\n        [9.16, 45.45],\n        [9.16, 45.46],\n        [9.15, 45.46],\n        [9.15, 45.45]\n      ]\n    ]\n  },\n  \"fieldId\": \"ITALY-RICE-FIELD\",\n  \"date\": \"2024-07-15\"\n}"
+        },
+        "url": {
+          "raw": "http://localhost:3000/api/field-analysis/productivity-differences",
+          "protocol": "http",
+          "host": ["localhost"],
+          "port": "3000",
+          "path": ["api", "field-analysis", "productivity-differences"]
+        },
+        "description": "Generates 7-zone productivity classification analysis for a field.\n\n**Request Parameters:**\n- `fieldBoundary` (required): GeoJSON Polygon defining the field boundary\n- `fieldId` (required): Unique identifier for the field\n- `date` (optional): Analysis date in YYYY-MM-DD format (defaults to current date)\n\n**Response:**\n- `success`: Boolean indicating success\n- `field_id`: Field identifier\n- `analysis_date`: Date of analysis\n- `field_statistics`: NDVI statistics (mean, std dev, min, max)\n- `productivity_differences`: Productivity percentages for each zone\n- `available_productivity_zones`: Array of zones present in the field\n- `zone_distribution`: Detailed statistics for each zone\n- `images`: URLs to visualization images\n- `zone_details`: Management recommendations for each zone"
+      },
+      "response": [
+        {
+          "name": "Successful Analysis",
+          "originalRequest": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"fieldBoundary\": {\n    \"type\": \"Polygon\",\n    \"coordinates\": [\n      [\n        [9.15, 45.45],\n        [9.16, 45.45],\n        [9.16, 45.46],\n        [9.15, 45.46],\n        [9.15, 45.45]\n      ]\n    ]\n  },\n  \"fieldId\": \"ITALY-RICE-FIELD\",\n  \"date\": \"2024-07-15\"\n}"
+            },
+            "url": {
+              "raw": "http://localhost:3000/api/field-analysis/productivity-differences",
+              "protocol": "http",
+              "host": ["localhost"],
+              "port": "3000",
+              "path": ["api", "field-analysis", "productivity-differences"]
+            }
+          },
+          "status": "OK",
+          "code": 200,
+          "_postman_previewlanguage": "json",
+          "header": [
+            {
+              "key": "Content-Type",
+              "value": "application/json"
+            }
+          ],
+          "body": "{\n  \"success\": true,\n  \"field_id\": \"ITALY-RICE-FIELD\",\n  \"analysis_date\": \"2024-07-15\",\n  \"field_statistics\": {\n    \"mean_ndvi\": 0.2742,\n    \"std_dev_ndvi\": 0.1918,\n    \"min_ndvi\": -0.0312,\n    \"max_ndvi\": 0.8093,\n    \"image_count\": 2\n  },\n  \"productivity_differences\": {\n    \"m3\": 69,\n    \"m2\": 87,\n    \"m1\": 95,\n    \"p0\": 100,\n    \"p1\": 107,\n    \"p2\": 111,\n    \"p3\": 119\n  },\n  \"available_productivity_zones\": [\"m3\", \"m2\", \"m1\", \"p0\", \"p1\", \"p2\", \"p3\"],\n  \"zone_distribution\": {\n    \"m3\": {\n      \"pixel_count\": 17,\n      \"percentage\": 0.14,\n      \"productivity_percentage\": 69,\n      \"label\": \"Very Low Productivity\"\n    },\n    \"m2\": {\n      \"pixel_count\": 5382.4,\n      \"percentage\": 43.46,\n      \"productivity_percentage\": 87,\n      \"label\": \"Low Productivity\"\n    },\n    \"m1\": {\n      \"pixel_count\": 1288.31,\n      \"percentage\": 10.4,\n      \"productivity_percentage\": 95,\n      \"label\": \"Below Average\"\n    },\n    \"p0\": {\n      \"pixel_count\": 1614.51,\n      \"percentage\": 13.04,\n      \"productivity_percentage\": 100,\n      \"label\": \"Average Productivity\"\n    },\n    \"p1\": {\n      \"pixel_count\": 668.37,\n      \"percentage\": 5.4,\n      \"productivity_percentage\": 107,\n      \"label\": \"Above Average\"\n    },\n    \"p2\": {\n      \"pixel_count\": 1934.18,\n      \"percentage\": 15.62,\n      \"productivity_percentage\": 111,\n      \"label\": \"High Productivity\"\n    },\n    \"p3\": {\n      \"pixel_count\": 1478.56,\n      \"percentage\": 11.94,\n      \"productivity_percentage\": 119,\n      \"label\": \"Very High Productivity\"\n    }\n  },\n  \"images\": {\n    \"ndvi_map\": \"/productivity-zones/ITALY-RICE-FIELD/ndvi_map.png\",\n    \"productivity_zones_map\": \"/productivity-zones/ITALY-RICE-FIELD/productivity_zones.png\"\n  },\n  \"zone_details\": [\n    {\n      \"code\": \"m3\",\n      \"label\": \"Very Low Productivity\",\n      \"productivity_percentage\": 69,\n      \"color\": \"#8B0000\",\n      \"management\": \"Urgent intervention - soil testing, drainage, pest control\"\n    },\n    {\n      \"code\": \"m2\",\n      \"label\": \"Low Productivity\",\n      \"productivity_percentage\": 87,\n      \"color\": \"#DC143C\",\n      \"management\": \"Targeted fertilization and irrigation needed\"\n    },\n    {\n      \"code\": \"m1\",\n      \"label\": \"Below Average\",\n      \"productivity_percentage\": 95,\n      \"color\": \"#FF8C00\",\n      \"management\": \"Monitor closely, consider soil amendments\"\n    },\n    {\n      \"code\": \"p0\",\n      \"label\": \"Average Productivity\",\n      \"productivity_percentage\": 100,\n      \"color\": \"#FFD700\",\n      \"management\": \"Maintain current practices\"\n    },\n    {\n      \"code\": \"p1\",\n      \"label\": \"Above Average\",\n      \"productivity_percentage\": 107,\n      \"color\": \"#9ACD32\",\n      \"management\": \"Good performance, optimize for maximum yield\"\n    },\n    {\n      \"code\": \"p2\",\n      \"label\": \"High Productivity\",\n      \"productivity_percentage\": 111,\n      \"color\": \"#32CD32\",\n      \"management\": \"Excellent conditions, use as reference\"\n    },\n    {\n      \"code\": \"p3\",\n      \"label\": \"Very High Productivity\",\n      \"productivity_percentage\": 119,\n      \"color\": \"#006400\",\n      \"management\": \"Optimal productivity, replicate conditions\"\n    }\n  ]\n}"
+        }
+      ]
+    }
+  ]
+}

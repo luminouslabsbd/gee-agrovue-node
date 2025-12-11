@@ -1,0 +1,161 @@
+{
+  "info": {
+    "name": "NDVI 2-Year Time Series API",
+    "description": "Complete API collection for 2-year NDVI analysis and field data management",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "item": [
+    {
+      "name": "2-Year Time Series",
+      "item": [
+        {
+          "name": "Generate 2-Year Time Series (Monthly)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"fieldBoundary\": {\n    \"type\": \"Polygon\",\n    \"coordinates\": [[[90.37110641598703, 23.841231509287553],\n                     [90.37093743681908, 23.84014467798467],\n                     [90.37123516201974, 23.84014713133873],\n                     [90.3713531792164, 23.840186384997345],\n                     [90.37110641598703, 23.841231509287553]]]\n  },\n  \"fieldId\": \"NGR-KD-12345\",\n  \"intervalType\": \"monthly\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/field-analysis/two-year-time-series",
+              "host": ["{{base_url}}"],
+              "path": ["api", "field-analysis", "two-year-time-series"]
+            }
+          }
+        },
+        {
+          "name": "Generate 2-Year Time Series (Weekly)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"fieldBoundary\": {\n    \"type\": \"Polygon\",\n    \"coordinates\": [[[90.37110641598703, 23.841231509287553],\n                     [90.37093743681908, 23.84014467798467],\n                     [90.37123516201974, 23.84014713133873],\n                     [90.3713531792164, 23.840186384997345],\n                     [90.37110641598703, 23.841231509287553]]]\n  },\n  \"fieldId\": \"NGR-KD-12345\",\n  \"intervalType\": \"weekly\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/field-analysis/two-year-time-series",
+              "host": ["{{base_url}}"],
+              "path": ["api", "field-analysis", "two-year-time-series"]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Field Images",
+      "item": [
+        {
+          "name": "Generate Field Image",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"fieldBoundary\": {\n    \"type\": \"Polygon\",\n    \"coordinates\": [[[90.37110641598703, 23.841231509287553],\n                     [90.37093743681908, 23.84014467798467],\n                     [90.37123516201974, 23.84014713133873],\n                     [90.3713531792164, 23.840186384997345],\n                     [90.37110641598703, 23.841231509287553]]]\n  },\n  \"fieldId\": \"NGR-KD-12345\",\n  \"date\": \"2025-01-15\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/field-analysis/field-image",
+              "host": ["{{base_url}}"],
+              "path": ["api", "field-analysis", "field-image"]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Field Data Management",
+      "item": [
+        {
+          "name": "Update Field Boundary",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"fieldId\": \"NGR-KD-12345\",\n  \"newBoundary\": {\n    \"type\": \"Polygon\",\n    \"coordinates\": [[[90.37, 23.84],\n                     [90.371, 23.84],\n                     [90.371, 23.841],\n                     [90.37, 23.841],\n                     [90.37, 23.84]]]\n  },\n  \"metadata\": {\n    \"crop\": \"Rice\",\n    \"season\": \"Monsoon\"\n  }\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/field-analysis/update-field",
+              "host": ["{{base_url}}"],
+              "path": ["api", "field-analysis", "update-field"]
+            }
+          }
+        },
+        {
+          "name": "Recalculate NDVI",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"fieldId\": \"NGR-KD-12345\",\n  \"date\": \"2025-06-15\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/field-analysis/recalculate-ndvi",
+              "host": ["{{base_url}}"],
+              "path": ["api", "field-analysis", "recalculate-ndvi"]
+            }
+          }
+        },
+        {
+          "name": "Get Field Data",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/api/field-analysis/field-data/NGR-KD-12345",
+              "host": ["{{base_url}}"],
+              "path": ["api", "field-analysis", "field-data", "NGR-KD-12345"]
+            }
+          }
+        },
+        {
+          "name": "Get Change History",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/api/field-analysis/change-history/NGR-KD-12345",
+              "host": ["{{base_url}}"],
+              "path": ["api", "field-analysis", "change-history", "NGR-KD-12345"]
+            }
+          }
+        }
+      ]
+    }
+  ],
+  "variable": [
+    {
+      "key": "base_url",
+      "value": "http://localhost:3000",
+      "type": "string"
+    }
+  ]
+}
+

@@ -1,0 +1,20 @@
+{
+  "err": null,
+  "data": {
+    "statusCode": 200,
+    "headers": {
+      "content-type": "application/json; charset=UTF-8",
+      "vary": "X-Origin, Referer, Origin,Accept-Encoding",
+      "date": "Thu, 30 Oct 2025 11:29:18 GMT",
+      "server": "ESF",
+      "x-xss-protection": "0",
+      "x-frame-options": "SAMEORIGIN",
+      "x-content-type-options": "nosniff",
+      "alt-svc": "h3=\":443\"; ma=2592000,h3-29=\":443\"; ma=2592000",
+      "accept-ranges": "none",
+      "connection": "close",
+      "transfer-encoding": "chunked"
+    },
+    "text": "{\n  \"result\": {\n    \"NDVI_mean\": null,\n    \"NDVI_stdDev\": null\n  }\n}\n"
+  }
+}

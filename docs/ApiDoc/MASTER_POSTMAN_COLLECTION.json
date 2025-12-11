@@ -1,0 +1,1401 @@
+{
+  "info": {
+    "name": "Google Earth Engine Agrovue - Complete API Collection (With Auth)",
+    "description": "Comprehensive API collection for GEE Agrovue Node.js application with JWT Authentication - 42 endpoints total",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+    "_postman_id": "gee-agrovue-master-collection-auth",
+    "version": "2.0.0"
+  },
+  "auth": {
+    "type": "bearer",
+    "bearer": [
+      {
+        "key": "token",
+        "value": "{{authToken}}",
+        "type": "string"
+      }
+    ]
+  },
+  "variable": [
+    {
+      "key": "baseUrl",
+      "value": "http://localhost:3000",
+      "type": "string"
+    },
+    {
+      "key": "authToken",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "adminEmail",
+      "value": "admin@agrovue.com",
+      "type": "string"
+    },
+    {
+      "key": "adminPassword",
+      "value": "Admin@123456",
+      "type": "string"
+    },
+    {
+      "key": "fieldBoundary",
+      "value": "{\"type\":\"Polygon\",\"coordinates\":[[[90.37110641598703,23.841231509287553],[90.37093743681908,23.84014467798467],[90.37123516201974,23.84014713133873],[90.3713531792164,23.840186384997345],[90.37143632769585,23.840105424313425],[90.37150606513023,23.840120144441542],[90.37162408232689,23.8403286794102],[90.37181988358499,23.840316412656623],[90.37198618054391,23.840529854003293],[90.37194058299067,23.840890495480306],[90.37191644310953,23.84110638921785],[90.37187889218332,23.841135829245108],[90.3714242577553,23.84087086875907],[90.37147387862206,23.841177535938964],[90.37157043814659,23.841177535938964],[90.37110641598703,23.841231509287553]]]}",
+      "type": "string"
+    }
+  ],
+  "event": [
+    {
+      "listen": "prerequest",
+      "script": {
+        "type": "text/javascript",
+        "exec": [
+          "// Auto-set auth token if available",
+          "if (pm.collectionVariables.get('authToken')) {",
+          "    pm.request.headers.add({",
+          "        key: 'Authorization',",
+          "        value: 'Bearer ' + pm.collectionVariables.get('authToken')",
+          "    });",
+          "}"
+        ]
+      }
+    }
+  ],
+  "item": [
+    {
+      "name": "🔐 Authentication",
+      "description": "User authentication endpoints - Register, Login, Profile management",
+      "item": [
+        {
+          "name": "Register New User",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "if (pm.response.code === 201) {",
+                  "    var jsonData = pm.response.json();",
+                  "    if (jsonData.data && jsonData.data.token) {",
+                  "        pm.collectionVariables.set('authToken', jsonData.data.token);",
+                  "        console.log('✅ Token saved:', jsonData.data.token);",
+                  "    }",
+                  "}"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "auth": {
+              "type": "noauth"
+            },
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Test User\",\n  \"email\": \"test@example.com\",\n  \"password\": \"Test123456\",\n  \"phone\": \"+1234567890\",\n  \"country\": \"USA\",\n  \"status\": \"active\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/auth/register",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "auth",
+                "register"
+              ]
+            },
+            "description": "Register a new user account. Password must be at least 6 characters with uppercase, lowercase, and number."
+          },
+          "response": []
+        },
+        {
+          "name": "Login (Admin)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "if (pm.response.code === 200) {",
+                  "    var jsonData = pm.response.json();",
+                  "    if (jsonData.data && jsonData.data.token) {",
+                  "        pm.collectionVariables.set('authToken', jsonData.data.token);",
+                  "        console.log('✅ Admin token saved:', jsonData.data.token);",
+                  "    }",
+                  "}"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "auth": {
+              "type": "noauth"
+            },
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"{{adminEmail}}\",\n  \"password\": \"{{adminPassword}}\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/auth/login",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "auth",
+                "login"
+              ]
+            },
+            "description": "Login with admin credentials. Token is automatically saved to collection variables."
+          },
+          "response": []
+        },
+        {
+          "name": "Login (Custom User)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "if (pm.response.code === 200) {",
+                  "    var jsonData = pm.response.json();",
+                  "    if (jsonData.data && jsonData.data.token) {",
+                  "        pm.collectionVariables.set('authToken', jsonData.data.token);",
+                  "        console.log('✅ Token saved:', jsonData.data.token);",
+                  "    }",
+                  "}"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "auth": {
+              "type": "noauth"
+            },
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"test@example.com\",\n  \"password\": \"Test123456\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/auth/login",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "auth",
+                "login"
+              ]
+            },
+            "description": "Login with custom user credentials. Token is automatically saved to collection variables."
+          },
+          "response": []
+        },
+        {
+          "name": "Get My Profile",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{authToken}}",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/auth/me",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "auth",
+                "me"
+              ]
+            },
+            "description": "Get current user profile (requires authentication)"
+          },
+          "response": []
+        },
+        {
+          "name": "Update Profile",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{authToken}}",
+                "type": "text"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Updated Name\",\n  \"phone\": \"+9876543210\",\n  \"country\": \"Canada\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/auth/profile",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "auth",
+                "profile"
+              ]
+            },
+            "description": "Update user profile information (requires authentication)"
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "System APIs",
+      "item": [
+        {
+          "name": "Health Check",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/health",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "health"
+              ]
+            },
+            "description": "Check if the server is running"
+          },
+          "response": []
+        },
+        {
+          "name": "Earth Engine Status",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/ee-status",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "ee-status"
+              ]
+            },
+            "description": "Check Earth Engine initialization status"
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "NDVI & Satellite APIs",
+      "item": [
+        {
+          "name": "Get NDVI Data",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/ndvi",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "ndvi"
+              ]
+            },
+            "description": "Get NDVI data for a predefined region (MODIS)"
+          },
+          "response": []
+        },
+        {
+          "name": "Get Satellite Imagery",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/satellite",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "satellite"
+              ]
+            },
+            "description": "Get Sentinel-2 satellite imagery"
+          },
+          "response": []
+        },
+        {
+          "name": "Get NDVI Legend",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/ndvi-legend",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "ndvi-legend"
+              ]
+            },
+            "description": "Get NDVI color scale and legend"
+          },
+          "response": []
+        },
+        {
+          "name": "Get NDVI Color Visualization",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/ndvi-color-visualization",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "ndvi-color-visualization"
+              ]
+            },
+            "description": "Get NDVI visualization parameters"
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "🌾 Field Analysis APIs",
+      "description": "All field analysis endpoints require Bearer token authentication",
+      "item": [
+        {
+          "name": "Field Analysis",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{authToken}}",
+                "type": "text"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"fieldBoundary\": {{fieldBoundary}},\n  \"fieldId\": \"FIELD-001\",\n  \"startDate\": \"2024-10-01\",\n  \"endDate\": \"2024-10-26\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/field-analysis",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "field-analysis"
+              ]
+            },
+            "description": "Analyze NDVI for a farm field boundary"
+          },
+          "response": []
+        },
+        {
+          "name": "Time Series Analysis",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{authToken}}",
+                "type": "text"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"fieldBoundary\": {{fieldBoundary}},\n  \"fieldId\": \"FIELD-001\",\n  \"startDate\": \"2024-01-01\",\n  \"endDate\": \"2024-10-26\",\n  \"intervalDays\": 10\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/field-analysis/time-series",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "field-analysis",
+                "time-series"
+              ]
+            },
+            "description": "Generate historical NDVI time series"
+          },
+          "response": []
+        },
+        {
+          "name": "Time Series Map",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{authToken}}",
+                "type": "text"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"fieldBoundary\": {{fieldBoundary}},\n  \"fieldId\": \"FIELD-001\",\n  \"startDate\": \"2024-01-01\",\n  \"endDate\": \"2024-10-26\",\n  \"intervalDays\": 30\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/field-analysis/time-series-map",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "field-analysis",
+                "time-series-map"
+              ]
+            },
+            "description": "Generate NDVI maps for time series visualization"
+          },
+          "response": []
+        },
+        {
+          "name": "Two-Year Time Series",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{authToken}}",
+                "type": "text"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"fieldBoundary\": {{fieldBoundary}},\n  \"fieldId\": \"FIELD-001\",\n  \"intervalType\": \"monthly\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/field-analysis/two-year-time-series",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "field-analysis",
+                "two-year-time-series"
+              ]
+            },
+            "description": "Generate 2-year NDVI time series with image storage"
+          },
+          "response": []
+        },
+        {
+          "name": "Field Image",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{authToken}}",
+                "type": "text"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"fieldBoundary\": {{fieldBoundary}},\n  \"fieldId\": \"FIELD-001\",\n  \"date\": \"2024-10-26\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/field-analysis/field-image",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "field-analysis",
+                "field-image"
+              ]
+            },
+            "description": "Generate field image for a specific date"
+          },
+          "response": []
+        },
+        {
+          "name": "NDVI Chart",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{authToken}}",
+                "type": "text"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"fieldBoundary\": {{fieldBoundary}},\n  \"fieldId\": \"FIELD-001\",\n  \"startDate\": \"2024-01-01\",\n  \"endDate\": \"2024-10-26\",\n  \"interval\": \"monthly\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/field-analysis/ndvi-chart",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "field-analysis",
+                "ndvi-chart"
+              ]
+            },
+            "description": "Generate NDVI chart with water, vegetation, and soil analysis"
+          },
+          "response": []
+        },
+        {
+          "name": "Update Field",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{authToken}}",
+                "type": "text"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"fieldId\": \"FIELD-001\",\n  \"newBoundary\": {{fieldBoundary}},\n  \"metadata\": {\n    \"cropType\": \"rice\",\n    \"area\": 5.0\n  }\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/field-analysis/update-field",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "field-analysis",
+                "update-field"
+              ]
+            },
+            "description": "Update field boundary and metadata"
+          },
+          "response": []
+        },
+        {
+          "name": "Recalculate NDVI",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{authToken}}",
+                "type": "text"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"fieldId\": \"FIELD-001\",\n  \"date\": \"2024-10-26\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/field-analysis/recalculate-ndvi",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "field-analysis",
+                "recalculate-ndvi"
+              ]
+            },
+            "description": "Recalculate NDVI for a specific field and date"
+          },
+          "response": []
+        },
+        {
+          "name": "Get Field Data",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/field-analysis/field-data/FIELD-001",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "field-analysis",
+                "field-data",
+                "FIELD-001"
+              ]
+            },
+            "description": "Get field data by field ID"
+          },
+          "response": []
+        },
+        {
+          "name": "Get Change History",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/field-analysis/change-history/FIELD-001",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "field-analysis",
+                "change-history",
+                "FIELD-001"
+              ]
+            },
+            "description": "Get change history for a field"
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "Image Export & Storage APIs",
+      "item": [
+        {
+          "name": "Export NDVI Image",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{authToken}}",
+                "type": "text"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"fieldBoundary\": {{fieldBoundary}},\n  \"fieldId\": \"FIELD-001\",\n  \"date\": \"2024-10-26\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/field-analysis/export-ndvi-image",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "field-analysis",
+                "export-ndvi-image"
+              ]
+            },
+            "description": "Export and store NDVI image"
+          },
+          "response": []
+        },
+        {
+          "name": "List Stored Images",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/field-analysis/stored-images?fieldId=FIELD-001",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "field-analysis",
+                "stored-images"
+              ],
+              "query": [
+                {
+                  "key": "fieldId",
+                  "value": "FIELD-001"
+                }
+              ]
+            },
+            "description": "List all stored NDVI images"
+          },
+          "response": []
+        },
+        {
+          "name": "Get Image Metadata",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/field-analysis/stored-image/:filename",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "field-analysis",
+                "stored-image",
+                ":filename"
+              ],
+              "variable": [
+                {
+                  "key": "filename",
+                  "value": "ndvi_FIELD-001_2024-10-26.json"
+                }
+              ]
+            },
+            "description": "Get stored image metadata"
+          },
+          "response": []
+        },
+        {
+          "name": "Delete Stored Image",
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/field-analysis/stored-image/:filename",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "field-analysis",
+                "stored-image",
+                ":filename"
+              ],
+              "variable": [
+                {
+                  "key": "filename",
+                  "value": "ndvi_FIELD-001_2024-10-26.json"
+                }
+              ]
+            },
+            "description": "Delete stored NDVI image"
+          },
+          "response": []
+        },
+        {
+          "name": "Get Storage Stats",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/field-analysis/storage-stats",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "field-analysis",
+                "storage-stats"
+              ]
+            },
+            "description": "Get storage statistics"
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "Time Series Management APIs",
+      "item": [
+        {
+          "name": "Get Series Metadata",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/field-analysis/time-series/:seriesId",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "field-analysis",
+                "time-series",
+                ":seriesId"
+              ],
+              "variable": [
+                {
+                  "key": "seriesId",
+                  "value": "series_FIELD-001_1698316800000"
+                }
+              ]
+            },
+            "description": "Get time series metadata"
+          },
+          "response": []
+        },
+        {
+          "name": "List Time Series",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/field-analysis/time-series-list?fieldId=FIELD-001",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "field-analysis",
+                "time-series-list"
+              ],
+              "query": [
+                {
+                  "key": "fieldId",
+                  "value": "FIELD-001"
+                }
+              ]
+            },
+            "description": "List all time series"
+          },
+          "response": []
+        },
+        {
+          "name": "Get Time Series Stats",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/field-analysis/time-series-stats",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "field-analysis",
+                "time-series-stats"
+              ]
+            },
+            "description": "Get time series storage statistics"
+          },
+          "response": []
+        },
+        {
+          "name": "Delete Time Series",
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/field-analysis/time-series/:seriesId",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "field-analysis",
+                "time-series",
+                ":seriesId"
+              ],
+              "variable": [
+                {
+                  "key": "seriesId",
+                  "value": "series_FIELD-001_1698316800000"
+                }
+              ]
+            },
+            "description": "Delete time series"
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "Flood Detection APIs",
+      "item": [
+        {
+          "name": "Flood Detection",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{authToken}}",
+                "type": "text"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"fieldBoundary\": {{fieldBoundary}},\n  \"fieldId\": \"FIELD-001\",\n  \"currentDate\": \"2024-10-26\",\n  \"baselineStartDate\": \"2024-01-01\",\n  \"baselineEndDate\": \"2024-03-31\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/field-analysis/flood-detection",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "field-analysis",
+                "flood-detection"
+              ]
+            },
+            "description": "Detect current flood status using Sentinel-1 SAR imagery. Compares current water extent with baseline period."
+          },
+          "response": []
+        },
+        {
+          "name": "Flood Time Series",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{authToken}}",
+                "type": "text"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"fieldBoundary\": {{fieldBoundary}},\n  \"fieldId\": \"FIELD-001\",\n  \"startDate\": \"2024-01-01\",\n  \"endDate\": \"2024-10-26\",\n  \"intervalDays\": 30\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/field-analysis/flood-time-series",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "field-analysis",
+                "flood-time-series"
+              ]
+            },
+            "description": "Generate flood time series showing water extent changes over time using SAR imagery"
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "Zone Analysis APIs",
+      "item": [
+        {
+          "name": "Generate Zone Image",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{authToken}}",
+                "type": "text"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"fieldBoundary\": {{fieldBoundary}},\n  \"fieldId\": \"FIELD-001\",\n  \"date\": \"2024-10-26\",\n  \"gridSize\": 50,\n  \"cropType\": \"rice\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/field-analysis/zone-image",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "field-analysis",
+                "zone-image"
+              ]
+            },
+            "description": "Generate zone-based productivity map with NDVI classification and yield estimation"
+          },
+          "response": []
+        },
+        {
+          "name": "Get Zone Image Metadata",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/field-analysis/zone-image/:imageId",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "field-analysis",
+                "zone-image",
+                ":imageId"
+              ],
+              "variable": [
+                {
+                  "key": "imageId",
+                  "value": "zone_FIELD-001_2024-10-26_1698316800000"
+                }
+              ]
+            },
+            "description": "Get metadata for a specific zone image including zones, productivity, and yield estimates"
+          },
+          "response": []
+        },
+        {
+          "name": "List Zone Images",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/field-analysis/zone-images",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "field-analysis",
+                "zone-images"
+              ]
+            },
+            "description": "List all generated zone images with metadata"
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "Crop Analysis APIs",
+      "item": [
+        {
+          "name": "Track Crop Growth",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{authToken}}",
+                "type": "text"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"fieldBoundary\": {{fieldBoundary}},\n  \"fieldId\": \"FIELD-001\",\n  \"cropType\": \"rice\",\n  \"plantingDate\": \"2024-06-01\",\n  \"currentDate\": \"2024-10-26\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/crop-analysis/track-growth",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "crop-analysis",
+                "track-growth"
+              ]
+            },
+            "description": "Track crop growth stages and phenology from planting to current date"
+          },
+          "response": []
+        },
+        {
+          "name": "Classify Crop Type",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{authToken}}",
+                "type": "text"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"fieldBoundary\": {{fieldBoundary}},\n  \"fieldId\": \"FIELD-001\",\n  \"startDate\": \"2024-01-01\",\n  \"endDate\": \"2024-10-26\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/crop-analysis/classify-crop",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "crop-analysis",
+                "classify-crop"
+              ]
+            },
+            "description": "Classify crop type based on NDVI temporal patterns and signatures"
+          },
+          "response": []
+        },
+        {
+          "name": "Crop Performance Analysis",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{authToken}}",
+                "type": "text"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"fieldBoundary\": {{fieldBoundary}},\n  \"fieldId\": \"FIELD-001\",\n  \"cropType\": \"rice\",\n  \"startDate\": \"2024-06-01\",\n  \"endDate\": \"2024-10-26\",\n  \"fieldArea\": 5.0\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/crop-analysis/performance",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "crop-analysis",
+                "performance"
+              ]
+            },
+            "description": "Analyze crop performance with health metrics, yield estimation, and recommendations"
+          },
+          "response": []
+        },
+        {
+          "name": "Estimate Crop Yield",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{authToken}}",
+                "type": "text"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"fieldBoundary\": {{fieldBoundary}},\n  \"fieldId\": \"FIELD-001\",\n  \"cropType\": \"rice\",\n  \"startDate\": \"2024-06-01\",\n  \"endDate\": \"2024-10-26\",\n  \"fieldArea\": 5.0\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/crop-analysis/estimate-yield",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "crop-analysis",
+                "estimate-yield"
+              ]
+            },
+            "description": "Estimate current crop yield based on NDVI and crop-specific models"
+          },
+          "response": []
+        },
+        {
+          "name": "Detect Crop Stress",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{authToken}}",
+                "type": "text"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"fieldBoundary\": {{fieldBoundary}},\n  \"fieldId\": \"FIELD-001\",\n  \"cropType\": \"rice\",\n  \"startDate\": \"2024-06-01\",\n  \"endDate\": \"2024-10-26\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/crop-analysis/detect-stress",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "crop-analysis",
+                "detect-stress"
+              ]
+            },
+            "description": "Detect crop stress events including water stress, nutrient deficiency, and disease"
+          },
+          "response": []
+        },
+        {
+          "name": "Predict Crop Yield",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{authToken}}",
+                "type": "text"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"fieldBoundary\": {{fieldBoundary}},\n  \"fieldId\": \"FIELD-001\",\n  \"cropType\": \"rice\",\n  \"plantingDate\": \"2024-06-01\",\n  \"currentDate\": \"2024-10-26\",\n  \"fieldArea\": 5.0\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/crop-analysis/predict-yield",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "crop-analysis",
+                "predict-yield"
+              ]
+            },
+            "description": "Predict final crop yield at harvest based on current growth patterns"
+          },
+          "response": []
+        },
+        {
+          "name": "Forecast Crop Growth",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{authToken}}",
+                "type": "text"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"fieldBoundary\": {{fieldBoundary}},\n  \"fieldId\": \"FIELD-001\",\n  \"cropType\": \"rice\",\n  \"plantingDate\": \"2024-06-01\",\n  \"currentDate\": \"2024-10-26\",\n  \"forecastDays\": 30\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/crop-analysis/forecast-growth",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "crop-analysis",
+                "forecast-growth"
+              ]
+            },
+            "description": "Forecast future crop growth and NDVI trends for the next N days"
+          },
+          "response": []
+        },
+        {
+          "name": "Comprehensive Crop Chart",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{authToken}}",
+                "type": "text"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"fieldBoundary\": {{fieldBoundary}},\n  \"fieldId\": \"FIELD-001\",\n  \"cropType\": \"rice\",\n  \"plantingDate\": \"2024-06-01\",\n  \"startDate\": \"2024-06-01\",\n  \"endDate\": \"2024-10-26\",\n  \"interval\": \"weekly\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/crop-analysis/crop-chart",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "crop-analysis",
+                "crop-chart"
+              ]
+            },
+            "description": "Generate comprehensive crop chart with NDVI, growth stages, and crop-specific metrics"
+          },
+          "response": []
+        }
+      ]
+    }
+  ]
+}

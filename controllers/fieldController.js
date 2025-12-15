@@ -21,8 +21,8 @@ exports.createField = async (req, res) => {
       });
     }
 
-    const { fieldBoundary, name, crop_type, planting_date, harvest_date, farm_name, location, notes, tags } = req.body;
-    const user_id = req.user.user_id;
+    const { fieldBoundary, name, crop_type, planting_date, harvest_date, farm_name, location, notes, tags, field_id } = req.body;
+    const user_id = req?.user?.user_id ?? null;
 
     // Validate field boundary
     if (!fieldBoundary || !fieldBoundary.coordinates) {
@@ -39,6 +39,17 @@ exports.createField = async (req, res) => {
       });
     }
 
+    const fieldExsit = await Field.findOne({
+      where: { field_id }
+    });
+
+    if (fieldExsit) {
+      return res.status(409).json({
+        success: false,
+        error: 'Conflict, this data alredy exist against this field id'
+      });
+    }
+
     // Create field using static method (auto-generates field_id)
     const field = await Field.createField({
       fieldBoundary,
@@ -50,7 +61,8 @@ exports.createField = async (req, res) => {
       farm_name,
       location,
       notes,
-      tags
+      tags,
+      field_id
     });
 
     res.status(201).json({
@@ -160,11 +172,12 @@ exports.getFieldById = async (req, res) => {
 exports.updateField = async (req, res) => {
   try {
     const { field_id } = req.params;
-    const user_id = req.user.user_id;
+    const user_id = req?.user?.user_id || null;
     const { name, crop_type, planting_date, harvest_date, farm_name, location, notes, tags, status } = req.body;
 
     const field = await Field.findOne({
-      where: { field_id, user_id }
+      // where: { field_id, user_id }
+      where: { field_id }
     });
 
     if (!field) {

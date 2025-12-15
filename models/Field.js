@@ -11,12 +11,13 @@ const crypto = require("crypto");
  * Generate unique field ID
  * Format: FIELD-YYYYMMDD-XXXXXX (e.g., FIELD-20251029-A3B5C7)
  */
-function generateFieldId() {
-  const date = new Date();
-  const dateStr = date.toISOString().split("T")[0].replace(/-/g, "");
-  const randomStr = crypto.randomBytes(3).toString("hex").toUpperCase();
-  return `FIELD-${dateStr}-${randomStr}`;
-}
+// function generateFieldId() {
+//   const date = new Date();
+//   const dateStr = date.toISOString().split("T")[0].replace(/-/g, "");
+//   const randomStr = crypto.randomBytes(3).toString("hex").toUpperCase();
+//   return `FIELD-${dateStr}-${randomStr}`;
+// }
+
 
 const Field = sequelize.define(
   "Field",
@@ -108,36 +109,36 @@ const Field = sequelize.define(
       { fields: ["status"] },
     ],
     hooks: {
-      beforeValidate: async (field) => {
-        // Auto-generate field_id if not provided or null
-        if (!field.field_id || field.field_id === null) {
-          let isUnique = false;
-          let attempts = 0;
-          const maxAttempts = 10;
+      // beforeValidate: async (field) => {
+      //   // Auto-generate field_id if not provided or null
+      //   if (!field.field_id || field.field_id === null) {
+      //     let isUnique = false;
+      //     let attempts = 0;
+      //     const maxAttempts = 10;
 
-          while (!isUnique && attempts < maxAttempts) {
-            field.field_id = generateFieldId();
+      //     while (!isUnique && attempts < maxAttempts) {
+      //       field.field_id = generateFieldId();
 
-            // Check if this ID already exists
-            const existing = await Field.findOne({
-              where: { field_id: field.field_id },
-            });
+      //       // Check if this ID already exists
+      //       const existing = await Field.findOne({
+      //         where: { field_id: field.field_id },
+      //       });
 
-            if (!existing) {
-              isUnique = true;
-            }
-            attempts++;
-          }
+      //       if (!existing) {
+      //         isUnique = true;
+      //       }
+      //       attempts++;
+      //     }
 
-          if (!isUnique) {
-            throw new Error(
-              "Failed to generate unique field_id after multiple attempts"
-            );
-          }
+      //     if (!isUnique) {
+      //       throw new Error(
+      //         "Failed to generate unique field_id after multiple attempts"
+      //       );
+      //     }
 
-          console.log(`🆔 Auto-generated field_id: ${field.field_id}`);
-        }
-      },
+      //     console.log(`🆔 Auto-generated field_id: ${field.field_id}`);
+      //   }
+      // },
     },
   }
 );
@@ -187,6 +188,7 @@ Field.createField = async function (fieldData) {
     location,
     notes,
     tags,
+    field_id
   } = fieldData;
 
   // Validate required fields
@@ -230,6 +232,7 @@ Field.createField = async function (fieldData) {
     tags: tags ? JSON.stringify(tags) : null,
     area_sqm,
     area_hectares,
+    field_id,
     status: "active",
   });
 

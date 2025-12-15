@@ -34,97 +34,102 @@ const generateToken = (user) => {
  * Protects routes by requiring valid authentication token
  */
 const verifyToken = async (req, res, next) => {
-  try {
-    // Get token from header
-    const authHeader = req.headers.authorization;
+  // try {
+  //   // Get token from header
+  //   const authHeader = req.headers.authorization;
 
-    if (!authHeader) {
-      return res.status(401).json({
-        success: false,
-        error: "No authorization token provided",
-        message:
-          "Please provide a valid authentication token in the Authorization header",
-      });
-    }
+  //   if (!authHeader) {
+  //     return res.status(401).json({
+  //       success: false,
+  //       error: "No authorization token provided",
+  //       message:
+  //         "Please provide a valid authentication token in the Authorization header",
+  //     });
+  //   }
 
-    // Check if Bearer token
-    if (!authHeader.startsWith("Bearer ")) {
-      return res.status(401).json({
-        success: false,
-        error: "Invalid token format",
-        message: "Authorization header must be in format: Bearer <token>",
-      });
-    }
+  //   // Check if Bearer token
+  //   if (!authHeader.startsWith("Bearer ")) {
+  //     return res.status(401).json({
+  //       success: false,
+  //       error: "Invalid token format",
+  //       message: "Authorization header must be in format: Bearer <token>",
+  //     });
+  //   }
 
-    // Extract token
-    const token = authHeader.substring(7);
+  //   // Extract token
+  //   const token = authHeader.substring(7);
 
-    if (!token) {
-      return res.status(401).json({
-        success: false,
-        error: "Token not found",
-        message: "Please provide a valid authentication token",
-      });
-    }
+  //   if (!token) {
+  //     return res.status(401).json({
+  //       success: false,
+  //       error: "Token not found",
+  //       message: "Please provide a valid authentication token",
+  //     });
+  //   }
 
-    // Verify token
-    const decoded = jwt.verify(token, JWT_SECRET);
+  //   // Verify token
+  //   const decoded = jwt.verify(token, JWT_SECRET);
 
-    // Check if user still exists and is active
-    const user = await models.User.findOne({
-      where: {
-        user_id: decoded.user_id,
-        status: "active",
-      },
-    });
+  //   // Check if user still exists and is active
+  //   const user = await models.User.findOne({
+  //     where: {
+  //       user_id: decoded.user_id,
+  //       status: "active",
+  //     },
+  //   });
 
-    if (!user) {
-      return res.status(401).json({
-        success: false,
-        error: "User not found or inactive",
-        message: "Your account is not active or has been deleted",
-      });
-    }
+  //   if (!user) {
+  //     return res.status(401).json({
+  //       success: false,
+  //       error: "User not found or inactive",
+  //       message: "Your account is not active or has been deleted",
+  //     });
+  //   }
 
-    // Update last login and API usage
-    user.last_login = new Date();
-    await user.incrementApiUsage();
+  //   // Update last login and API usage
+  //   user.last_login = new Date();
+  //   await user.incrementApiUsage();
 
-    // Attach user to request
-    req.user = {
-      user_id: user.user_id,
-      email: user.email,
-      name: user.name,
-      role: user.role,
-      status: user.status,
-      country: user.country,
-    };
+  //   // Attach user to request
+  //   req.user = {
+  //     user_id: user.user_id,
+  //     email: user.email,
+  //     name: user.name,
+  //     role: user.role,
+  //     status: user.status,
+  //     country: user.country,
+  //   };
 
-    next();
-  } catch (error) {
-    if (error.name === "JsonWebTokenError") {
-      return res.status(401).json({
-        success: false,
-        error: "Invalid token",
-        message: "The provided authentication token is invalid",
-      });
-    }
+  //   next();
+  // } catch (error) {
+  //   if (error.name === "JsonWebTokenError") {
+  //     return res.status(401).json({
+  //       success: false,
+  //       error: "Invalid token",
+  //       message: "The provided authentication token is invalid",
+  //     });
+  //   }
 
-    if (error.name === "TokenExpiredError") {
-      return res.status(401).json({
-        success: false,
-        error: "Token expired",
-        message: "Your authentication token has expired. Please login again",
-      });
-    }
+  //   if (error.name === "TokenExpiredError") {
+  //     return res.status(401).json({
+  //       success: false,
+  //       error: "Token expired",
+  //       message: "Your authentication token has expired. Please login again",
+  //     });
+  //   }
 
-    console.error("Authentication error:", error);
-    return res.status(500).json({
-      success: false,
-      error: "Authentication failed",
-      message: error.message,
-    });
+  //   console.error("Authentication error:", error);
+  //   return res.status(500).json({
+  //     success: false,
+  //     error: "Authentication failed",
+  //     message: error.message,
+  //   });
+  // }
+
+  if (req.headers['x-service-secret'] !== process.env.GEE_KEY) {
+    return res.status(401).json({ message: 'Unauthorized service' });
   }
+  next();
 };
 
 /**
@@ -191,6 +196,15 @@ const authorize = (...roles) => {
   };
 };
 
+const verifyService = async (req, res, next) => {
+  if (req.headers['x-service-secret'] !== process.env.GEE_KEY) {
+    return res.status(401).json({ message: 'Unauthorized service' });
+  }
+
+  next();
+}
+
+
 module.exports = {
   generateToken,
   verifyToken,
@@ -198,4 +212,5 @@ module.exports = {
   authorize,
   JWT_SECRET,
   JWT_EXPIRES_IN,
+  verifyService,
 };

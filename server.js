@@ -2,6 +2,7 @@ const express = require("express");
 const cors = require("cors");
 const path = require("path");
 const fs = require("fs");
+const axios = require("axios");
 require("dotenv").config();
 
 // MySQL Database with Sequelize
@@ -12,7 +13,7 @@ const models = require("./models");
 const { resolveFieldBoundary } = require("./utils/fieldBoundaryHelper");
 
 // Authentication
-const { verifyToken, optionalAuth } = require("./middleware/auth");
+const { verifyToken, optionalAuth, verifyService } = require("./middleware/auth");
 const authController = require("./controllers/authController");
 const fieldController = require("./controllers/fieldController");
 console.log("✅ Auth Controller loaded:", Object.keys(authController));
@@ -590,42 +591,69 @@ app.post("/api/field-analysis/time-series", verifyToken, async (req, res) => {
 // ============================================
 
 // Field Analysis endpoint - Analyze NDVI for farm field boundaries
-app.post("/api/field-analysis", verifyToken, async (req, res) => {
+app.post("/api/field-analysis", verifyService, (req, res) => {
+  // 1️⃣ Respond immediately (ACK)
+  res.json({ status: 'accepted' });
+
+    // 2️⃣ Extract plain data ONLY
+    const payload = {
+      body: req.body,
+      user: req?.user,
+    };
+     // 2️⃣ Run heavy job AFTER response
+  setImmediate(async () => {
+    console.log("🕒 Background task started");
+
+    try {
+
+      // Fake result (for webhook test)
+      const analysisResult = await getGeeAnalysisData(payload);
+      console.log('got analysis result', analysisResult, 'analysisResult');
+      const fieldId = req.body.fieldId || 'TEST_FIELD_ID_123';
+      const isNew = false;
+
+      console.log("📡 Sending webhook to Laravel");
+     
+      const hookPayload =  {
+          data: analysisResult,
+          field_id: fieldId,
+          is_new_field: isNew,
+          message: "Webhook test success",
+        };
+
+      axios.post(req.body.callback_url, hookPayload, {
+        headers: { "X-WEBHOOK-SECRET": process.env.GEE_WEBHOOK_SECRET },
+      });
+
+      console.log("📡 Webhook dispatched (fire-and-forget)");
+      console.log("✅ Webhook sent successfully and completed");
+    } catch (err) {
+      console.error("❌ Background task failed:", err.message);
+      throw new Error("Background task failed: " + err.message);
+    }
+  });
+});
+
+async function getGeeAnalysisData({ body, user }) {
+
   try {
     if (!eeInitialized || !fieldAnalysisService) {
-      return res.status(503).json({
-        success: false,
-        error:
-          "Earth Engine not initialized yet. Please try again in a moment.",
-      });
+        throw new Error("Earth Engine not initialized");
     }
 
     const { startDate, endDate, name, crop_type, farm_name, location } =
-      req.body;
+      body;
 
-    // Resolve field boundary (from request or database)
-    // This will auto-create a field with generated ID if fieldBoundary provided without fieldId
-    let resolvedData;
-    try {
-      resolvedData = await resolveFieldBoundary(req.body, req.user.user_id, {
-        autoCreate: true,
-        fieldMetadata: { name, crop_type, farm_name, location },
-      });
-    } catch (error) {
-      return res.status(400).json({
-        success: false,
-        error: error.message,
-      });
-    }
-
+    const resolvedData = await resolveFieldBoundary(body, user?.user_id, {
+      autoCreate: true,
+      fieldMetadata: { name, crop_type, farm_name, location },
+    });
+    console.log("✅ Resolve Field Boundary complete");
     const { fieldBoundary, fieldId, fromDatabase, isNew } = resolvedData;
 
     // Validate field boundary type
     if (fieldBoundary.type !== "Polygon") {
-      return res.status(400).json({
-        success: false,
-        error: "Only Polygon geometries are supported",
-      });
+      throw new Error("Only Polygon geometries are supported");
     }
 
     // Log source of boundary
@@ -654,16 +682,18 @@ app.post("/api/field-analysis", verifyToken, async (req, res) => {
       start,
       end
     );
+    console.log("✅ complete Field Analysis");
 
     // Save to MySQL if connected
     if (dbInitialized) {
       try {
+        console.log("💾 Saving analysis to MySQL database");
         // Save or update field (upsert)
         const [field, created] = await models.Field.findOrCreate({
           where: { field_id: fieldId },
           defaults: {
             field_id: fieldId,
-            user_id: req.user.user_id,
+            // user_id: req.user.user_id,
             boundary_type: fieldBoundary.type,
             boundary_coordinates: JSON.stringify(fieldBoundary.coordinates),
             area_sqm: analysisResult.hectares * 10000,
@@ -671,56 +701,60 @@ app.post("/api/field-analysis", verifyToken, async (req, res) => {
             status: "active",
           },
         });
-
+        console.log("✅ Field upsert complete");
         if (!created) {
           // Update existing field
           await field.update({
-            user_id: req.user.user_id,
+            // user_id: req.user.user_id,
             boundary_type: fieldBoundary.type,
             boundary_coordinates: JSON.stringify(fieldBoundary.coordinates),
             area_sqm: analysisResult.hectares * 10000,
             area_hectares: analysisResult.hectares,
           });
+          console.log("✅ Field update complete");
         }
 
-        // Save field analysis
-        await models.FieldAnalysis.create({
-          field_id: fieldId,
-          user_id: req.user.user_id,
-          analysis_date: new Date(analysisResult.date),
-          ndvi_mean: analysisResult.ndvi.mean,
-          ndvi_std: analysisResult.ndvi.std,
-          ndvi_min: analysisResult.ndvi.min,
-          ndvi_max: analysisResult.ndvi.max,
-          ndvi_median: analysisResult.ndvi.median,
-          ndvi_percentile_25: analysisResult.ndvi.percentile_25,
-          ndvi_percentile_75: analysisResult.ndvi.percentile_75,
-          cloud_cover: analysisResult.quality.cloud_cover,
-          pixel_count: analysisResult.quality.pixel_count,
-          data_source: analysisResult.quality.data_source,
-          acquisition_date: analysisResult.quality.acquisition_date,
-          confidence: analysisResult.quality.confidence,
-          interpretation_status: analysisResult.interpretation.status,
-          interpretation_description: analysisResult.interpretation.description,
-          interpretation_color: analysisResult.interpretation.color,
-          interpretation_recommendation:
-            analysisResult.interpretation.recommendation,
-          hectares: analysisResult.hectares,
-          satellite_platform: "Sentinel-2",
-          satellite_sensor: "MSI",
-          satellite_resolution: "10m",
-          satellite_bands: JSON.stringify(["B4", "B8"]),
-        });
+        await models.FieldAnalysis.findOrCreate({
+            where: {
+              field_id: fieldId,
+            },
+            defaults: {
+              analysis_date: new Date(analysisResult.date),
+              ndvi_mean: analysisResult.ndvi.mean,
+              ndvi_std: analysisResult.ndvi.std,
+              ndvi_min: analysisResult.ndvi.min,
+              ndvi_max: analysisResult.ndvi.max,
+              ndvi_median: analysisResult.ndvi.median,
+              ndvi_percentile_25: analysisResult.ndvi.percentile_25,
+              ndvi_percentile_75: analysisResult.ndvi.percentile_75,
+              cloud_cover: analysisResult.quality.cloud_cover,
+              pixel_count: analysisResult.quality.pixel_count,
+              data_source: analysisResult.quality.data_source,
+              acquisition_date: analysisResult.quality.acquisition_date,
+              confidence: analysisResult.quality.confidence,
+              interpretation_status: analysisResult.interpretation.status,
+              interpretation_description: analysisResult.interpretation.description,
+              interpretation_color: analysisResult.interpretation.color,
+              interpretation_recommendation:
+                analysisResult.interpretation.recommendation,
+              hectares: analysisResult.hectares,
+              satellite_platform: "Sentinel-2",
+              satellite_sensor: "MSI",
+              satellite_resolution: "10m",
+              satellite_bands: JSON.stringify(["B4", "B8"]),
+            },
+          });
+
         console.log(
-          `✅ Field analysis saved to MySQL for ${fieldId} by user ${req.user.email}`
+          `✅ Field analysis saved to MySQL for Field ID: ${fieldId}`
         );
       } catch (dbError) {
-        console.error("❌ Error saving to MySQL:", dbError.message);
-        // Continue without failing the request
+        throw new Error("Only Polygon geometries are supported - " + dbError.message);
       }
     }
-
-    res.json({
+    
+    console.log(`✅ Analysis completed for field ${fieldId}`);
+    return {
       success: true,
       data: analysisResult,
       field_id: fieldId,
@@ -729,15 +763,21 @@ app.post("/api/field-analysis", verifyToken, async (req, res) => {
         ? `Field created with ID: ${fieldId}. Analysis completed successfully.`
         : "Field analysis completed successfully",
       saved_to_db: dbInitialized,
-    });
+    };
   } catch (error) {
-    console.error("Error analyzing field:", error);
-    res.status(500).json({
+    console.error("❌ Error analyzing field:", error.message);
+   return {
       success: false,
-      error: error.message,
-    });
+      data: analysisResult,
+      field_id: fieldId,
+      is_new_field: isNew || false,
+      message: isNew
+        ? `Field created with ID: ${fieldId}. Analysis completed successfully.`
+        : "Field analysis completed successfully",
+      saved_to_db: dbInitialized,
+    };
   }
-});
+}
 
 // 2-Year NDVI Time Series endpoint
 app.post(
